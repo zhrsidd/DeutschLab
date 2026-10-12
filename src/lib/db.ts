@@ -1,6 +1,6 @@
 import Database from "@tauri-apps/plugin-sql";
 
-import { buildReviewExercise } from "./reviewExercises";
+import { buildReviewExercise, lessonIdFor } from "./reviewExercises";
 
 import type { PlannerMistake } from "./dailyPlanner";
 
@@ -179,13 +179,6 @@ export async function saveLessonAttempt(
  * Mistakes + review scheduling
  */
 
-const LESSON_FOR_SOURCE: Record<ReviewSourceType, string> = {
-  vocabulary: "vocab-001",
-  pronunciation: "pronunciation-001",
-  grammar: "grammar-001",
-  listening: "listening-001",
-};
-
 function itemKey(sourceType: ReviewSourceType, sourceId: string) {
   return `${sourceType}:${sourceId}`;
 }
@@ -235,7 +228,7 @@ async function upsertMistake(
       VALUES (?, ?, ?, ?, ?, ?, ?, 1)
     `,
     [
-      LESSON_FOR_SOURCE[sourceType],
+      lessonIdFor(sourceType, sourceId),
       key,
       category,
       prompt,

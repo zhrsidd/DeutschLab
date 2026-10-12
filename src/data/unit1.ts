@@ -221,6 +221,21 @@ export const starterTasks: LessonTask[] = [
     minutes: 12,
   },
   {
+    id: "grammar-002",
+    title: "Regular verbs + word order",
+    description:
+      "Conjugate common regular verbs and build German sentences with the verb in position 2.",
+    type: "grammar",
+    minutes: 14,
+  },
+  {
+    id: "grammar-003",
+    title: "Questions in German",
+    description: "Form yes/no questions and basic W-questions.",
+    type: "grammar",
+    minutes: 11,
+  },
+  {
     id: "listening-001",
     title: "Listen for introductions",
     description: "Recognise names, countries and simple introductory phrases.",

@@ -75,6 +75,12 @@ const WEAK_AREA_TITLE: Record<string, string> = {
   listening: "Revisit listening: introductions",
 };
 
+const WEAK_AREA_TITLE_BY_LESSON: Record<string, string> = {
+  "grammar-001": "Review sein conjugation",
+  "grammar-002": "Review regular verbs and word order",
+  "grammar-003": "Review German questions",
+};
+
 function sourceTypeOf(itemKey: string): string {
   return itemKey.split(":")[0];
 }
@@ -164,7 +170,9 @@ export function generateDailyPlan(input: PlannerInput): DailyPlan {
       kind: "mistake",
       sourceId: weak.lessonId,
       title:
-        WEAK_AREA_TITLE[sourceTypeOf(weak.itemKey)] ?? "Revisit a weak area",
+        WEAK_AREA_TITLE_BY_LESSON[weak.lessonId] ??
+        WEAK_AREA_TITLE[sourceTypeOf(weak.itemKey)] ??
+        "Revisit a weak area",
       description: `You missed: ${weak.prompt}`,
       minutes: WEAK_AREA_MINUTES,
       reason: "You missed this recently",

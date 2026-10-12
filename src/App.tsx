@@ -27,6 +27,8 @@ import GrammarLesson from "./components/GrammarLesson";
 import ListeningLesson from "./components/ListeningLesson";
 import ReviewView, { formatReviewDate } from "./components/ReviewView";
 import SpeakingLesson from "./components/SpeakingLesson";
+import QuestionsLesson from "./components/QuestionsLesson";
+import RegularVerbsLesson from "./components/RegularVerbsLesson";
 import PronunciationLesson from "./components/PronunciationLesson";
 import VocabularyLesson from "./components/VocabularyLesson";
 
@@ -304,6 +306,30 @@ function App() {
           saveLessonAttempt("listening-001", score, total)
         }
         onFinish={() => finishLesson("listening-001")}
+      />
+    );
+  }
+
+  if (activeLessonId === "grammar-002") {
+    return (
+      <RegularVerbsLesson
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("grammar-002", score, total)
+        }
+        onFinish={() => finishLesson("grammar-002")}
+      />
+    );
+  }
+
+  if (activeLessonId === "grammar-003") {
+    return (
+      <QuestionsLesson
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("grammar-003", score, total)
+        }
+        onFinish={() => finishLesson("grammar-003")}
       />
     );
   }
@@ -796,6 +822,8 @@ function TodayView({
                 {selectedTask.id === "vocab-001" ||
                 selectedTask.id === "pronunciation-001" ||
                 selectedTask.id === "grammar-001" ||
+                selectedTask.id === "grammar-002" ||
+                selectedTask.id === "grammar-003" ||
                 selectedTask.id === "listening-001" ||
                 selectedTask.id === "speaking-001" ? (
                   <button

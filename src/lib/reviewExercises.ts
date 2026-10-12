@@ -8,6 +8,10 @@ import { week1SeinQuiz } from "../data/lessons/week1Sein";
 import { week1PronunciationQuiz } from "../data/lessons/week1Pronunciation";
 import { week1ListeningQuiz } from "../data/lessons/week1Listening";
 
+import { week1RegularVerbsQuiz } from "../data/lessons/week1RegularVerbs";
+import { week1QuestionsQuiz } from "../data/lessons/week1Questions";
+import type { CourseQuestion } from "../data/lessons/grammarCourseTypes";
+
 import type {
   ReviewExercise,
   ReviewSourceType,
@@ -56,6 +60,77 @@ function englishVariants(item: VocabularyItem): string[] {
   return [...new Set([...base, ...withoutTo])];
 }
 
+/* ---------- grammar-002 / grammar-003 ---------- */
+
+/** Which lesson a review concept came from (used for mistakes + planning). */
+export function lessonIdFor(
+  sourceType: ReviewSourceType,
+  sourceId: string,
+): string {
+  if (sourceType === "vocabulary") return "vocab-001";
+  if (sourceType === "pronunciation") return "pronunciation-001";
+  if (sourceType === "listening") return "listening-001";
+  if (sourceId.startsWith("rv-")) return "grammar-002";
+  if (sourceId.startsWith("qn-")) return "grammar-003";
+
+  return "grammar-001";
+}
+
+const courseQuestions: CourseQuestion[] = [
+  ...week1RegularVerbsQuiz,
+  ...week1QuestionsQuiz,
+];
+
+/** Turns a data-driven grammar question into a structured review exercise. */
+export function exerciseFromCourseQuestion(
+  question: CourseQuestion,
+): ReviewExercise {
+  if (question.kind === "choice") {
+    return {
+      kind: "choice",
+      prompt: question.prompt,
+      options: question.options,
+      answer: question.answer,
+      explanation: question.explanation,
+      audioText: "",
+      audioRequired: false,
+    };
+  }
+
+  if (question.kind === "fill") {
+    return {
+      kind: "typed",
+      instruction: "Type the missing word.",
+      prompt: question.hint
+        ? `${question.sentence} ${question.hint}`
+        : question.sentence,
+      accepted: question.accepted,
+      preferred: question.accepted[0],
+      explanation: question.explanation,
+    };
+  }
+
+  if (question.kind === "reorder") {
+    return {
+      kind: "typed",
+      instruction: "Put the words in the correct order.",
+      prompt: question.words.join(" / "),
+      accepted: question.accepted,
+      preferred: question.accepted[0],
+      explanation: question.explanation,
+    };
+  }
+
+  return {
+    kind: "typed",
+    instruction: question.instruction,
+    prompt: question.prompt,
+    accepted: question.accepted,
+    preferred: question.accepted[0],
+    explanation: question.explanation,
+  };
+}
+
 /* ---------- building ---------- */
 
 export function buildReviewExercise(
@@ -96,6 +171,9 @@ export function buildReviewExercise(
   }
 
   if (sourceType === "grammar") {
+    const course = courseQuestions.find((entry) => entry.id === sourceId);
+    if (course) return exerciseFromCourseQuestion(course);
+
     const question = week1SeinQuiz.find((entry) => entry.id === sourceId);
     if (!question) return null;
 
