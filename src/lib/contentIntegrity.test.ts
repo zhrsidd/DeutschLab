@@ -39,11 +39,16 @@ import {
 const unique = (values: string[]) => new Set(values).size === values.length;
 
 describe("curriculum", () => {
-  it("has unique task ids in the agreed Week 1 order", () => {
-    const ids = starterTasks.map((task) => task.id);
+  it("has unique task ids", () => {
+    expect(unique(starterTasks.map((task) => task.id))).toBe(true);
+  });
 
-    expect(unique(ids)).toBe(true);
-    expect(ids).toEqual([
+  it("keeps the Week 1 task ids and order unchanged", () => {
+    const week1 = starterTasks
+      .filter((task) => (task.week ?? 1) === 1)
+      .map((task) => task.id);
+
+    expect(week1).toEqual([
       "vocab-001",
       "pronunciation-001",
       "grammar-001",
@@ -53,6 +58,14 @@ describe("curriculum", () => {
       "speaking-001",
       "checkpoint-001",
     ]);
+  });
+
+  it("adds Week 2 after the checkpoint", () => {
+    const ids = starterTasks.map((task) => task.id);
+
+    expect(ids.slice(-2)).toEqual(["vocab-002", "grammar-004"]);
+    expect(ids.indexOf("vocab-002")).toBeGreaterThan(ids.indexOf("checkpoint-001"));
+    expect(starterTasks.filter((task) => task.week === 2)).toHaveLength(2);
   });
 });
 

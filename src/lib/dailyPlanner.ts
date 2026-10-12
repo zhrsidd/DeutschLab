@@ -5,7 +5,9 @@
  * lesson → D) one more lesson only if time clearly remains.
  */
 
-import type { LessonTask } from "../data/unit1";
+import { taskWeek, type LessonTask } from "../data/unit1";
+
+import { isWeek1Mastered } from "./checkpointScoring";
 
 export const STUDY_TIME_OPTIONS = [15, 30, 45, 60] as const;
 export const DEFAULT_STUDY_MINUTES = 30;
@@ -82,6 +84,8 @@ const WEAK_AREA_TITLE_BY_LESSON: Record<string, string> = {
   "grammar-001": "Review sein conjugation",
   "grammar-002": "Review regular verbs and word order",
   "grammar-003": "Review German questions",
+  "grammar-004": "Review haben",
+  "vocab-002": "Revisit Week 2 vocabulary",
 };
 
 function sourceTypeOf(itemKey: string): string {
@@ -192,10 +196,16 @@ export function generateDailyPlan(input: PlannerInput): DailyPlan {
   for (const task of unfinished) {
     if (lessons >= MAX_LESSONS_PER_DAY) break;
 
+    // Week 2 new content is offered once Week 1 is mastered. Until then,
+    // unfinished Week 1 work, the checkpoint and reviews come first. The
+    // learner can still open Week 2 from the curriculum list.
+    if (taskWeek(task) > 1 && !isWeek1Mastered(completedTaskIds)) break;
+
     if (task.id.startsWith(CHECKPOINT_PREFIX)) {
       // Only once every instructional lesson is done...
       const lessonsLeft = unfinished.some(
-        (other) => !other.id.startsWith(CHECKPOINT_PREFIX),
+        (other) =>
+          taskWeek(other) === 1 && !other.id.startsWith(CHECKPOINT_PREFIX),
       );
       if (lessonsLeft) break;
 

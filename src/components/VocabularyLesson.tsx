@@ -4,10 +4,12 @@ import { ArrowRight, RotateCcw, Volume2 } from "lucide-react";
 
 import {
   categoryLabels,
-  vocabularyBatches,
-  week1Vocabulary,
   type VocabularyItem,
 } from "../data/lessons/week1Vocabulary";
+import {
+  week1VocabularySet,
+  type VocabularySet,
+} from "../data/lessons/vocabularySets";
 
 import { useGermanSpeech } from "../hooks/useGermanSpeech";
 
@@ -38,18 +40,21 @@ type Stage =
   | "results";
 
 interface VocabularyLessonProps {
+  /** Which vocabulary lesson to run; defaults to Week 1 (vocab-001). */
+  set?: VocabularySet;
   onBack: () => void;
   onFinish: () => Promise<void>;
   onSaveAttempt: (score: number, total: number) => Promise<void>;
 }
 
-function itemsForBatch(batchIndex: number): VocabularyItem[] {
-  return vocabularyBatches[batchIndex].itemIds
-    .map((id) => week1Vocabulary.find((item) => item.id === id))
+function itemsForBatch(set: VocabularySet, batchIndex: number): VocabularyItem[] {
+  return set.batches[batchIndex].itemIds
+    .map((id) => set.items.find((item) => item.id === id))
     .filter((item): item is VocabularyItem => item !== undefined);
 }
 
 export default function VocabularyLesson({
+  set = week1VocabularySet,
   onBack,
   onFinish,
   onSaveAttempt,
@@ -68,15 +73,15 @@ export default function VocabularyLesson({
 
   const speech = useGermanSpeech();
 
-  const batch = vocabularyBatches[batchIndex];
-  const batchItems = useMemo(() => itemsForBatch(batchIndex), [batchIndex]);
+  const batch = set.batches[batchIndex];
+  const batchItems = useMemo(() => itemsForBatch(set, batchIndex), [set, batchIndex]);
   const checkQuestions = useMemo(() => buildBatchCheck(batch), [batch]);
   const quizQuestions = useMemo(
-    () => buildFinalQuiz(quizAttempt),
-    [quizAttempt],
+    () => buildFinalQuiz(quizAttempt, set),
+    [quizAttempt, set],
   );
 
-  const batchCount = vocabularyBatches.length;
+  const batchCount = set.batches.length;
   const quizTotal = quizQuestions.length;
   const passingScore = Math.ceil(quizTotal * 0.8);
   const passed = quizScore >= passingScore;
@@ -222,22 +227,19 @@ export default function VocabularyLesson({
       <LessonShell onBack={onBack}>
         <div className="mx-auto max-w-2xl px-8 py-12">
           <p className="text-sm font-medium text-neutral-400">
-            Week 1 · Vocabulary
+            {set.kicker}
           </p>
 
           <h1 className="mt-3 text-4xl font-semibold tracking-tight">
-            Week 1 vocabulary
+            {set.title}
           </h1>
 
           <p className="mt-4 max-w-xl text-lg leading-8 text-neutral-500">
-            Build your first {week1Vocabulary.length} words and phrases in
-            small batches: greetings, pronouns, verbs, countries, languages,
-            school subjects and numbers. Each batch ends with a short check,
-            and a mixed quiz closes the lesson.
+            {set.intro.replace("{count}", String(set.items.length))}
           </p>
 
           <div className="mt-10 grid grid-cols-3 gap-3">
-            <Stat label="Words" value={String(week1Vocabulary.length)} />
+            <Stat label="Words" value={String(set.items.length)} />
             <Stat label="Batches" value={String(batchCount)} />
             <Stat label="Final quiz" value={`${quizTotal} Qs`} />
           </div>
@@ -352,6 +354,12 @@ export default function VocabularyLesson({
             </div>
 
             <p className="mt-5 text-xl text-neutral-500">{learnItem.english}</p>
+
+            {learnItem.plural ? (
+              <p className="mt-2 text-sm text-neutral-400">
+                Plural: {learnItem.plural}
+              </p>
+            ) : null}
 
             {learnItem.exampleGerman ? (
               <>

@@ -11,7 +11,11 @@ import {
 } from "./dailyPlanner";
 
 const ids = starterTasks.map((task) => task.id);
-const instructional = ids.filter((id) => id !== "checkpoint-001");
+// Week 1 lessons, without the checkpoint or any Week 2 task.
+const instructional = starterTasks
+  .filter((task) => (task.week ?? 1) === 1 && task.id !== "checkpoint-001")
+  .map((task) => task.id);
+const week1All = [...instructional, "checkpoint-001"];
 
 const base: PlannerInput = {
   tasks: starterTasks,
@@ -187,6 +191,7 @@ describe("resolveReviewLimit", () => {
 describe("completion states", () => {
   it("is done when everything is complete and nothing is due", () => {
     const plan = generateDailyPlan({ ...base, completedTaskIds: ids });
+    expect(ids.length).toBeGreaterThan(week1All.length);
 
     expect(plan.done).toBe(true);
     expect(plan.items).toEqual([]);
@@ -248,5 +253,80 @@ describe("checkpoint scheduling", () => {
     });
 
     expect(plan.items.map((item) => item.sourceId)).toEqual(["checkpoint-001"]);
+  });
+});
+
+describe("Week 2 progression", () => {
+  const sources = (input: Partial<PlannerInput>) =>
+    generateDailyPlan({ ...base, budgetMinutes: 60, ...input }).items.map(
+      (item) => item.sourceId,
+    );
+
+  it("keeps unfinished Week 1 work first and withholds Week 2 before mastery", () => {
+    const early = sources({ completedTaskIds: instructional.slice(0, 3) });
+
+    expect(early[0]).toBe("grammar-002");
+    expect(early).not.toContain("vocab-002");
+    expect(early).not.toContain("grammar-004");
+  });
+
+  it("offers the checkpoint, not Week 2, when only the checkpoint is left", () => {
+    expect(sources({ completedTaskIds: instructional })).toEqual([
+      "checkpoint-001",
+    ]);
+  });
+
+  it("makes vocab-002 the next new task after Week 1 mastery", () => {
+    const plan = sources({ completedTaskIds: week1All });
+
+    expect(plan[0]).toBe("vocab-002");
+  });
+
+  it("makes grammar-004 next after vocab-002", () => {
+    expect(
+      sources({ completedTaskIds: [...week1All, "vocab-002"] }),
+    ).toEqual(["grammar-004"]);
+  });
+
+  it("is done once Week 2's two tasks are complete", () => {
+    expect(
+      generateDailyPlan({ ...base, completedTaskIds: ids }).done,
+    ).toBe(true);
+  });
+
+  it("still puts due reviews and a Week 1 weak area before Week 2 content", () => {
+    const plan = generateDailyPlan({
+      ...base,
+      budgetMinutes: 60,
+      completedTaskIds: week1All,
+      dueReviewCount: 4,
+      unresolvedMistakes: [mistake],
+    });
+
+    expect(plan.items.map((item) => item.kind)).toEqual([
+      "review",
+      "mistake",
+      "lesson",
+      "lesson",
+    ]);
+    expect(plan.items[2].sourceId).toBe("vocab-002");
+  });
+
+  it("titles a haben weak area", () => {
+    const plan = generateDailyPlan({
+      ...base,
+      completedTaskIds: ids,
+      unresolvedMistakes: [
+        {
+          id: 9,
+          lessonId: "grammar-004",
+          itemKey: "grammar:hb-f-ich",
+          prompt: "Complete: Ich ___ Zeit.",
+          timesMissed: 1,
+        },
+      ],
+    });
+
+    expect(plan.items[0].title).toBe("Review haben");
   });
 });

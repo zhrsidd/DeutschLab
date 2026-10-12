@@ -3,12 +3,16 @@
  * Pure: same batch / seed always yields the same questions.
  */
 
-import {
-  week1Vocabulary,
-  type VocabularyBatch,
-  type VocabularyCategory,
-  type VocabularyItem,
+import type {
+  VocabularyBatch,
+  VocabularyItem,
 } from "../data/lessons/week1Vocabulary";
+import {
+  findVocabularyItem,
+  vocabularySetForItem,
+  week1VocabularySet,
+  type VocabularySet,
+} from "../data/lessons/vocabularySets";
 
 import { seededShuffle } from "../components/lesson/shuffle";
 
@@ -37,30 +41,17 @@ export interface VocabQuestion {
 }
 
 export const CHECK_QUESTIONS_PER_BATCH = 4;
-export const FINAL_QUIZ_SIZE = 16;
 
-/** Questions per category in the final quiz (sums to FINAL_QUIZ_SIZE). */
-const FINAL_QUOTA: [VocabularyCategory, number][] = [
-  ["greetings", 3],
-  ["pronouns", 2],
-  ["verbs", 2],
-  ["countries", 2],
-  ["languages", 2],
-  ["subjects", 2],
-  ["numbers", 3],
-];
+/** Final quiz size of the Week 1 set (kept for existing callers). */
+export const FINAL_QUIZ_SIZE = week1VocabularySet.finalQuota.reduce(
+  (sum, [, count]) => sum + count,
+  0,
+);
 
 const TYPED_EVERY = 5;
-const TYPED_CATEGORIES = new Set<VocabularyCategory>([
-  "greetings",
-  "countries",
-  "languages",
-  "subjects",
-  "numbers",
-]);
 
 function itemById(id: string): VocabularyItem | undefined {
-  return week1Vocabulary.find((item) => item.id === id);
+  return findVocabularyItem(id);
 }
 
 function meaningParts(item: VocabularyItem): string[] {
@@ -78,7 +69,8 @@ function distractors(
   field: "english" | "german",
   seed: string,
 ): string[] {
-  const candidates = week1Vocabulary.filter(
+  // Wrong answers come from the same lesson's vocabulary.
+  const candidates = vocabularySetForItem(item.id).items.filter(
     (other) =>
       other.id !== item.id &&
       !sameMeaning(item, other) &&
@@ -177,18 +169,22 @@ export function buildBatchCheck(batch: VocabularyBatch): VocabQuestion[] {
  * shuffle and interleaved. `attempt` varies the selection between retries
  * while keeping every attempt reproducible.
  */
-export function buildFinalQuiz(attempt: number): VocabQuestion[] {
-  const seed = `final:${attempt}`;
+export function buildFinalQuiz(
+  attempt: number,
+  set: VocabularySet = week1VocabularySet,
+): VocabQuestion[] {
+  const seed = `${set.seedPrefix}:${attempt}`;
+  const typedCategories = new Set(set.typedCategories);
 
-  const perCategory = FINAL_QUOTA.map(([category, count]) =>
+  const perCategory = set.finalQuota.map(([category, count]) =>
     seededShuffle(
-      week1Vocabulary.filter((item) => item.category === category),
+      set.items.filter((item) => item.category === category),
       `${seed}:${category}`,
     ).slice(0, count),
   );
 
   const ordered: VocabularyItem[] = [];
-  const rounds = Math.max(...perCategory.map((list) => list.length));
+  const rounds = Math.max(0, ...perCategory.map((list) => list.length));
 
   for (let round = 0; round < rounds; round += 1) {
     for (const list of perCategory) {
@@ -199,7 +195,7 @@ export function buildFinalQuiz(attempt: number): VocabQuestion[] {
   return ordered.map((item, index) => {
     const wantsTyped =
       index % TYPED_EVERY === TYPED_EVERY - 1 &&
-      TYPED_CATEGORIES.has(item.category);
+      typedCategories.has(item.category);
 
     const kind: VocabQuestionKind = wantsTyped
       ? "typed"

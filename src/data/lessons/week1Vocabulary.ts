@@ -5,7 +5,14 @@ export type VocabularyCategory =
   | "countries"
   | "languages"
   | "subjects"
-  | "numbers";
+  | "numbers"
+  | "family"
+  | "activities"
+  | "places"
+  | "adjectives"
+  | "days"
+  | "months"
+  | "time";
 
 export interface VocabularyItem {
   id: string;
@@ -21,7 +28,14 @@ export interface VocabularyItem {
   acceptedGerman?: string[];
   /** What the speech engine says, if different from `german`. */
   audioText?: string;
-  partOfSpeech?: "noun" | "verb" | "pronoun" | "expression" | "number";
+  partOfSpeech?:
+    | "noun"
+    | "verb"
+    | "pronoun"
+    | "expression"
+    | "number"
+    | "adjective"
+    | "adverb";
   article?: "der" | "die" | "das";
   plural?: string;
 }
@@ -34,6 +48,13 @@ export const categoryLabels: Record<VocabularyCategory, string> = {
   languages: "Languages",
   subjects: "School subjects",
   numbers: "Numbers",
+  family: "Family",
+  activities: "Daily activities",
+  places: "Places",
+  adjectives: "Adjectives",
+  days: "Days",
+  months: "Months",
+  time: "Time words",
 };
 
 export const week1Vocabulary: VocabularyItem[] = [

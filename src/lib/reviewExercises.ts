@@ -3,7 +3,12 @@
  * Pure: no database or React imports.
  */
 
-import { week1Vocabulary, type VocabularyItem } from "../data/lessons/week1Vocabulary";
+import type { VocabularyItem } from "../data/lessons/week1Vocabulary";
+import {
+  findVocabularyItem,
+  vocabularySetForItem,
+} from "../data/lessons/vocabularySets";
+import { week2HabenQuiz } from "../data/lessons/week2Haben";
 import { week1SeinQuiz } from "../data/lessons/week1Sein";
 import { week1PronunciationQuiz } from "../data/lessons/week1Pronunciation";
 import { week1ListeningQuiz } from "../data/lessons/week1Listening";
@@ -67,11 +72,14 @@ export function lessonIdFor(
   sourceType: ReviewSourceType,
   sourceId: string,
 ): string {
-  if (sourceType === "vocabulary") return "vocab-001";
+  if (sourceType === "vocabulary") {
+    return vocabularySetForItem(sourceId).taskId;
+  }
   if (sourceType === "pronunciation") return "pronunciation-001";
   if (sourceType === "listening") return "listening-001";
   if (sourceId.startsWith("rv-")) return "grammar-002";
   if (sourceId.startsWith("qn-")) return "grammar-003";
+  if (sourceId.startsWith("hb-")) return "grammar-004";
 
   return "grammar-001";
 }
@@ -79,6 +87,7 @@ export function lessonIdFor(
 const courseQuestions: CourseQuestion[] = [
   ...week1RegularVerbsQuiz,
   ...week1QuestionsQuiz,
+  ...week2HabenQuiz,
 ];
 
 /** Turns a data-driven grammar question into a structured review exercise. */
@@ -138,7 +147,7 @@ export function buildReviewExercise(
   sourceId: string,
 ): ReviewExercise | null {
   if (sourceType === "vocabulary") {
-    const item = week1Vocabulary.find((entry) => entry.id === sourceId);
+    const item = findVocabularyItem(sourceId);
     if (!item) return null;
 
     const englishAnswers = englishVariants(item);
@@ -146,13 +155,18 @@ export function buildReviewExercise(
 
     // Words sharing a displayed meaning (e.g. "Hello") are also valid
     // German answers; so are explicitly accepted alternatives.
-    const germanAnswers = week1Vocabulary
-      .filter((other) =>
+    const germanAnswers = vocabularySetForItem(item.id)
+      .items.filter((other) =>
         englishParts(other.english).some((part) =>
           myParts.has(normaliseEnglish(part)),
         ),
       )
       .flatMap((other) => [other.german, ...(other.acceptedGerman ?? [])]);
+
+    // "die Mutter" may also be typed without its article.
+    const withoutArticle = [item.german, ...germanAnswers]
+      .map((word) => word.replace(/^(der|die|das)\s+/i, ""))
+      .filter((word) => word.length > 0);
 
     return {
       kind: "vocab",
@@ -164,6 +178,7 @@ export function buildReviewExercise(
           item.german,
           ...(item.acceptedGerman ?? []),
           ...germanAnswers,
+          ...withoutArticle,
         ]),
       ],
       audioText: item.audioText,

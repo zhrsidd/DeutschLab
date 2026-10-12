@@ -64,6 +64,8 @@ export type CourseQuestion =
 
 export interface GrammarCourse {
   taskId: string;
+  /** Small label above the title, e.g. "Week 2 · Grammar". */
+  kicker?: string;
   title: string;
   summary: string;
   goal: string;

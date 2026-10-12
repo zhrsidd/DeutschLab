@@ -7,12 +7,13 @@ vi.mock("../../lib/db", () => ({ trackAnswer: vi.fn() }));
 import type { CourseQuestion } from "../../data/lessons/grammarCourseTypes";
 import { week1QuestionsQuiz } from "../../data/lessons/week1Questions";
 import { week1RegularVerbsQuiz } from "../../data/lessons/week1RegularVerbs";
+import { week2HabenQuiz } from "../../data/lessons/week2Haben";
 import { trackAnswer } from "../../lib/db";
 
 import CoursePractice from "./CoursePractice";
 
 const find = (id: string): CourseQuestion =>
-  [...week1RegularVerbsQuiz, ...week1QuestionsQuiz].find((q) => q.id === id)!;
+  [...week1RegularVerbsQuiz, ...week1QuestionsQuiz, ...week2HabenQuiz].find((q) => q.id === id)!;
 
 function setup(id: string, props: { trackCorrect?: boolean } = {}) {
   const onAnswered = vi.fn();
@@ -119,5 +120,33 @@ describe("CoursePractice", () => {
     expect(trackAnswer).toHaveBeenCalledWith(
       expect.objectContaining({ correct: true, enterOnCorrect: false }),
     );
+  });
+
+  describe("haben questions", () => {
+    it("accepts the right form with Enter", async () => {
+      const { user, onAnswered } = setup("hb-f-du");
+
+      await user.type(screen.getByLabelText("Your answer"), "hast{Enter}");
+
+      expect(screen.getByText("Correct.")).toBeInTheDocument();
+      expect(onAnswered).toHaveBeenCalledWith(true);
+    });
+
+    it("rejects du habe", async () => {
+      const { user, onAnswered } = setup("hb-t-du-physik");
+
+      await user.type(screen.getByLabelText("Your answer"), "Du habe Physik.{Enter}");
+
+      expect(screen.getByText("Not quite.")).toBeInTheDocument();
+      expect(onAnswered).toHaveBeenCalledWith(false);
+    });
+
+    it("accepts a translation regardless of case and punctuation", async () => {
+      const { user } = setup("hb-e-wir");
+
+      await user.type(screen.getByLabelText("Your answer"), "wir haben deutsch{Enter}");
+
+      expect(screen.getByText("Correct.")).toBeInTheDocument();
+    });
   });
 });

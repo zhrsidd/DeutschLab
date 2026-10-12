@@ -102,7 +102,7 @@ export default function GrammarCourseLesson({
       <LessonShell onBack={onBack}>
         <div className="mx-auto max-w-2xl px-8 py-12">
           <p className="text-sm font-medium text-neutral-400">
-            Week 1 · Grammar
+            {course.kicker ?? "Week 1 · Grammar"}
           </p>
 
           <h1 className="mt-3 text-4xl font-semibold tracking-tight">

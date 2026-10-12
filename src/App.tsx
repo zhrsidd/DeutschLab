@@ -1,4 +1,5 @@
 import {
+  Fragment,
   useCallback,
   useEffect,
   useMemo,
@@ -28,6 +29,8 @@ import ListeningLesson from "./components/ListeningLesson";
 import ReviewView, { formatReviewDate } from "./components/ReviewView";
 import SpeakingLesson from "./components/SpeakingLesson";
 import WeekCheckpoint from "./components/WeekCheckpoint";
+import { week2VocabularySet } from "./data/lessons/vocabularySets";
+import HabenLesson from "./components/HabenLesson";
 import QuestionsLesson from "./components/QuestionsLesson";
 import RegularVerbsLesson from "./components/RegularVerbsLesson";
 import PronunciationLesson from "./components/PronunciationLesson";
@@ -36,6 +39,7 @@ import VocabularyLesson from "./components/VocabularyLesson";
 import {
   starterTasks,
   unit1Curriculum,
+  taskWeek,
   type LessonTask,
   type LessonType,
 } from "./data/unit1";
@@ -198,12 +202,16 @@ function App() {
     [],
   );
 
+  // Progress and the sidebar bar track Week 1; Week 2 appears below it.
+  const week1Tasks = starterTasks.filter((task) => taskWeek(task) === 1);
+
   const progress =
-    starterTasks.length === 0
+    week1Tasks.length === 0
       ? 0
       : Math.round(
-          (completedTasks.length /
-            starterTasks.length) *
+          (week1Tasks.filter((task) => completedTasks.includes(task.id))
+            .length /
+            week1Tasks.length) *
             100,
         );
 
@@ -275,6 +283,31 @@ function App() {
    * We render the lesson by itself instead of
    * keeping the normal sidebar visible.
    */
+  if (activeLessonId === "vocab-002") {
+    return (
+      <VocabularyLesson
+        set={week2VocabularySet}
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("vocab-002", score, total)
+        }
+        onFinish={() => finishLesson("vocab-002")}
+      />
+    );
+  }
+
+  if (activeLessonId === "grammar-004") {
+    return (
+      <HabenLesson
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("grammar-004", score, total)
+        }
+        onFinish={() => finishLesson("grammar-004")}
+      />
+    );
+  }
+
   if (activeLessonId === "vocab-001") {
     return (
       <VocabularyLesson
@@ -325,7 +358,9 @@ function App() {
         unfinishedLessons={
           starterTasks.filter(
             (task) =>
-              task.id !== CHECKPOINT_ID && !completedTasks.includes(task.id),
+              taskWeek(task) === 1 &&
+              task.id !== CHECKPOINT_ID &&
+              !completedTasks.includes(task.id),
           ).length
         }
         onBack={() => setActiveLessonId(null)}
@@ -626,9 +661,18 @@ function TodayView({
               </p>
 
               <p className="mt-1 text-sm text-neutral-400">
-                {completedTasks.length} of{" "}
-                {starterTasks.length}{" "}
-                activities complete
+                {
+                  starterTasks.filter(
+                    (task) =>
+                      taskWeek(task) === 1 &&
+                      completedTasks.includes(task.id),
+                  ).length
+                }{" "}
+                of{" "}
+                {
+                  starterTasks.filter((task) => taskWeek(task) === 1).length
+                }{" "}
+                Week 1 activities complete
               </p>
             </div>
 
@@ -725,7 +769,7 @@ function TodayView({
           <section>
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-semibold tracking-tight">
-                Week 1 activities
+                Activities
               </h2>
 
               <span className="text-sm text-neutral-400">
@@ -750,9 +794,20 @@ function TodayView({
                     selectedTask?.id ===
                     task.id;
 
+                  const startsNewWeek =
+                    index > 0 &&
+                    taskWeek(task) !==
+                      taskWeek(starterTasks[index - 1]);
+
                   return (
+                    <Fragment key={task.id}>
+                      {startsNewWeek ? (
+                        <div className="border-y border-black/5 bg-neutral-50 px-5 py-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
+                          Week {taskWeek(task)}
+                        </div>
+                      ) : null}
+
                     <button
-                      key={task.id}
                       type="button"
                       onClick={() =>
                         setSelectedTask(
@@ -823,6 +878,7 @@ function TodayView({
                         />
                       )}
                     </button>
+                    </Fragment>
                   );
                 },
               )}
@@ -864,6 +920,8 @@ function TodayView({
                 selectedTask.id === "grammar-002" ||
                 selectedTask.id === "grammar-003" ||
                 selectedTask.id === CHECKPOINT_ID ||
+                selectedTask.id === "vocab-002" ||
+                selectedTask.id === "grammar-004" ||
                 selectedTask.id === "listening-001" ||
                 selectedTask.id === "speaking-001" ? (
                   <button

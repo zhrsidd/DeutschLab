@@ -13,7 +13,11 @@ export interface LessonTask {
   description: string;
   type: LessonType;
   minutes: number;
+  /** Curriculum week; tasks without one belong to Week 1. */
+  week?: number;
 }
+
+export const taskWeek = (task: LessonTask): number => task.week ?? 1;
 
 export interface CurriculumWeek {
   week: number;
@@ -256,5 +260,22 @@ export const starterTasks: LessonTask[] = [
       "Test your Week 1 vocabulary, grammar, listening and spoken introduction.",
     type: "review",
     minutes: 22,
+  },
+  {
+    id: "vocab-002",
+    title: "Week 2 vocabulary",
+    description:
+      "Learn family, daily life, places, adjectives, days and months.",
+    type: "vocabulary",
+    minutes: 20,
+    week: 2,
+  },
+  {
+    id: "grammar-004",
+    title: "haben",
+    description: "Learn how to use and conjugate haben.",
+    type: "grammar",
+    minutes: 13,
+    week: 2,
   },
 ];
