@@ -1,6 +1,7 @@
 import Database from "@tauri-apps/plugin-sql";
 
 import {
+  checkpointConfigFor,
   parseSections,
   serializeSections,
   type CheckpointResult,
@@ -633,7 +634,7 @@ export interface CheckpointAttemptRow {
   checkpointId: string;
   total: number;
   possible: number;
-  sections: SectionScores | null;
+  sections: Partial<SectionScores> | null;
   passed: boolean;
   completedAt: string;
 }
@@ -694,8 +695,49 @@ export async function getCheckpointAttempts(
     checkpointId: row.checkpoint_id,
     total: row.total_score,
     possible: row.total_possible,
-    sections: parseSections(row.section_scores_json),
+    sections: parseSections(
+      row.section_scores_json,
+      checkpointConfigFor(row.checkpoint_id),
+    ),
     passed: row.passed === 1,
     completedAt: row.completed_at,
   }));
+}
+
+/*
+ * Writing drafts (kept in app_state, so no schema change is needed)
+ */
+
+const draftKey = (taskId: string) => `writing_draft:${taskId}`;
+
+/** The saved draft for a writing task, or "" if there is none. */
+export async function getWritingDraft(taskId: string): Promise<string> {
+  const db = await getDatabase();
+
+  const rows = await db.select<{ value: string }[]>(
+    `SELECT value FROM app_state WHERE key = ?`,
+    [draftKey(taskId)],
+  );
+
+  return rows.length > 0 ? rows[0].value : "";
+}
+
+export async function saveWritingDraft(taskId: string, text: string) {
+  const db = await getDatabase();
+
+  await db.execute(
+    `
+      INSERT INTO app_state (key, value)
+      VALUES (?, ?)
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value
+    `,
+    [draftKey(taskId), text],
+  );
+}
+
+/** Deliberately discards the draft (the learner chose to start again). */
+export async function clearWritingDraft(taskId: string) {
+  const db = await getDatabase();
+
+  await db.execute(`DELETE FROM app_state WHERE key = ?`, [draftKey(taskId)]);
 }

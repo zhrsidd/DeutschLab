@@ -33,6 +33,24 @@ Current scope: Unit 1 only, A0 → strong A1, Oct 2026–Jan 2027.
 - Attempts are saved
 - Passed lesson is persisted as complete
 
+## Curriculum source of truth
+
+Before creating or materially changing lesson content, read `CURRICULUM.md`.
+
+`CURRICULUM.md` defines:
+- curriculum sequence
+- permitted grammar/vocabulary scope
+- CEFR progression
+- lesson IDs
+- mastery targets
+- Physics German progression
+
+Do not introduce later curriculum concepts or change lesson sequencing without checking and, when appropriate, updating `CURRICULUM.md`.
+
+- Read the relevant `CURRICULUM.md` sections before adding or changing lesson content.
+- Do not introduce later concepts casually (for example in example sentences, reading texts or answer keys).
+- When a lesson's status or scope changes, update `CURRICULUM.md` in the same change.
+
 ## Development rules
 - Keep UI minimal, clean, monochrome, macOS-like
 - Preserve existing working behavior

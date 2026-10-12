@@ -1,33 +1,5 @@
-import type { DatabaseSync } from "node:sqlite";
-
 import { expect, test } from "./fixtures";
-
-const WEEK_1_IDS = [
-  "vocab-001",
-  "pronunciation-001",
-  "grammar-001",
-  "grammar-002",
-  "grammar-003",
-  "listening-001",
-  "speaking-001",
-];
-
-/** Pre-populates progress the way a returning learner's database would be. */
-function seedCompleted(db: DatabaseSync, ids: string[]) {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS task_progress (
-      task_id TEXT PRIMARY KEY NOT NULL,
-      completed INTEGER NOT NULL DEFAULT 0,
-      completed_at TEXT
-    )
-  `);
-
-  const insert = db.prepare(
-    `INSERT INTO task_progress (task_id, completed, completed_at) VALUES (?, 1, ?)`,
-  );
-
-  for (const id of ids) insert.run(id, new Date().toISOString());
-}
+import { WEEK_1_IDS, seedCompleted } from "./helpers";
 
 const planSection = (page: import("@playwright/test").Page) =>
   page.locator("section", {

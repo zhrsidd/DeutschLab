@@ -4,8 +4,14 @@ import {
   CHECKPOINT_ID,
   CHECKPOINT_TOTAL,
   SECTION_RULES,
+  WEEK1_CHECKPOINT,
+  WEEK2_CHECKPOINT,
+  WEEK2_CHECKPOINT_TOTAL,
+  WEEK2_SECTION_RULES,
+  checkpointConfigFor,
   evaluateCheckpoint,
   isWeek1Mastered,
+  isWeek2Mastered,
   parseSections,
   requiredMarks,
   serializeSections,
@@ -120,5 +126,119 @@ describe("Week 1 mastery", () => {
 
   it("is true once the checkpoint is complete", () => {
     expect(isWeek1Mastered(["vocab-001", CHECKPOINT_ID])).toBe(true);
+  });
+});
+
+describe("Week 2 checkpoint scoring (checkpoint-002)", () => {
+  const w2 = (v: number, g: number, r: number, l: number, w: number) =>
+    evaluateCheckpoint(
+      { vocabulary: v, grammar: g, reading: r, listening: l, writing: w },
+      WEEK2_CHECKPOINT,
+    );
+
+  it("totals 32 marks: 8 + 10 + 4 + 4 + 6", () => {
+    expect(WEEK2_CHECKPOINT_TOTAL).toBe(32);
+    expect(WEEK2_SECTION_RULES.map((rule) => rule.max)).toEqual([8, 10, 4, 4, 6]);
+    expect(WEEK2_SECTION_RULES.map((rule) => rule.key)).toEqual([
+      "vocabulary", "grammar", "reading", "listening", "writing",
+    ]);
+  });
+
+  it("has no speaking section", () => {
+    expect(WEEK2_SECTION_RULES.some((rule) => rule.key === "speaking")).toBe(false);
+  });
+
+  it("requires 6/8, 7/10, 0/4, 2/4, 4/6 in the sections", () => {
+    expect(WEEK2_SECTION_RULES.map(requiredMarks)).toEqual([6, 7, 0, 2, 4]);
+  });
+
+  it("passes at 26/32 with every minimum met", () => {
+    const result = w2(6, 7, 4, 3, 6);
+
+    expect(result.total).toBe(26);
+    expect(result.possible).toBe(32);
+    expect(result.passed).toBe(true);
+  });
+
+  it("fails at 25/32 (below 80%) even with every minimum met", () => {
+    const result = w2(6, 7, 4, 3, 5);
+
+    expect(result.total).toBe(25);
+    expect(result.overallPassed).toBe(false);
+    expect(result.passed).toBe(false);
+  });
+
+  it("a strong total cannot hide a weak grammar result (29/32, grammar 6/10)", () => {
+    const result = w2(8, 6, 4, 4, 6);
+
+    expect(result.total).toBe(28);
+    expect(result.overallPassed).toBe(true);
+    expect(result.passed).toBe(false);
+    expect(result.weakSections).toEqual(["grammar"]);
+
+    const high = w2(8, 6, 4, 4, 6);
+    expect(high.percent).toBeGreaterThanOrEqual(80);
+  });
+
+  it("fails when vocabulary is below 6/8", () => {
+    const result = w2(5, 10, 4, 4, 6);
+
+    expect(result.overallPassed).toBe(true);
+    expect(result.passed).toBe(false);
+    expect(result.weakSections).toEqual(["vocabulary"]);
+  });
+
+  it("fails when listening is below 2/4", () => {
+    const result = w2(8, 10, 4, 1, 6);
+
+    expect(result.passed).toBe(false);
+    expect(result.weakSections).toEqual(["listening"]);
+    expect(w2(8, 10, 4, 2, 6).passed).toBe(true);
+  });
+
+  it("fails when writing is below 4/6", () => {
+    expect(w2(8, 10, 4, 4, 3).passed).toBe(false);
+    expect(w2(8, 10, 4, 4, 4).passed).toBe(true);
+  });
+
+  it("has no hard minimum for reading", () => {
+    expect(w2(8, 10, 0, 4, 6).passed).toBe(true);
+  });
+
+  it("round-trips Week 2 section scores with the Week 2 config", () => {
+    const json = serializeSections(w2(7, 8, 3, 3, 5));
+
+    expect(parseSections(json, WEEK2_CHECKPOINT)).toEqual({
+      vocabulary: 7, grammar: 8, reading: 3, listening: 3, writing: 5,
+    });
+    // A Week 1 reader would reject it (no speaking score).
+    expect(parseSections(json)).toBeNull();
+  });
+
+  it("selects the right config by checkpoint id", () => {
+    expect(checkpointConfigFor("checkpoint-002")).toBe(WEEK2_CHECKPOINT);
+    expect(checkpointConfigFor("checkpoint-001")).toBe(WEEK1_CHECKPOINT);
+  });
+
+  it("leaves Week 1 scoring exactly as it was (34 marks, 28 to pass)", () => {
+    expect(CHECKPOINT_TOTAL).toBe(34);
+    expect(evaluateCheckpoint(scores(7, 6, 4, 3, 4, 4)).passed).toBe(true);
+    expect(evaluateCheckpoint(scores(7, 6, 4, 3, 4, 3)).passed).toBe(false);
+  });
+});
+
+describe("Week 2 mastery", () => {
+  it("is false until checkpoint-002 is complete", () => {
+    expect(isWeek2Mastered([])).toBe(false);
+    expect(isWeek2Mastered(["checkpoint-001", "vocab-002", "grammar-004"])).toBe(false);
+  });
+
+  it("is true once checkpoint-002 is complete", () => {
+    expect(isWeek2Mastered(["checkpoint-002"])).toBe(true);
+  });
+
+  it("is independent of Week 1 mastery in both directions", () => {
+    expect(isWeek1Mastered(["checkpoint-002"])).toBe(false);
+    expect(isWeek2Mastered(["checkpoint-001"])).toBe(false);
   });
 });

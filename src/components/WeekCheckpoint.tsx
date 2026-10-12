@@ -2,24 +2,14 @@ import { useMemo, useState } from "react";
 
 import { AlertTriangle, ArrowRight, RotateCcw } from "lucide-react";
 
-import {
-  listeningItems,
-  readingQuestions,
-  readingText,
-  type ComprehensionQuestion,
-} from "../data/lessons/week1Checkpoint";
-
 import { useGermanSpeech } from "../hooks/useGermanSpeech";
 
 import {
-  buildCheckpointGrammar,
-  buildCheckpointVocabulary,
-} from "../lib/checkpointBuilders";
+  week1CheckpointDefinition,
+  type CheckpointDefinition,
+} from "../lib/checkpointDefinitions";
 
 import {
-  CHECKPOINT_TOTAL,
-  OVERALL_PASS_FRACTION,
-  SECTION_RULES,
   evaluateCheckpoint,
   type CheckpointResult,
   type SectionKey,
@@ -43,15 +33,6 @@ import WritingSection from "./checkpoint/WritingSection";
 
 type Stage = "intro" | SectionKey | "results";
 
-const SECTION_ORDER: SectionKey[] = [
-  "vocabulary",
-  "grammar",
-  "reading",
-  "listening",
-  "writing",
-  "speaking",
-];
-
 const SECTION_TITLE: Record<SectionKey, string> = {
   vocabulary: "Vocabulary",
   grammar: "Grammar",
@@ -61,68 +42,12 @@ const SECTION_TITLE: Record<SectionKey, string> = {
   speaking: "Speaking",
 };
 
-const emptyScores = (): SectionScores => ({
-  vocabulary: 0,
-  grammar: 0,
-  reading: 0,
-  listening: 0,
-  writing: 0,
-  speaking: 0,
-});
-
-interface Recommendation {
-  label: string;
-  target: PlanTarget;
-}
-
-function recommendationsFor(
-  result: CheckpointResult,
-  missedGrammarLessons: string[],
-): Recommendation[] {
-  const out: Recommendation[] = [];
-  const add = (label: string, target: PlanTarget) => {
-    const key = JSON.stringify(target) + label;
-    if (!out.some((item) => JSON.stringify(item.target) + item.label === key)) {
-      out.push({ label, target });
-    }
-  };
-
-  const grammarLabels: Record<string, string> = {
-    "grammar-001": "Review sein and pronouns",
-    "grammar-002": "Review regular verbs and word order",
-    "grammar-003": "Review German questions",
-  };
-
-  for (const key of result.weakSections) {
-    if (key === "vocabulary" || key === "reading") {
-      add("Review Week 1 vocabulary", { type: "lesson", taskId: "vocab-001" });
-    } else if (key === "grammar") {
-      const lessons = missedGrammarLessons.length
-        ? missedGrammarLessons
-        : ["grammar-001"];
-
-      for (const lessonId of lessons) {
-        add(grammarLabels[lessonId] ?? "Review grammar", {
-          type: "lesson",
-          taskId: lessonId,
-        });
-      }
-    } else if (key === "listening") {
-      add("Practise listening", { type: "lesson", taskId: "listening-001" });
-    } else if (key === "writing") {
-      add("Practise building sentences", { type: "lesson", taskId: "grammar-002" });
-    } else if (key === "speaking") {
-      add("Practise your self-introduction", { type: "lesson", taskId: "speaking-001" });
-    }
-  }
-
-  if (!result.passed) add("Open Review", { type: "review" });
-
-  return out;
-}
+const emptyScores = (): Partial<SectionScores> => ({});
 
 interface WeekCheckpointProps {
-  /** Instructional Week 1 lessons not yet completed. */
+  /** Which checkpoint to run; defaults to Week 1. */
+  definition?: CheckpointDefinition;
+  /** Instructional lessons of this week not yet completed. */
   unfinishedLessons: number;
   onBack: () => void;
   onFinish: () => Promise<void>;
@@ -131,6 +56,7 @@ interface WeekCheckpointProps {
 }
 
 export default function WeekCheckpoint({
+  definition = week1CheckpointDefinition,
   unfinishedLessons,
   onBack,
   onFinish,
@@ -139,7 +65,7 @@ export default function WeekCheckpoint({
 }: WeekCheckpointProps) {
   const [stage, setStage] = useState<Stage>("intro");
   const [attempt, setAttempt] = useState(1);
-  const [scores, setScores] = useState<SectionScores>(emptyScores);
+  const [scores, setScores] = useState<Partial<SectionScores>>(emptyScores);
   const [missedGrammar, setMissedGrammar] = useState<string[]>([]);
   const [result, setResult] = useState<CheckpointResult | null>(null);
   const [saving, setSaving] = useState(false);
@@ -148,38 +74,26 @@ export default function WeekCheckpoint({
 
   const speech = useGermanSpeech();
 
-  const vocabulary = useMemo(() => buildCheckpointVocabulary(attempt), [attempt]);
-  const grammar = useMemo(() => buildCheckpointGrammar(attempt), [attempt]);
-  const listening = useMemo<ComprehensionQuestion[]>(
-    () =>
-      listeningItems.flatMap((item) =>
-        item.questions.map((question) => ({
-          ...question,
-          audio: item.audio,
-          translation: item.translation,
-        })),
-      ),
-    [],
+  const sectionOrder = definition.sections;
+  const lastSection = sectionOrder[sectionOrder.length - 1];
+  const rules = definition.config.rules;
+  const possible = rules.reduce((sum, rule) => sum + rule.max, 0);
+  const passPercent = Math.round(definition.config.overallPassFraction * 100);
+
+  const vocabulary = useMemo(
+    () => definition.buildVocabulary(attempt),
+    [definition, attempt],
+  );
+  const grammar = useMemo(
+    () => definition.buildGrammar(attempt),
+    [definition, attempt],
   );
 
-  const sectionIndex = SECTION_ORDER.indexOf(stage as SectionKey);
+  const sectionIndex = sectionOrder.indexOf(stage as SectionKey);
 
-  const advance = (from: SectionKey, patch: SectionScores) => {
-    setScores(patch);
+  const finalise = async (finalScores: Partial<SectionScores>) => {
+    const evaluated = evaluateCheckpoint(finalScores, definition.config);
 
-    const next = SECTION_ORDER[SECTION_ORDER.indexOf(from) + 1];
-    if (next) setStage(next);
-  };
-
-  const completeSection = (key: SectionKey, score: number) => {
-    advance(key, { ...scores, [key]: score });
-  };
-
-  const completeSpeaking = async (score: number) => {
-    const finalScores = { ...scores, speaking: score };
-    const evaluated = evaluateCheckpoint(finalScores);
-
-    setScores(finalScores);
     setError(null);
 
     try {
@@ -199,6 +113,20 @@ export default function WeekCheckpoint({
     }
   };
 
+  /** Records a section's score, then moves on (or finishes after the last). */
+  const completeSection = (key: SectionKey, score: number) => {
+    const next = { ...scores, [key]: score };
+
+    setScores(next);
+
+    if (key === lastSection) {
+      void finalise(next);
+      return;
+    }
+
+    setStage(sectionOrder[sectionOrder.indexOf(key) + 1]);
+  };
+
   const retry = () => {
     speech.stop();
     setAttempt((current) => current + 1);
@@ -206,7 +134,7 @@ export default function WeekCheckpoint({
     setMissedGrammar([]);
     setResult(null);
     setError(null);
-    setStage("vocabulary");
+    setStage(sectionOrder[0]);
   };
 
   const finish = async () => {
@@ -230,40 +158,39 @@ export default function WeekCheckpoint({
       <LessonShell onBack={onBack}>
         <div className="mx-auto max-w-2xl px-8 py-12">
           <p className="text-sm font-medium text-neutral-400">
-            Week 1 · Checkpoint
+            {definition.weekLabel} · Checkpoint
           </p>
 
           <h1 className="mt-3 text-4xl font-semibold tracking-tight">
-            Week 1 Checkpoint
+            {definition.title}
           </h1>
 
           <p className="mt-4 max-w-xl text-lg leading-8 text-neutral-500">
-            One check across everything in Week 1: vocabulary, grammar,
-            reading, listening, a short piece of writing and a spoken
-            introduction.
+            {definition.summary}
           </p>
 
           {unfinishedLessons > 0 ? (
             <div className="mt-8 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-6 text-amber-900">
               <AlertTriangle size={18} className="mt-0.5 shrink-0" />
               <p>
-                You still have unfinished Week 1 lessons. You can take the
-                checkpoint now, but completing them first is recommended.
+                You still have unfinished {definition.weekLabel} lessons. You
+                can take the checkpoint now, but completing them first is
+                recommended.
               </p>
             </div>
           ) : null}
 
           <div className="mt-10 grid grid-cols-3 gap-3">
-            <Stat label="Sections" value="6" />
-            <Stat label="Time" value="20–25 min" />
-            <Stat label="Marks" value={String(CHECKPOINT_TOTAL)} />
+            <Stat label="Sections" value={String(sectionOrder.length)} />
+            <Stat label="Time" value={definition.time} />
+            <Stat label="Marks" value={String(possible)} />
           </div>
 
           <div className="mt-10 rounded-2xl border border-black/5 bg-neutral-50 p-5">
             <p className="text-sm font-medium">How it's scored</p>
 
             <div className="mt-3 space-y-1.5 text-sm text-neutral-500">
-              {SECTION_RULES.map((rule) => (
+              {rules.map((rule) => (
                 <div key={rule.key} className="flex justify-between">
                   <span>{rule.label}</span>
                   <span>{rule.max} marks</span>
@@ -272,16 +199,15 @@ export default function WeekCheckpoint({
             </div>
 
             <p className="mt-4 text-sm leading-6 text-neutral-500">
-              Pass with {Math.round(OVERALL_PASS_FRACTION * 100)}% overall
-              and the minimum in every section, so one strong area can't hide
-              a weak one. Writing and speaking are self-assessed. You'll need
-              a German voice for the listening section.
+              Pass with {passPercent}% overall and the minimum in every
+              section, so one strong area can't hide a weak one.{" "}
+              {definition.scoringNote}
             </p>
           </div>
 
           <button
             type="button"
-            onClick={() => setStage("vocabulary")}
+            onClick={() => setStage(sectionOrder[0])}
             className="mt-8 flex items-center gap-2 rounded-xl bg-neutral-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-neutral-800"
           >
             Begin checkpoint
@@ -297,13 +223,13 @@ export default function WeekCheckpoint({
    */
 
   if (stage === "results" && result) {
-    const recommendations = recommendationsFor(result, missedGrammar);
+    const recommendations = definition.recommend(result, missedGrammar);
 
     return (
       <LessonShell onBack={onBack}>
         <div className="mx-auto max-w-2xl px-8 py-12">
           <p className="text-center text-sm font-medium text-neutral-400">
-            Week 1 Checkpoint
+            {definition.title}
           </p>
 
           <div className="mt-6 text-center text-6xl font-semibold tracking-tighter">
@@ -315,7 +241,9 @@ export default function WeekCheckpoint({
           </p>
 
           <h1 className="mt-6 text-center text-3xl font-semibold tracking-tight">
-            {result.passed ? "Week 1 mastered" : "Review recommended"}
+            {result.passed
+              ? `${definition.weekLabel} mastered`
+              : "Review recommended"}
           </h1>
 
           <div className="mt-8 overflow-hidden rounded-2xl border border-black/5 bg-white">
@@ -356,7 +284,7 @@ export default function WeekCheckpoint({
             <p className="mt-4 text-sm leading-6 text-neutral-500">
               {result.overallPassed
                 ? "Your overall score is high enough, but a section is below its minimum."
-                : `You need ${Math.round(OVERALL_PASS_FRACTION * 100)}% overall and the minimum in every section.`}
+                : `You need ${passPercent}% overall and the minimum in every section.`}
             </p>
           ) : null}
 
@@ -428,11 +356,11 @@ export default function WeekCheckpoint({
 
   return (
     <LessonShell onBack={onBack}>
-      <ProgressBar value={((sectionIndex + 1) / SECTION_ORDER.length) * 100} />
+      <ProgressBar value={((sectionIndex + 1) / sectionOrder.length) * 100} />
 
       <div className="mx-auto max-w-2xl px-8 py-12">
         <p className="text-sm font-medium text-neutral-400">
-          Section {sectionIndex + 1} of {SECTION_ORDER.length} ·{" "}
+          Section {sectionIndex + 1} of {sectionOrder.length} ·{" "}
           {SECTION_TITLE[stage as SectionKey]}
         </p>
 
@@ -459,8 +387,8 @@ export default function WeekCheckpoint({
         {stage === "reading" ? (
           <ComprehensionSection
             key={`r-${attempt}`}
-            questions={readingQuestions}
-            passage={readingText}
+            questions={definition.readingQuestions}
+            passage={definition.readingText}
             speech={speech}
             onComplete={(score) => completeSection("reading", score)}
           />
@@ -497,7 +425,7 @@ export default function WeekCheckpoint({
         {stage === "listening" && speech.available ? (
           <ComprehensionSection
             key={`l-${attempt}`}
-            questions={listening}
+            questions={definition.listeningQuestions}
             speech={speech}
             onComplete={(score) => completeSection("listening", score)}
           />
@@ -506,17 +434,20 @@ export default function WeekCheckpoint({
         {stage === "writing" ? (
           <WritingSection
             key={`w-${attempt}`}
+            content={definition.writing}
             onComplete={(score) => completeSection("writing", score)}
           />
         ) : null}
 
         {stage === "speaking" ? (
-          <>
-            <SpeakingSection
-              key={`s-${attempt}`}
-              onComplete={(score) => void completeSpeaking(score)}
-            />
+          <SpeakingSection
+            key={`s-${attempt}`}
+            onComplete={(score) => completeSection("speaking", score)}
+          />
+        ) : null}
 
+        {stage === lastSection ? (
+          <>
             {saving ? (
               <p className="mt-4 text-center text-sm text-neutral-400">
                 Saving…

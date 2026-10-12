@@ -6,12 +6,17 @@ import {
   grammarSlots,
   vocabularySlots,
   type ComprehensionQuestion,
+  type VocabularySlot,
 } from "../data/lessons/week1Checkpoint";
+import {
+  week2GrammarSlots,
+  week2VocabularySlots,
+} from "../data/lessons/week2Checkpoint";
+import { findVocabularyItem } from "../data/lessons/vocabularySets";
 import type { CourseQuestion } from "../data/lessons/grammarCourseTypes";
 import { week1QuestionsQuiz } from "../data/lessons/week1Questions";
 import { week1RegularVerbsQuiz } from "../data/lessons/week1RegularVerbs";
-import { week1SeinQuiz } from "../data/lessons/week1Sein";
-import { week1Vocabulary } from "../data/lessons/week1Vocabulary";
+import { normaliseGerman, week1SeinQuiz } from "../data/lessons/week1Sein";
 
 import { seededShuffle } from "../components/lesson/shuffle";
 
@@ -19,22 +24,39 @@ import { normaliseEnglish, type Grade } from "./reviewExercises";
 import { buildQuestion, type VocabQuestion } from "./vocabularyExercises";
 
 /** Eight vocabulary questions across categories, varied by attempt. */
-export function buildCheckpointVocabulary(attempt: number): VocabQuestion[] {
+export function buildCheckpointVocabulary(
+  attempt: number,
+  slots: VocabularySlot[] = vocabularySlots,
+  seedPrefix = "cp",
+): VocabQuestion[] {
   const used = new Set<string>();
   const questions: VocabQuestion[] = [];
 
-  vocabularySlots.forEach((slot, index) => {
-    const candidates = seededShuffle(slot.pool, `cp:${attempt}:${index}`);
+  slots.forEach((slot, index) => {
+    const candidates = seededShuffle(
+      slot.pool,
+      `${seedPrefix}:${attempt}:${index}`,
+    );
     const id = candidates.find((candidate) => !used.has(candidate));
-    const item = week1Vocabulary.find((entry) => entry.id === id);
+    const item = id ? findVocabularyItem(id) : undefined;
 
     if (!id || !item) return;
 
     used.add(id);
-    questions.push(buildQuestion(item, slot.kind, `cp:${attempt}`));
+    questions.push(buildQuestion(item, slot.kind, `${seedPrefix}:${attempt}`));
   });
 
   return questions;
+}
+
+/** Eight Week 2 vocabulary questions across the new categories. */
+export function buildWeek2CheckpointVocabulary(attempt: number): VocabQuestion[] {
+  return buildCheckpointVocabulary(attempt, week2VocabularySlots, "cp2");
+}
+
+/** Ten Week 2 grammar questions, one per skill, varied by attempt. */
+export function buildWeek2CheckpointGrammar(attempt: number): CourseQuestion[] {
+  return week2GrammarSlots.map((options) => options[attempt % options.length]);
 }
 
 /** Adapts a grammar-001 question to the data-driven shape. */
@@ -101,18 +123,20 @@ export function gradeComprehension(
     };
   }
 
-  const tokens = normaliseEnglish(answer)
+  const normalise =
+    question.language === "german" ? normaliseGerman : normaliseEnglish;
+
+  const tokens = normalise(answer)
     .replace(/[-/]/g, " ")
     .split(" ")
     .filter(Boolean);
 
+  const has = (word: string) => tokens.includes(normalise(word));
+
   const groups = question.keywords ?? [];
   const hasAll =
-    groups.length > 0 &&
-    groups.every((group) => group.some((word) => tokens.includes(word)));
-  const hasForbidden = (question.forbidden ?? []).some((word) =>
-    tokens.includes(word),
-  );
+    groups.length > 0 && groups.every((group) => group.some(has));
+  const hasForbidden = (question.forbidden ?? []).some(has);
 
   return {
     correct: hasAll && !hasForbidden,

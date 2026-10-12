@@ -284,11 +284,11 @@ describe("Week 2 progression", () => {
 
   it("makes grammar-004 next after vocab-002", () => {
     expect(
-      sources({ completedTaskIds: [...week1All, "vocab-002"] }),
-    ).toEqual(["grammar-004"]);
+      sources({ completedTaskIds: [...week1All, "vocab-002"] })[0],
+    ).toBe("grammar-004");
   });
 
-  it("is done once Week 2's two tasks are complete", () => {
+  it("is done once every task is complete", () => {
     expect(
       generateDailyPlan({ ...base, completedTaskIds: ids }).done,
     ).toBe(true);
@@ -328,5 +328,124 @@ describe("Week 2 progression", () => {
     });
 
     expect(plan.items[0].title).toBe("Review haben");
+  });
+});
+
+describe("Week 2 order and checkpoint-002", () => {
+  const week2Order = [
+    "vocab-002",
+    "grammar-004",
+    "grammar-005",
+    "writing-001",
+    "reading-001",
+    "listening-002",
+    "checkpoint-002",
+  ];
+
+  const next = (completed: string[]) =>
+    generateDailyPlan({
+      ...base,
+      budgetMinutes: 15, // one item at a time keeps the order visible
+      completedTaskIds: completed,
+    }).items[0]?.sourceId;
+
+  it("offers each Week 2 task in order as the previous one is completed", () => {
+    for (let i = 0; i < week2Order.length; i += 1) {
+      const done = [...week1All, ...week2Order.slice(0, i)];
+
+      expect(next(done), week2Order[i]).toBe(week2Order[i]);
+    }
+  });
+
+  it("grammar-005 follows grammar-004, writing follows grammar-005, reading follows writing, listening follows reading", () => {
+    expect(next([...week1All, "vocab-002", "grammar-004"])).toBe("grammar-005");
+    expect(next([...week1All, "vocab-002", "grammar-004", "grammar-005"])).toBe("writing-001");
+    expect(next([...week1All, "vocab-002", "grammar-004", "grammar-005", "writing-001"])).toBe("reading-001");
+    expect(
+      next([...week1All, "vocab-002", "grammar-004", "grammar-005", "writing-001", "reading-001"]),
+    ).toBe("listening-002");
+  });
+
+  it("offers checkpoint-002 only after all six Week 2 instructional tasks", () => {
+    const sixDone = week2Order.slice(0, 6);
+
+    for (let missing = 0; missing < 6; missing += 1) {
+      const partial = sixDone.filter((_, i) => i !== missing);
+      const plan = generateDailyPlan({
+        ...base,
+        budgetMinutes: 60,
+        completedTaskIds: [...week1All, ...partial],
+      });
+
+      expect(plan.items.map((i) => i.sourceId), sixDone[missing]).not.toContain(
+        "checkpoint-002",
+      );
+    }
+
+    expect(next([...week1All, ...sixDone])).toBe("checkpoint-002");
+  });
+
+  it("does not let unfinished Week 2 tasks block the Week 1 checkpoint", () => {
+    expect(next(instructional)).toBe("checkpoint-001");
+  });
+
+  it("keeps Week 1 mastery as the gate for all Week 2 work", () => {
+    const plan = generateDailyPlan({
+      ...base,
+      budgetMinutes: 60,
+      completedTaskIds: instructional, // checkpoint-001 not passed
+    });
+
+    expect(plan.items.some((item) => week2Order.includes(item.sourceId))).toBe(false);
+  });
+
+  it("after a failed checkpoint-002, reviews and weak areas come before a retry", () => {
+    const done = [...week1All, ...week2Order.slice(0, 6)];
+
+    const withReviews = generateDailyPlan({
+      ...base,
+      budgetMinutes: 60,
+      completedTaskIds: done,
+      attemptedCheckpointIds: ["checkpoint-002"],
+      dueReviewCount: 6,
+    });
+
+    expect(withReviews.items.map((i) => i.sourceId)).toEqual(["review"]);
+
+    const withWeakArea = generateDailyPlan({
+      ...base,
+      budgetMinutes: 60,
+      completedTaskIds: done,
+      attemptedCheckpointIds: ["checkpoint-002"],
+      unresolvedMistakes: [
+        {
+          id: 3,
+          lessonId: "grammar-005",
+          itemKey: "grammar:cv-f-du-sprechen",
+          prompt: "Du ___ Deutsch. (sprechen)",
+          timesMissed: 2,
+        },
+      ],
+    });
+
+    expect(withWeakArea.items.map((i) => i.kind)).toEqual(["mistake"]);
+    expect(withWeakArea.items[0].title).toBe("Review common verbs");
+  });
+
+  it("offers the retry again when nothing else is pending", () => {
+    const done = [...week1All, ...week2Order.slice(0, 6)];
+
+    expect(
+      generateDailyPlan({
+        ...base,
+        budgetMinutes: 60,
+        completedTaskIds: done,
+        attemptedCheckpointIds: ["checkpoint-002"],
+      }).items.map((i) => i.sourceId),
+    ).toEqual(["checkpoint-002"]);
+  });
+
+  it("is done once checkpoint-002 is passed", () => {
+    expect(generateDailyPlan({ ...base, completedTaskIds: ids }).done).toBe(true);
   });
 });

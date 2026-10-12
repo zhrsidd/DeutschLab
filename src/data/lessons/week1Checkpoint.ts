@@ -61,6 +61,13 @@ export interface ComprehensionQuestion {
   /** Listening: the German the speech engine says. */
   audio?: string;
   translation?: string;
+  /** Short answers: which language the learner types (default English). */
+  language?: "english" | "german";
+  /**
+   * A reusable language concept this question exercises. When answered
+   * wrongly it feeds Mistakes and Review; questions without one never do.
+   */
+  concept?: { sourceType: "vocabulary" | "grammar"; sourceId: string };
 }
 
 export const readingText = `Guten Morgen! Ich heiße Leila und ich bin Schülerin. Ich komme aus Pakistan. Ich wohne in Doha. Ich spreche Urdu und Englisch, und ich lerne Deutsch. Die Lehrerin heißt Frau Weber. Sie kommt aus Österreich und wohnt auch in Doha. Ich mag Physik und Mathematik. Chemie lerne ich auch. Heute lerne ich Deutsch. Wir sind in der Klasse. Wir lernen Deutsch und Englisch.`;
@@ -197,3 +204,24 @@ export const speakingChecklist = [
   "I used Week 1 grammar correctly most of the time",
   "I spoke mostly without reading",
 ];
+
+/** Content for a free-writing task (used by lessons and checkpoints). */
+export interface WritingContent {
+  prompt: string;
+  targetWords: { min: number; max: number };
+  cues: string[];
+  checklist: string[];
+  /** Shown only after the learner submits. */
+  sample: string;
+  continueLabel?: string;
+}
+
+/** The Week 1 checkpoint's writing task. */
+export const week1WritingContent: WritingContent = {
+  prompt: "Write a short introduction about yourself in German.",
+  targetWords: writingTargetWords,
+  cues: writingCues,
+  checklist: writingChecklist,
+  sample: writingSample,
+  continueLabel: "Continue to speaking",
+};

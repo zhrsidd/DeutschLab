@@ -15,6 +15,12 @@ interface ComprehensionSectionProps {
   passage?: string;
   speech: Speech;
   onComplete: (score: number) => void;
+  /** Called once per question when it is answered. */
+  onResult?: (
+    question: ComprehensionQuestion,
+    correct: boolean,
+    answer: string,
+  ) => void;
 }
 
 /*
@@ -26,6 +32,7 @@ export default function ComprehensionSection({
   passage,
   speech,
   onComplete,
+  onResult,
 }: ComprehensionSectionProps) {
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -40,8 +47,9 @@ export default function ComprehensionSection({
       speech={speech}
       position={`${index + 1} of ${questions.length}`}
       isLast={index === questions.length - 1}
-      onAnswered={(correct) => {
+      onAnswered={(correct, answer) => {
         if (correct) setScore((current) => current + 1);
+        onResult?.(question, correct, answer);
       }}
       onNext={() => {
         speech.stop();
@@ -71,7 +79,7 @@ function QuestionCard({
   speech: Speech;
   position: string;
   isLast: boolean;
-  onAnswered: (correct: boolean) => void;
+  onAnswered: (correct: boolean, answer: string) => void;
   onNext: () => void;
 }) {
   const [typed, setTyped] = useState("");
@@ -96,7 +104,7 @@ function QuestionCard({
 
     setChosen(answer);
     setGrade(result);
-    onAnswered(result.correct);
+    onAnswered(result.correct, answer);
   };
 
   return (

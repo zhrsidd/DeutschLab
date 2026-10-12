@@ -85,6 +85,7 @@ const WEAK_AREA_TITLE_BY_LESSON: Record<string, string> = {
   "grammar-002": "Review regular verbs and word order",
   "grammar-003": "Review German questions",
   "grammar-004": "Review haben",
+  "grammar-005": "Review common verbs",
   "vocab-002": "Revisit Week 2 vocabulary",
 };
 
@@ -205,7 +206,8 @@ export function generateDailyPlan(input: PlannerInput): DailyPlan {
       // Only once every instructional lesson is done...
       const lessonsLeft = unfinished.some(
         (other) =>
-          taskWeek(other) === 1 && !other.id.startsWith(CHECKPOINT_PREFIX),
+          taskWeek(other) === taskWeek(task) &&
+          !other.id.startsWith(CHECKPOINT_PREFIX),
       );
       if (lessonsLeft) break;
 

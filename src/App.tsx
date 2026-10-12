@@ -30,6 +30,11 @@ import ReviewView, { formatReviewDate } from "./components/ReviewView";
 import SpeakingLesson from "./components/SpeakingLesson";
 import WeekCheckpoint from "./components/WeekCheckpoint";
 import { week2VocabularySet } from "./data/lessons/vocabularySets";
+import CommonVerbsLesson from "./components/CommonVerbsLesson";
+import WritingLesson from "./components/WritingLesson";
+import Week2ListeningLesson from "./components/Week2ListeningLesson";
+import Week2ReadingLesson from "./components/Week2ReadingLesson";
+import { week2CheckpointDefinition } from "./lib/checkpointDefinitions";
 import HabenLesson from "./components/HabenLesson";
 import QuestionsLesson from "./components/QuestionsLesson";
 import RegularVerbsLesson from "./components/RegularVerbsLesson";
@@ -59,7 +64,9 @@ import {
 
 import {
   CHECKPOINT_ID,
+  WEEK2_CHECKPOINT_ID,
   isWeek1Mastered,
+  isWeek2Mastered,
 } from "./lib/checkpointScoring";
 
 import {
@@ -79,8 +86,12 @@ const iconForType: Record<LessonType, ElementType> = {
   listening: Headphones,
   speaking: Mic,
   writing: NotebookPen,
+  reading: BookOpen,
   review: Target,
 };
+
+/** Tasks that open a real lesson (the rest use the manual toggle). */
+const IMPLEMENTED_LESSON_IDS = new Set(starterTasks.map((task) => task.id));
 
 function App() {
   const [view, setView] = useState<View>("today");
@@ -352,6 +363,84 @@ function App() {
     );
   }
 
+  if (activeLessonId === "grammar-005") {
+    return (
+      <CommonVerbsLesson
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("grammar-005", score, total)
+        }
+        onFinish={() => finishLesson("grammar-005")}
+      />
+    );
+  }
+
+  if (activeLessonId === "writing-001") {
+    return (
+      <WritingLesson
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("writing-001", score, total)
+        }
+        onFinish={() => finishLesson("writing-001")}
+      />
+    );
+  }
+
+  if (activeLessonId === "reading-001") {
+    return (
+      <Week2ReadingLesson
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("reading-001", score, total)
+        }
+        onFinish={() => finishLesson("reading-001")}
+      />
+    );
+  }
+
+  if (activeLessonId === "listening-002") {
+    return (
+      <Week2ListeningLesson
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("listening-002", score, total)
+        }
+        onFinish={() => finishLesson("listening-002")}
+      />
+    );
+  }
+
+  if (activeLessonId === WEEK2_CHECKPOINT_ID) {
+    return (
+      <WeekCheckpoint
+        definition={week2CheckpointDefinition}
+        unfinishedLessons={
+          starterTasks.filter(
+            (task) =>
+              taskWeek(task) === 2 &&
+              task.id !== WEEK2_CHECKPOINT_ID &&
+              !completedTasks.includes(task.id),
+          ).length
+        }
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(result) =>
+          saveCheckpointAttempt(WEEK2_CHECKPOINT_ID, result)
+        }
+        onFinish={() => finishLesson(WEEK2_CHECKPOINT_ID)}
+        onOpenTarget={(target) => {
+          if (target.type === "review") {
+            setReviewLimit(null);
+            setActiveLessonId(null);
+            setView("review");
+          } else {
+            setActiveLessonId(target.taskId);
+          }
+        }}
+      />
+    );
+  }
+
   if (activeLessonId === CHECKPOINT_ID) {
     return (
       <WeekCheckpoint
@@ -530,7 +619,6 @@ function App() {
                 completedTasks
               }
               totalMinutes={totalMinutes}
-              progress={progress}
               selectedTask={selectedTask}
               setSelectedTask={
                 setSelectedTask
@@ -541,6 +629,7 @@ function App() {
               }
               plan={plan}
               week1Mastered={isWeek1Mastered(completedTasks)}
+              week2Mastered={isWeek2Mastered(completedTasks)}
               nextReviewAt={planData.nextDueAt}
               studyMinutes={studyMinutes}
               setStudyMinutes={(minutes) =>
@@ -568,7 +657,6 @@ function App() {
 interface TodayViewProps {
   completedTasks: string[];
   totalMinutes: number;
-  progress: number;
 
   selectedTask: LessonTask | null;
 
@@ -586,6 +674,7 @@ interface TodayViewProps {
 
   plan: DailyPlan;
   week1Mastered: boolean;
+  week2Mastered: boolean;
   nextReviewAt: string | null;
   studyMinutes: number;
   setStudyMinutes: (minutes: number) => void;
@@ -595,13 +684,13 @@ interface TodayViewProps {
 function TodayView({
   completedTasks,
   totalMinutes,
-  progress,
   selectedTask,
   setSelectedTask,
   toggleTask,
   startLesson,
   plan,
   week1Mastered,
+  week2Mastered,
   nextReviewAt,
   studyMinutes,
   setStudyMinutes,
@@ -653,43 +742,19 @@ function TodayView({
           </div>
         </header>
 
-        <section className="mb-8 rounded-2xl border border-black/5 bg-white p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">
-                Week 1 progress{week1Mastered ? " · Mastered" : ""}
-              </p>
+        <WeekProgressCard
+          label="Week 1"
+          tasks={starterTasks.filter((task) => taskWeek(task) === 1)}
+          completedTasks={completedTasks}
+          mastered={week1Mastered}
+        />
 
-              <p className="mt-1 text-sm text-neutral-400">
-                {
-                  starterTasks.filter(
-                    (task) =>
-                      taskWeek(task) === 1 &&
-                      completedTasks.includes(task.id),
-                  ).length
-                }{" "}
-                of{" "}
-                {
-                  starterTasks.filter((task) => taskWeek(task) === 1).length
-                }{" "}
-                Week 1 activities complete
-              </p>
-            </div>
-
-            <div className="text-sm font-medium">
-              {progress}%
-            </div>
-          </div>
-
-          <div className="h-2 overflow-hidden rounded-full bg-neutral-100">
-            <div
-              className="h-full rounded-full bg-neutral-900 transition-all duration-300"
-              style={{
-                width: `${progress}%`,
-              }}
-            />
-          </div>
-        </section>
+        <WeekProgressCard
+          label="Week 2"
+          tasks={starterTasks.filter((task) => taskWeek(task) === 2)}
+          completedTasks={completedTasks}
+          mastered={week2Mastered}
+        />
 
         <section className="mb-8">
           <div className="mb-3 flex items-center justify-between">
@@ -914,16 +979,7 @@ function TodayView({
                   minutes
                 </div>
 
-                {selectedTask.id === "vocab-001" ||
-                selectedTask.id === "pronunciation-001" ||
-                selectedTask.id === "grammar-001" ||
-                selectedTask.id === "grammar-002" ||
-                selectedTask.id === "grammar-003" ||
-                selectedTask.id === CHECKPOINT_ID ||
-                selectedTask.id === "vocab-002" ||
-                selectedTask.id === "grammar-004" ||
-                selectedTask.id === "listening-001" ||
-                selectedTask.id === "speaking-001" ? (
+                {IMPLEMENTED_LESSON_IDS.has(selectedTask.id) ? (
                   <button
                     type="button"
                     onClick={() =>
@@ -978,6 +1034,46 @@ function TodayView({
         </div>
       </div>
     </div>
+  );
+}
+
+function WeekProgressCard({
+  label,
+  tasks,
+  completedTasks,
+  mastered,
+}: {
+  label: string;
+  tasks: LessonTask[];
+  completedTasks: string[];
+  mastered: boolean;
+}) {
+  const done = tasks.filter((task) => completedTasks.includes(task.id)).length;
+  const percent = tasks.length === 0 ? 0 : Math.round((done / tasks.length) * 100);
+
+  return (
+    <section className="mb-4 rounded-2xl border border-black/5 bg-white p-6 last:mb-8">
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium">
+            {label} progress{mastered ? " · Mastered" : ""}
+          </p>
+
+          <p className="mt-1 text-sm text-neutral-400">
+            {done} of {tasks.length} {label} activities complete
+          </p>
+        </div>
+
+        <div className="text-sm font-medium">{percent}%</div>
+      </div>
+
+      <div className="h-2 overflow-hidden rounded-full bg-neutral-100">
+        <div
+          className="h-full rounded-full bg-neutral-900 transition-all duration-300"
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+    </section>
   );
 }
 

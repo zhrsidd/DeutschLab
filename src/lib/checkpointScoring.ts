@@ -1,5 +1,5 @@
 /*
- * Week 1 checkpoint scoring. Pure: thresholds live here in one place.
+ * Checkpoint scoring (Week 1 and Week 2). Pure: every threshold lives here.
  */
 
 export const CHECKPOINT_ID = "checkpoint-001";
@@ -31,12 +31,48 @@ export const SECTION_RULES: SectionRule[] = [
   { key: "speaking", label: "Speaking self-check", max: 5, minFraction: 0.6 },
 ];
 
-export const CHECKPOINT_TOTAL = SECTION_RULES.reduce(
-  (sum, rule) => sum + rule.max,
-  0,
-);
+const totalOf = (rules: SectionRule[]) =>
+  rules.reduce((sum, rule) => sum + rule.max, 0);
+
+export const CHECKPOINT_TOTAL = totalOf(SECTION_RULES);
 
 export type SectionScores = Record<SectionKey, number>;
+
+/** One checkpoint's marks and thresholds. */
+export interface CheckpointConfig {
+  id: string;
+  rules: SectionRule[];
+  overallPassFraction: number;
+}
+
+export const WEEK1_CHECKPOINT: CheckpointConfig = {
+  id: CHECKPOINT_ID,
+  rules: SECTION_RULES,
+  overallPassFraction: OVERALL_PASS_FRACTION,
+};
+
+export const WEEK2_CHECKPOINT_ID = "checkpoint-002";
+
+/** Week 2 has no speaking section; writing is out of 6. */
+export const WEEK2_SECTION_RULES: SectionRule[] = [
+  { key: "vocabulary", label: "Vocabulary", max: 8, minFraction: 0.75 },
+  { key: "grammar", label: "Grammar", max: 10, minFraction: 0.7 },
+  { key: "reading", label: "Reading", max: 4, minFraction: 0 },
+  { key: "listening", label: "Listening", max: 4, minFraction: 0.5 },
+  { key: "writing", label: "Writing self-check", max: 6, minFraction: 4 / 6 },
+];
+
+export const WEEK2_CHECKPOINT_TOTAL = totalOf(WEEK2_SECTION_RULES);
+
+export const WEEK2_CHECKPOINT: CheckpointConfig = {
+  id: WEEK2_CHECKPOINT_ID,
+  rules: WEEK2_SECTION_RULES,
+  overallPassFraction: OVERALL_PASS_FRACTION,
+};
+
+export function checkpointConfigFor(id: string): CheckpointConfig {
+  return id === WEEK2_CHECKPOINT_ID ? WEEK2_CHECKPOINT : WEEK1_CHECKPOINT;
+}
 
 export interface SectionResult {
   key: SectionKey;
@@ -69,9 +105,16 @@ function clamp(value: number, max: number): number {
   return Math.min(max, Math.max(0, Math.round(value)));
 }
 
-export function evaluateCheckpoint(scores: SectionScores): CheckpointResult {
-  const sections: SectionResult[] = SECTION_RULES.map((rule) => {
-    const score = clamp(scores[rule.key], rule.max);
+export function evaluateCheckpoint(
+  scores: Partial<SectionScores>,
+  config: CheckpointConfig = WEEK1_CHECKPOINT,
+): CheckpointResult {
+  const rules = config.rules;
+  const possible = totalOf(rules);
+  const passFraction = config.overallPassFraction;
+
+  const sections: SectionResult[] = rules.map((rule) => {
+    const score = clamp(scores[rule.key] ?? 0, rule.max);
     const required = requiredMarks(rule);
 
     return {
@@ -85,8 +128,8 @@ export function evaluateCheckpoint(scores: SectionScores): CheckpointResult {
   });
 
   const total = sections.reduce((sum, section) => sum + section.score, 0);
-  const percent = Math.round((total / CHECKPOINT_TOTAL) * 100);
-  const overallPassed = total / CHECKPOINT_TOTAL >= OVERALL_PASS_FRACTION - 1e-9;
+  const percent = Math.round((total / possible) * 100);
+  const overallPassed = total / possible >= passFraction - 1e-9;
   const failedMinimums = sections.filter((section) => !section.passed);
 
   const passed = overallPassed && failedMinimums.length === 0;
@@ -95,13 +138,13 @@ export function evaluateCheckpoint(scores: SectionScores): CheckpointResult {
 
   if (!passed && weak.length === 0) {
     weak = sections.filter(
-      (section) => section.score / section.max < OVERALL_PASS_FRACTION,
+      (section) => section.score / section.max < passFraction,
     );
   }
 
   return {
     total,
-    possible: CHECKPOINT_TOTAL,
+    possible,
     percent,
     sections,
     overallPassed,
@@ -120,14 +163,17 @@ export function serializeSections(result: CheckpointResult): string {
   return JSON.stringify(scores);
 }
 
-export function parseSections(json: string | null): SectionScores | null {
+export function parseSections(
+  json: string | null,
+  config: CheckpointConfig = WEEK1_CHECKPOINT,
+): Partial<SectionScores> | null {
   if (!json) return null;
 
   try {
     const raw = JSON.parse(json) as Record<string, unknown>;
-    const scores = {} as SectionScores;
+    const scores: Partial<SectionScores> = {};
 
-    for (const rule of SECTION_RULES) {
+    for (const rule of config.rules) {
       const value = raw[rule.key];
       if (typeof value !== "number") return null;
       scores[rule.key] = clamp(value, rule.max);
@@ -142,4 +188,9 @@ export function parseSections(json: string | null): SectionScores | null {
 /** Week 1 is mastered once the checkpoint task has been completed (passed). */
 export function isWeek1Mastered(completedTaskIds: string[]): boolean {
   return completedTaskIds.includes(CHECKPOINT_ID);
+}
+
+/** Week 2 is mastered once checkpoint-002 has been completed (passed). */
+export function isWeek2Mastered(completedTaskIds: string[]): boolean {
+  return completedTaskIds.includes(WEEK2_CHECKPOINT_ID);
 }

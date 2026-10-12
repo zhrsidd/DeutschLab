@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import {
@@ -60,12 +63,24 @@ describe("curriculum", () => {
     ]);
   });
 
-  it("adds Week 2 after the checkpoint", () => {
+  it("lists Week 2 after the Week 1 checkpoint, in the agreed order", () => {
     const ids = starterTasks.map((task) => task.id);
 
-    expect(ids.slice(-2)).toEqual(["vocab-002", "grammar-004"]);
-    expect(ids.indexOf("vocab-002")).toBeGreaterThan(ids.indexOf("checkpoint-001"));
-    expect(starterTasks.filter((task) => task.week === 2)).toHaveLength(2);
+    expect(ids.slice(ids.indexOf("checkpoint-001") + 1)).toEqual([
+      "vocab-002",
+      "grammar-004",
+      "grammar-005",
+      "writing-001",
+      "reading-001",
+      "listening-002",
+      "checkpoint-002",
+    ]);
+    expect(starterTasks.filter((task) => task.week === 2)).toHaveLength(7);
+  });
+
+  it("keeps the original Week 2 ids (vocab-002, grammar-004) unchanged", () => {
+    expect(starterTasks.find((t) => t.id === "vocab-002")?.title).toBe("Week 2 vocabulary");
+    expect(starterTasks.find((t) => t.id === "grammar-004")?.title).toBe("haben");
   });
 });
 
@@ -274,6 +289,29 @@ describe("checkpoint", () => {
     for (const attempt of [1, 2, 3]) {
       expect(buildCheckpointVocabulary(attempt)).toHaveLength(8);
       expect(buildCheckpointGrammar(attempt)).toHaveLength(8);
+    }
+  });
+});
+
+describe("CURRICULUM.md stays in step with the code", () => {
+  const doc = readFileSync(resolve(process.cwd(), "CURRICULUM.md"), "utf8");
+  const rows = [...doc.matchAll(/^\| `([a-z]+-\d{3})` \| .+? \| (Implemented|Planned) \|$/gm)];
+  const appIds = new Set(starterTasks.map((task) => task.id));
+
+  it("lists every Week 2 task as Implemented", () => {
+    const week2 = Object.fromEntries(rows.map((m) => [m[1], m[2]]));
+
+    for (const id of [
+      "vocab-002", "grammar-004", "grammar-005",
+      "writing-001", "reading-001", "listening-002", "checkpoint-002",
+    ]) {
+      expect(week2[id], id).toBe("Implemented");
+    }
+  });
+
+  it("only marks a task Implemented if it exists in the app", () => {
+    for (const [, id, status] of rows) {
+      if (status === "Implemented") expect(appIds.has(id), id).toBe(true);
     }
   });
 });

@@ -345,6 +345,250 @@ describe("checkpoint attempts", () => {
   });
 });
 
+describe("checkpoint-002 attempts", () => {
+  const section = (
+    key: "vocabulary" | "grammar" | "reading" | "listening" | "writing",
+    label: string,
+    score: number,
+    max: number,
+    required: number,
+  ) => ({ key, label, score, max, required, passed: score >= required });
+
+  const week2Result = (grammar: number, passed: boolean) => ({
+    total: 8 + grammar + 4 + 4 + 6,
+    possible: 32,
+    percent: 90,
+    sections: [
+      section("vocabulary", "Vocabulary", 8, 8, 6),
+      section("grammar", "Grammar", grammar, 10, 7),
+      section("reading", "Reading", 4, 4, 0),
+      section("listening", "Listening", 4, 4, 2),
+      section("writing", "Writing self-check", 6, 6, 4),
+    ],
+    overallPassed: true,
+    passed,
+    weakSections: passed ? [] : ["grammar" as const],
+  });
+
+  const week1Result = {
+    total: 24,
+    possible: 34,
+    percent: 71,
+    sections: [
+      section("vocabulary", "Vocabulary", 6, 8, 6),
+      section("grammar", "Grammar", 4, 8, 6),
+      section("reading", "Reading", 3, 4, 0),
+      section("listening", "Listening", 3, 4, 2),
+      section("writing", "Writing self-check", 4, 5, 3),
+      { key: "speaking" as const, label: "Speaking self-check", score: 4, max: 5, required: 3, passed: true },
+    ],
+    overallPassed: false,
+    passed: false,
+    weakSections: ["grammar" as const],
+  };
+
+  it("retries insert new rows and never overwrite earlier attempts", async () => {
+    await db.initialiseDatabase();
+
+    await db.saveCheckpointAttempt("checkpoint-002", week2Result(6, false));
+    await db.saveCheckpointAttempt("checkpoint-002", week2Result(9, true));
+
+    const attempts = await db.getCheckpointAttempts("checkpoint-002");
+
+    expect(attempts).toHaveLength(2);
+    expect(attempts.map((a) => a.passed)).toEqual([false, true]);
+    expect(attempts[0].id).not.toBe(attempts[1].id);
+    expect(attempts[0].total).toBe(8 + 6 + 4 + 4 + 6);
+    expect(attempts[1].total).toBe(8 + 9 + 4 + 4 + 6);
+  });
+
+  it("reads Week 2 section scores with the Week 2 layout (no speaking)", async () => {
+    await db.initialiseDatabase();
+    await db.saveCheckpointAttempt("checkpoint-002", week2Result(6, false));
+
+    const [attempt] = await db.getCheckpointAttempts("checkpoint-002");
+
+    expect(attempt.sections).toEqual({
+      vocabulary: 8,
+      grammar: 6,
+      reading: 4,
+      listening: 4,
+      writing: 6,
+    });
+  });
+
+  it("leaves checkpoint-001 history untouched", async () => {
+    await db.initialiseDatabase();
+    await db.saveCheckpointAttempt("checkpoint-001", week1Result);
+
+    const before = await db.getCheckpointAttempts("checkpoint-001");
+
+    await db.saveCheckpointAttempt("checkpoint-002", week2Result(6, false));
+    await db.saveCheckpointAttempt("checkpoint-002", week2Result(9, true));
+
+    const after = await db.getCheckpointAttempts("checkpoint-001");
+
+    expect(after).toEqual(before);
+    expect(after).toHaveLength(1);
+    expect(after[0].sections).toMatchObject({ speaking: 4 });
+  });
+
+  it("keeps the two checkpoints' attempts apart", async () => {
+    await db.initialiseDatabase();
+    await db.saveCheckpointAttempt("checkpoint-001", week1Result);
+    await db.saveCheckpointAttempt("checkpoint-002", week2Result(9, true));
+
+    expect(await db.getCheckpointAttempts("checkpoint-001")).toHaveLength(1);
+    expect(await db.getCheckpointAttempts("checkpoint-002")).toHaveLength(1);
+    expect((await db.getPlannerData()).attemptedCheckpointIds.sort()).toEqual([
+      "checkpoint-001",
+      "checkpoint-002",
+    ]);
+  });
+
+  it("does not complete the task by saving a passing attempt", async () => {
+    await db.initialiseDatabase();
+    await db.saveCheckpointAttempt("checkpoint-002", week2Result(9, true));
+
+    expect(await db.getCompletedTaskIds()).toEqual([]);
+
+    await db.markTaskComplete("checkpoint-002");
+
+    expect(await db.getCompletedTaskIds()).toEqual(["checkpoint-002"]);
+  });
+});
+
+describe("writing drafts", () => {
+  it("returns an empty draft before anything is saved", async () => {
+    await db.initialiseDatabase();
+
+    expect(await db.getWritingDraft("writing-001")).toBe("");
+  });
+
+  it("saves, overwrites and restores a draft", async () => {
+    await db.initialiseDatabase();
+
+    await db.saveWritingDraft("writing-001", "Ich heiße Anna.");
+    await db.saveWritingDraft("writing-001", "Ich heiße Anna. Ich wohne in Doha.");
+
+    expect(await db.getWritingDraft("writing-001")).toBe("Ich heiße Anna. Ich wohne in Doha.");
+    expect(rows(`SELECT * FROM app_state WHERE key LIKE 'writing_draft:%'`)).toHaveLength(1);
+  });
+
+  it("survives a restart (fresh module graph, same database)", async () => {
+    await db.initialiseDatabase();
+    await db.saveWritingDraft("writing-001", "Hallo, ich bin Anna.");
+
+    vi.resetModules();
+    const reopened = await import("./db");
+    await reopened.initialiseDatabase(); // migrations are idempotent
+
+    expect(await reopened.getWritingDraft("writing-001")).toBe("Hallo, ich bin Anna.");
+  });
+
+  it("keeps drafts for different tasks apart and clears only the chosen one", async () => {
+    await db.initialiseDatabase();
+    await db.saveWritingDraft("writing-001", "eins");
+    await db.saveWritingDraft("writing-002", "zwei");
+
+    await db.clearWritingDraft("writing-001");
+
+    expect(await db.getWritingDraft("writing-001")).toBe("");
+    expect(await db.getWritingDraft("writing-002")).toBe("zwei");
+  });
+
+  it("does not disturb the study-time preference sharing app_state", async () => {
+    await db.initialiseDatabase();
+    await db.setStudyMinutes(45);
+    await db.saveWritingDraft("writing-001", "text");
+    await db.clearWritingDraft("writing-001");
+
+    expect(await db.getStudyMinutes()).toBe(45);
+  });
+
+  it("never creates mistakes or review items", async () => {
+    await db.initialiseDatabase();
+    await db.saveWritingDraft("writing-001", "Ich bin Anna.");
+    await db.saveLessonAttempt("writing-001", 4, 6);
+
+    expect(rows(`SELECT * FROM mistakes`)).toHaveLength(0);
+    expect(rows(`SELECT * FROM review_items`)).toHaveLength(0);
+  });
+});
+
+describe("mistakes traced to the right lesson", () => {
+  it("records grammar-005 and vocab-002 mistakes with their own lesson ids", async () => {
+    await db.initialiseDatabase();
+
+    await db.recordAnswer({
+      sourceType: "grammar",
+      sourceId: "cv-f-du-sprechen",
+      category: "grammar · fill",
+      prompt: "Du ___ Deutsch. (sprechen)",
+      expected: "sprichst",
+      userAnswer: "sprechst",
+      correct: false,
+    });
+    await db.recordAnswer({
+      sourceType: "vocabulary",
+      sourceId: "mutter",
+      category: "vocabulary",
+      prompt: 'What does "die Mutter" mean?',
+      expected: "mother",
+      userAnswer: "father",
+      correct: false,
+    });
+    await db.recordAnswer({
+      sourceType: "vocabulary",
+      sourceId: "danke",
+      category: "vocabulary",
+      prompt: 'What does "Danke" mean?',
+      expected: "Thank you",
+      userAnswer: "Please",
+      correct: false,
+    });
+
+    const lessons = rows<{ item_key: string; lesson_id: string }>(
+      `SELECT item_key, lesson_id FROM mistakes ORDER BY id`,
+    );
+
+    expect(lessons).toEqual([
+      { item_key: "grammar:cv-f-du-sprechen", lesson_id: "grammar-005" },
+      { item_key: "vocabulary:mutter", lesson_id: "vocab-002" },
+      { item_key: "vocabulary:danke", lesson_id: "vocab-001" },
+    ]);
+  });
+
+  it("stores structured review data for grammar-005 and Week 2 vocabulary", async () => {
+    await db.initialiseDatabase();
+
+    await db.recordAnswer({
+      sourceType: "grammar",
+      sourceId: "cv-t-sie-schlafen",
+      category: "grammar · typed",
+      prompt: "She sleeps.",
+      expected: "Sie schläft.",
+      userAnswer: "Sie schlaft.",
+      correct: false,
+    });
+    await db.recordAnswer({
+      sourceType: "vocabulary",
+      sourceId: "grossmutter",
+      category: "vocabulary",
+      prompt: "p",
+      expected: "grandmother",
+      userAnswer: "x",
+      correct: false,
+    });
+
+    const stored = rows<{ source_id: string; exercise_json: string }>(
+      `SELECT source_id, exercise_json FROM review_items ORDER BY id`,
+    );
+
+    expect(stored.map((r) => JSON.parse(r.exercise_json).kind)).toEqual(["typed", "vocab"]);
+  });
+});
+
 describe("study-time preference", () => {
   it("returns null before anything is saved, then the saved value", async () => {
     await db.initialiseDatabase();

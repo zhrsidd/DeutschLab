@@ -5,6 +5,7 @@ export type LessonType =
   | "listening"
   | "speaking"
   | "writing"
+  | "reading"
   | "review";
 
 export interface LessonTask {
@@ -276,6 +277,50 @@ export const starterTasks: LessonTask[] = [
     description: "Learn how to use and conjugate haben.",
     type: "grammar",
     minutes: 13,
+    week: 2,
+  },
+  {
+    id: "grammar-005",
+    title: "Common present-tense verbs",
+    description:
+      "Consolidate the present tense and learn the vowel changes in sprechen, essen, lesen and schlafen.",
+    type: "grammar",
+    minutes: 15,
+    week: 2,
+  },
+  {
+    id: "writing-001",
+    title: "My daily life",
+    description:
+      "Write a short paragraph about yourself and your daily life in German.",
+    type: "writing",
+    minutes: 14,
+    week: 2,
+  },
+  {
+    id: "reading-001",
+    title: "Week 2 reading",
+    description: "Read two short texts and answer questions about them.",
+    type: "reading",
+    minutes: 11,
+    week: 2,
+  },
+  {
+    id: "listening-002",
+    title: "Week 2 listening",
+    description:
+      "Listen to short clips about family, daily life, school and time.",
+    type: "listening",
+    minutes: 11,
+    week: 2,
+  },
+  {
+    id: "checkpoint-002",
+    title: "Week 2 Checkpoint",
+    description:
+      "Test your Week 2 vocabulary, grammar, reading, listening and writing.",
+    type: "review",
+    minutes: 24,
     week: 2,
   },
 ];

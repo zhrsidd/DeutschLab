@@ -8,6 +8,8 @@ import {
   findVocabularyItem,
   vocabularySetForItem,
 } from "../data/lessons/vocabularySets";
+import { week2CommonVerbsQuiz } from "../data/lessons/week2CommonVerbs";
+import { week2GrammarSlots } from "../data/lessons/week2Checkpoint";
 import { week2HabenQuiz } from "../data/lessons/week2Haben";
 import { week1SeinQuiz } from "../data/lessons/week1Sein";
 import { week1PronunciationQuiz } from "../data/lessons/week1Pronunciation";
@@ -80,6 +82,12 @@ export function lessonIdFor(
   if (sourceId.startsWith("rv-")) return "grammar-002";
   if (sourceId.startsWith("qn-")) return "grammar-003";
   if (sourceId.startsWith("hb-")) return "grammar-004";
+  if (sourceId.startsWith("cv-")) return "grammar-005";
+  // Week 2 checkpoint questions trace back to the skill they test.
+  if (sourceId.startsWith("c2-hb-")) return "grammar-004";
+  if (sourceId.startsWith("c2-cv-")) return "grammar-005";
+  if (sourceId.startsWith("c2-v2-")) return "grammar-002";
+  if (sourceId.startsWith("c2-q-")) return "grammar-003";
 
   return "grammar-001";
 }
@@ -88,6 +96,8 @@ const courseQuestions: CourseQuestion[] = [
   ...week1RegularVerbsQuiz,
   ...week1QuestionsQuiz,
   ...week2HabenQuiz,
+  ...week2CommonVerbsQuiz,
+  ...week2GrammarSlots.flat(),
 ];
 
 /** Turns a data-driven grammar question into a structured review exercise. */
@@ -469,4 +479,33 @@ export function toChoiceQuestion(
       explanation: exercise.explanation,
     }),
   };
+}
+
+/**
+ * Prompt / expected answer for a reusable concept, used when a reading or
+ * listening question maps to a word or grammar item that can be reviewed.
+ */
+export function describeReviewConcept(
+  sourceType: ReviewSourceType,
+  sourceId: string,
+): { prompt: string; expected: string; audioText?: string } | null {
+  const exercise = buildReviewExercise(sourceType, sourceId);
+  if (!exercise) return null;
+
+  if (exercise.kind === "vocab") {
+    return {
+      prompt: `What does "${exercise.german}" mean?`,
+      expected: exercise.english,
+      audioText: exercise.audioText ?? exercise.german,
+    };
+  }
+
+  if (exercise.kind === "typed") {
+    return {
+      prompt: `${exercise.instruction} ${exercise.prompt}`,
+      expected: exercise.preferred,
+    };
+  }
+
+  return { prompt: exercise.prompt, expected: exercise.answer };
 }
