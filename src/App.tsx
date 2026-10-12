@@ -25,7 +25,7 @@ import {
 
 import GrammarLesson from "./components/GrammarLesson";
 import ListeningLesson from "./components/ListeningLesson";
-import ReviewView from "./components/ReviewView";
+import ReviewView, { formatReviewDate } from "./components/ReviewView";
 import SpeakingLesson from "./components/SpeakingLesson";
 import PronunciationLesson from "./components/PronunciationLesson";
 import VocabularyLesson from "./components/VocabularyLesson";
@@ -39,12 +39,23 @@ import {
 
 import {
   getCompletedTaskIds,
-  getReviewStats,
+  getPlannerData,
+  getStudyMinutes,
   initialiseDatabase,
   markTaskComplete,
   markTaskIncomplete,
   saveLessonAttempt,
+  setStudyMinutes,
+  type PlannerData,
 } from "./lib/db";
+
+import {
+  DEFAULT_STUDY_MINUTES,
+  STUDY_TIME_OPTIONS,
+  generateDailyPlan,
+  type DailyPlan,
+  type PlanItem,
+} from "./lib/dailyPlanner";
 
 type View = "today" | "curriculum" | "review";
 
@@ -69,7 +80,17 @@ function App() {
   );
 
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
-  const [reviewsDue, setReviewsDue] = useState(0);
+  const [planData, setPlanData] = useState<PlannerData>({
+    dueReviewCount: 0,
+    dueReviewKeys: [],
+    unresolvedMistakes: [],
+    nextDueAt: null,
+  });
+  const [studyMinutes, setStudyMinutesState] = useState(
+    DEFAULT_STUDY_MINUTES,
+  );
+  // Weak-area items practised this session; kept in memory only.
+  const [dismissedMistakes, setDismissedMistakes] = useState<number[]>([]);
 
   useEffect(() => {
     async function loadProgress() {
@@ -78,7 +99,17 @@ function App() {
 
         const completed = await getCompletedTaskIds();
 
+        const savedMinutes = await getStudyMinutes();
+
         setCompletedTasks(completed);
+
+        if (
+          savedMinutes !== null &&
+          (STUDY_TIME_OPTIONS as readonly number[]).includes(savedMinutes)
+        ) {
+          setStudyMinutesState(savedMinutes);
+        }
+
         setDatabaseReady(true);
       } catch (error) {
         console.error(
@@ -91,21 +122,58 @@ function App() {
     void loadProgress();
   }, []);
 
-  const refreshReviews = useCallback(async () => {
+  const refreshPlanData = useCallback(async () => {
     try {
-      const stats = await getReviewStats();
-      setReviewsDue(stats.dueToday);
+      setPlanData(await getPlannerData());
     } catch (error) {
-      console.error("Failed to load review stats:", error);
+      console.error("Failed to load planner data:", error);
     }
   }, []);
 
-  // Refresh the due count on load and whenever we return from a lesson.
+  // Refresh review/mistake data on load and whenever we return to Today
+  // from a lesson or the Review view.
   useEffect(() => {
     if (databaseReady && activeLessonId === null) {
-      void refreshReviews();
+      void refreshPlanData();
     }
-  }, [databaseReady, activeLessonId, refreshReviews]);
+  }, [databaseReady, activeLessonId, view, refreshPlanData]);
+
+  const plan: DailyPlan = useMemo(
+    () =>
+      generateDailyPlan({
+        tasks: starterTasks,
+        completedTaskIds: completedTasks,
+        dueReviewCount: planData.dueReviewCount,
+        dueReviewKeys: planData.dueReviewKeys,
+        unresolvedMistakes: planData.unresolvedMistakes,
+        dismissedMistakeIds: dismissedMistakes,
+        budgetMinutes: studyMinutes,
+      }),
+    [completedTasks, planData, dismissedMistakes, studyMinutes],
+  );
+
+  const changeStudyMinutes = async (minutes: number) => {
+    setStudyMinutesState(minutes);
+
+    try {
+      await setStudyMinutes(minutes);
+    } catch (error) {
+      console.error("Failed to save study time:", error);
+    }
+  };
+
+  const startPlanItem = (item: PlanItem) => {
+    if (item.mistakeId !== undefined) {
+      const id = item.mistakeId;
+      setDismissedMistakes((current) => [...current, id]);
+    }
+
+    if (item.target.type === "review") {
+      setView("review");
+    } else {
+      setActiveLessonId(item.target.taskId);
+    }
+  };
 
   const totalMinutes = useMemo(
     () =>
@@ -116,19 +184,6 @@ function App() {
     [],
   );
 
-  const completedMinutes = useMemo(
-    () =>
-      starterTasks
-        .filter((task) =>
-          completedTasks.includes(task.id),
-        )
-        .reduce(
-          (sum, task) => sum + task.minutes,
-          0,
-        ),
-    [completedTasks],
-  );
-
   const progress =
     starterTasks.length === 0
       ? 0
@@ -137,12 +192,6 @@ function App() {
             starterTasks.length) *
             100,
         );
-
-  const nextIncompleteTask =
-    starterTasks.find(
-      (task) =>
-        !completedTasks.includes(task.id),
-    ) ?? null;
 
   const toggleTask = async (id: string) => {
     const isComplete =
@@ -332,9 +381,9 @@ function App() {
             >
               <RotateCcw size={18} />
               Review
-              {reviewsDue > 0 ? (
+              {planData.dueReviewCount > 0 ? (
                 <span className="ml-auto rounded-full bg-neutral-900 px-2 py-0.5 text-xs font-medium text-white">
-                  {reviewsDue}
+                  {planData.dueReviewCount}
                 </span>
               ) : null}
             </SidebarButton>
@@ -377,9 +426,6 @@ function App() {
               completedTasks={
                 completedTasks
               }
-              completedMinutes={
-                completedMinutes
-              }
               totalMinutes={totalMinutes}
               progress={progress}
               selectedTask={selectedTask}
@@ -387,17 +433,19 @@ function App() {
                 setSelectedTask
               }
               toggleTask={toggleTask}
-              nextIncompleteTask={
-                nextIncompleteTask
-              }
               startLesson={(taskId) =>
                 setActiveLessonId(taskId)
               }
-              reviewsDue={reviewsDue}
-              openReview={() => setView("review")}
+              plan={plan}
+              nextReviewAt={planData.nextDueAt}
+              studyMinutes={studyMinutes}
+              setStudyMinutes={(minutes) =>
+                void changeStudyMinutes(minutes)
+              }
+              startPlanItem={startPlanItem}
             />
           ) : view === "review" ? (
-            <ReviewView onChange={() => void refreshReviews()} />
+            <ReviewView onChange={() => void refreshPlanData()} />
           ) : (
             <CurriculumView />
           )}
@@ -409,7 +457,6 @@ function App() {
 
 interface TodayViewProps {
   completedTasks: string[];
-  completedMinutes: number;
   totalMinutes: number;
   progress: number;
 
@@ -423,36 +470,31 @@ interface TodayViewProps {
     id: string,
   ) => Promise<void>;
 
-  nextIncompleteTask:
-    | LessonTask
-    | null;
-
   startLesson: (
     taskId: string,
   ) => void;
 
-  reviewsDue: number;
-  openReview: () => void;
+  plan: DailyPlan;
+  nextReviewAt: string | null;
+  studyMinutes: number;
+  setStudyMinutes: (minutes: number) => void;
+  startPlanItem: (item: PlanItem) => void;
 }
 
 function TodayView({
   completedTasks,
-  completedMinutes,
   totalMinutes,
   progress,
   selectedTask,
   setSelectedTask,
   toggleTask,
-  nextIncompleteTask,
   startLesson,
-  reviewsDue,
-  openReview,
+  plan,
+  nextReviewAt,
+  studyMinutes,
+  setStudyMinutes,
+  startPlanItem,
 }: TodayViewProps) {
-  const remainingMinutes = Math.max(
-    0,
-    totalMinutes - completedMinutes,
-  );
-
   return (
     <div className="px-10 py-9">
       <div className="mx-auto max-w-6xl">
@@ -474,21 +516,27 @@ function TodayView({
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={openReview}
-              className="flex items-center gap-2 rounded-xl border border-black/5 bg-white px-4 py-3 text-sm text-neutral-500 transition hover:bg-neutral-50"
-            >
-              <RotateCcw size={16} />
-              Reviews due: {reviewsDue}
-            </button>
+          <div>
+            <p className="mb-2 text-right text-xs font-medium uppercase tracking-wider text-neutral-400">
+              Study time today
+            </p>
 
-            <div className="flex items-center gap-2 rounded-xl border border-black/5 bg-white px-4 py-3 text-sm text-neutral-500">
-              <Clock3 size={16} />
-
-              {remainingMinutes} min
-              remaining
+            <div className="flex rounded-xl border border-black/5 bg-white p-1">
+              {STUDY_TIME_OPTIONS.map((minutes) => (
+                <button
+                  key={minutes}
+                  type="button"
+                  onClick={() => setStudyMinutes(minutes)}
+                  className={[
+                    "rounded-lg px-3.5 py-2 text-sm transition",
+                    minutes === studyMinutes
+                      ? "bg-neutral-900 font-medium text-white"
+                      : "text-neutral-500 hover:bg-neutral-50",
+                  ].join(" ")}
+                >
+                  {minutes} min
+                </button>
+              ))}
             </div>
           </div>
         </header>
@@ -497,7 +545,7 @@ function TodayView({
           <div className="mb-4 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium">
-                Today's session
+                Week 1 progress
               </p>
 
               <p className="mt-1 text-sm text-neutral-400">
@@ -522,11 +570,85 @@ function TodayView({
           </div>
         </section>
 
+        <section className="mb-8">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-semibold tracking-tight">
+              Today's plan
+            </h2>
+
+            <span className="text-sm text-neutral-400">
+              {plan.totalMinutes} of {plan.budgetMinutes} min ·{" "}
+              {plan.dueReviewCount}{" "}
+              {plan.dueReviewCount === 1 ? "review" : "reviews"} due
+            </span>
+          </div>
+
+          {plan.done ? (
+            <div className="rounded-2xl border border-black/5 bg-white p-6">
+              <p className="font-medium">You're done for today.</p>
+
+              <p className="mt-2 text-sm leading-6 text-neutral-500">
+                {nextReviewAt
+                  ? `Next review: ${formatReviewDate(nextReviewAt)}.`
+                  : "No reviews are scheduled yet."}{" "}
+                Consistency matters more than grinding extra lessons.
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-hidden rounded-2xl border border-black/5 bg-white">
+              {plan.items.map((item, index) => {
+                const Icon =
+                  item.kind === "lesson"
+                    ? iconForType[
+                        starterTasks.find(
+                          (task) => task.id === item.sourceId,
+                        )?.type ?? "review"
+                      ]
+                    : RotateCcw;
+
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => startPlanItem(item)}
+                    className={[
+                      "flex w-full items-center gap-4 px-5 py-4 text-left transition hover:bg-neutral-50/70",
+                      index !== plan.items.length - 1
+                        ? "border-b border-black/5"
+                        : "",
+                    ].join(" ")}
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-600">
+                      <Icon size={19} strokeWidth={1.8} />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium">{item.title}</p>
+                      <p className="mt-1 truncate text-sm text-neutral-400">
+                        {item.reason} · {item.description}
+                      </p>
+                    </div>
+
+                    <span className="shrink-0 text-sm text-neutral-400">
+                      {item.minutes} min
+                    </span>
+
+                    <ChevronRight
+                      size={18}
+                      className="text-neutral-300"
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
         <div className="grid grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)] gap-6">
           <section>
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-semibold tracking-tight">
-                Today's activities
+                Week 1 activities
               </h2>
 
               <span className="text-sm text-neutral-400">
@@ -714,23 +836,6 @@ function TodayView({
                 )}
               </div>
             ) : null}
-
-            {nextIncompleteTask ===
-              null && (
-              <div className="mt-4 rounded-2xl border border-black/5 bg-white p-6">
-                <p className="font-medium">
-                  Session complete 🎉
-                </p>
-
-                <p className="mt-2 text-sm leading-6 text-neutral-500">
-                  You're done for
-                  today. Consistency
-                  matters more than
-                  grinding extra
-                  lessons.
-                </p>
-              </div>
-            )}
           </aside>
         </div>
       </div>

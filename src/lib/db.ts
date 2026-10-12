@@ -1,5 +1,7 @@
 import Database from "@tauri-apps/plugin-sql";
 
+import type { PlannerMistake } from "./dailyPlanner";
+
 import {
   REPETITIONS_TO_RESOLVE,
   START_EASE,
@@ -480,4 +482,87 @@ export async function getMistakes(): Promise<MistakeRow[]> {
     timesMissed: row.times_missed,
     resolved: row.resolved_at !== null,
   }));
+}
+
+/*
+ * Planner data + preferences
+ */
+
+export interface PlannerData {
+  dueReviewCount: number;
+  dueReviewKeys: string[];
+  unresolvedMistakes: PlannerMistake[];
+  nextDueAt: string | null;
+}
+
+export async function getPlannerData(): Promise<PlannerData> {
+  const db = await getDatabase();
+
+  const stats = await getReviewStats();
+
+  const dueRows = await db.select<
+    { source_type: string; source_id: string }[]
+  >(
+    `SELECT source_type, source_id FROM review_items WHERE due_at <= ?`,
+    [endOfToday()],
+  );
+
+  const mistakeRows = await db.select<
+    {
+      id: number;
+      lesson_id: string;
+      item_key: string;
+      prompt: string;
+      times_missed: number;
+    }[]
+  >(
+    `
+      SELECT id, lesson_id, item_key, prompt, times_missed
+      FROM mistakes
+      WHERE resolved_at IS NULL
+    `,
+  );
+
+  return {
+    dueReviewCount: stats.dueToday,
+    dueReviewKeys: dueRows.map(
+      (row) => `${row.source_type}:${row.source_id}`,
+    ),
+    unresolvedMistakes: mistakeRows.map((row) => ({
+      id: row.id,
+      lessonId: row.lesson_id,
+      itemKey: row.item_key,
+      prompt: row.prompt,
+      timesMissed: row.times_missed,
+    })),
+    nextDueAt: stats.nextDueAt,
+  };
+}
+
+const STUDY_MINUTES_KEY = "study_minutes";
+
+export async function getStudyMinutes(): Promise<number | null> {
+  const db = await getDatabase();
+
+  const rows = await db.select<{ value: string }[]>(
+    `SELECT value FROM app_state WHERE key = ?`,
+    [STUDY_MINUTES_KEY],
+  );
+
+  const parsed = rows.length > 0 ? Number(rows[0].value) : NaN;
+
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+export async function setStudyMinutes(minutes: number) {
+  const db = await getDatabase();
+
+  await db.execute(
+    `
+      INSERT INTO app_state (key, value)
+      VALUES (?, ?)
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value
+    `,
+    [STUDY_MINUTES_KEY, String(minutes)],
+  );
 }
