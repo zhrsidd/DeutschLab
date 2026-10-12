@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { Check, Eye, RotateCcw, Volume2 } from "lucide-react";
-
 import type {
   MistakeRow,
   ReviewItem,
@@ -20,6 +18,7 @@ import {
 } from "../lib/db";
 
 import { ErrorMessage, ProgressBar } from "./lesson/LessonParts";
+import ReviewCard from "./review/ReviewCard";
 import { shuffleArray } from "./lesson/shuffle";
 
 interface ReviewViewProps {
@@ -28,13 +27,6 @@ interface ReviewViewProps {
   /** Lets the app refresh its due-count after reviews change. */
   onChange: () => void;
 }
-
-const sourceLabel: Record<string, string> = {
-  vocabulary: "Vocabulary",
-  pronunciation: "Pronunciation",
-  grammar: "Grammar",
-  listening: "Listening",
-};
 
 export function formatReviewDate(iso: string): string {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -224,9 +216,7 @@ function ReviewSession({
   onEnd: () => void;
 }) {
   const [index, setIndex] = useState(0);
-  const [revealed, setRevealed] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const speech = useGermanSpeech();
@@ -234,25 +224,24 @@ function ReviewSession({
   const done = index >= items.length;
   const item = items[index];
 
-  const answer = async (correct: boolean) => {
-    if (saving) return;
-
+  // Exercises grade themselves; this only records the result.
+  const grade = async (correct: boolean) => {
     try {
-      setSaving(true);
       setError(null);
-      speech.stop();
-
       await applyReviewResult(item, correct);
 
       if (correct) setCorrectCount((current) => current + 1);
-      setIndex((current) => current + 1);
-      setRevealed(false);
     } catch (saveError) {
       console.error("Failed to save review result:", saveError);
-      setError("That result could not be saved. Please try again.");
-    } finally {
-      setSaving(false);
+      setError(
+        "That result could not be saved, so this item will come back later.",
+      );
     }
+  };
+
+  const next = () => {
+    speech.stop();
+    setIndex((current) => current + 1);
   };
 
   if (done) {
@@ -304,71 +293,16 @@ function ReviewSession({
           <ProgressBar value={(index / items.length) * 100} />
         </div>
 
-        <div className="rounded-3xl border border-black/5 bg-white p-8">
-          <p className="text-xs font-medium uppercase tracking-wider text-neutral-400">
-            {sourceLabel[item.sourceType] ?? item.sourceType}
-          </p>
-
-          <h2 className="mt-4 text-2xl font-semibold tracking-tight">
-            {item.prompt}
-          </h2>
-
-          {item.audioText ? (
-            <button
-              type="button"
-              disabled={!speech.available}
-              onClick={() => speech.speak(item.audioText ?? "")}
-              className="mt-5 flex items-center gap-2 rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition enabled:hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <Volume2 size={16} />
-              Play
-            </button>
-          ) : null}
-
-          {revealed ? (
-            <div className="mt-6 rounded-xl bg-neutral-50 px-5 py-4">
-              <p className="text-xs font-medium uppercase tracking-wider text-neutral-400">
-                Answer
-              </p>
-              <p className="mt-2 text-lg font-medium">{item.answer}</p>
-            </div>
-          ) : null}
-        </div>
+        <ReviewCard
+          key={item.id}
+          item={item}
+          speech={speech}
+          isLast={index === items.length - 1}
+          onGraded={grade}
+          onNext={next}
+        />
 
         {error ? <ErrorMessage>{error}</ErrorMessage> : null}
-
-        {revealed ? (
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              disabled={saving}
-              onClick={() => void answer(false)}
-              className="flex items-center justify-center gap-2 rounded-xl border border-black/10 bg-white px-5 py-3.5 text-sm font-medium text-neutral-700 transition enabled:hover:bg-neutral-50 disabled:opacity-40"
-            >
-              <RotateCcw size={16} />
-              Again
-            </button>
-
-            <button
-              type="button"
-              disabled={saving}
-              onClick={() => void answer(true)}
-              className="flex items-center justify-center gap-2 rounded-xl bg-neutral-900 px-5 py-3.5 text-sm font-medium text-white transition enabled:hover:bg-neutral-800 disabled:opacity-40"
-            >
-              <Check size={16} />
-              Correct
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setRevealed(true)}
-            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 px-5 py-3.5 text-sm font-medium text-white transition hover:bg-neutral-800"
-          >
-            <Eye size={16} />
-            Reveal answer
-          </button>
-        )}
       </div>
     </div>
   );

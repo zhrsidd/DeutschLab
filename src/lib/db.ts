@@ -1,5 +1,7 @@
 import Database from "@tauri-apps/plugin-sql";
 
+import { buildReviewExercise } from "./reviewExercises";
+
 import type { PlannerMistake } from "./dailyPlanner";
 
 import {
@@ -90,6 +92,16 @@ export async function initialiseDatabase() {
       UNIQUE (source_type, source_id)
     )
   `);
+
+  // v0.4A: structured exercise data. Older databases get the column added;
+  // existing rows keep NULL and are rebuilt (or shown as legacy cards).
+  const columns = await db.select<{ name: string }[]>(
+    `PRAGMA table_info(review_items)`,
+  );
+
+  if (!columns.some((column) => column.name === "exercise_json")) {
+    await db.execute(`ALTER TABLE review_items ADD COLUMN exercise_json TEXT`);
+  }
 }
 
 interface TaskProgressRow {
@@ -244,6 +256,14 @@ export async function recordAnswer(input: AnswerRecord) {
   const now = new Date();
   const schedule = initialSchedule(now);
 
+  let exerciseJson: string | null = null;
+  try {
+    const exercise = buildReviewExercise(input.sourceType, input.sourceId);
+    exerciseJson = exercise ? JSON.stringify(exercise) : null;
+  } catch (error) {
+    console.error("Failed to build review exercise:", error);
+  }
+
   if (input.correct) {
     if (!input.enterOnCorrect) return;
 
@@ -251,9 +271,10 @@ export async function recordAnswer(input: AnswerRecord) {
       `
         INSERT INTO review_items (
           source_type, source_id, prompt, answer, audio_text,
-          due_at, interval_days, ease, repetitions, last_result, updated_at
+          due_at, interval_days, ease, repetitions, last_result, updated_at,
+          exercise_json
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 'correct', ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 'correct', ?, ?)
         ON CONFLICT(source_type, source_id) DO NOTHING
       `,
       [
@@ -266,6 +287,7 @@ export async function recordAnswer(input: AnswerRecord) {
         schedule.intervalDays,
         START_EASE,
         now.toISOString(),
+        exerciseJson,
       ],
     );
 
@@ -285,9 +307,10 @@ export async function recordAnswer(input: AnswerRecord) {
     `
       INSERT INTO review_items (
         source_type, source_id, prompt, answer, audio_text,
-        due_at, interval_days, ease, repetitions, last_result, updated_at
+        due_at, interval_days, ease, repetitions, last_result, updated_at,
+        exercise_json
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 'wrong', ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 'wrong', ?, ?)
       ON CONFLICT(source_type, source_id) DO UPDATE SET
         prompt = excluded.prompt,
         answer = excluded.answer,
@@ -297,7 +320,8 @@ export async function recordAnswer(input: AnswerRecord) {
         ease = MAX(1.3, review_items.ease - 0.2),
         repetitions = 0,
         last_result = 'wrong',
-        updated_at = excluded.updated_at
+        updated_at = excluded.updated_at,
+        exercise_json = COALESCE(excluded.exercise_json, review_items.exercise_json)
     `,
     [
       input.sourceType,
@@ -309,6 +333,7 @@ export async function recordAnswer(input: AnswerRecord) {
       schedule.intervalDays,
       START_EASE,
       now.toISOString(),
+      exerciseJson,
     ],
   );
 }
@@ -331,6 +356,7 @@ interface ReviewItemDbRow {
   interval_days: number;
   ease: number;
   repetitions: number;
+  exercise_json: string | null;
 }
 
 function toReviewItem(row: ReviewItemDbRow): ReviewItem {
@@ -345,6 +371,7 @@ function toReviewItem(row: ReviewItemDbRow): ReviewItem {
     intervalDays: row.interval_days,
     ease: row.ease,
     repetitions: row.repetitions,
+    exerciseJson: row.exercise_json,
   };
 }
 
@@ -354,7 +381,7 @@ export async function getDueReviewItems(limit = 20): Promise<ReviewItem[]> {
   const rows = await db.select<ReviewItemDbRow[]>(
     `
       SELECT id, source_type, source_id, prompt, answer, audio_text,
-             due_at, interval_days, ease, repetitions
+             due_at, interval_days, ease, repetitions, exercise_json
       FROM review_items
       WHERE due_at <= ?
       ORDER BY due_at ASC
@@ -398,11 +425,22 @@ export async function applyReviewResult(
   const db = await getDatabase();
   const now = new Date();
 
+  // Use the stored schedule, not the session snapshot, in case the item was
+  // rescheduled or deleted while the session was open.
+  const current = await db.select<
+    { interval_days: number; ease: number; repetitions: number }[]
+  >(
+    `SELECT interval_days, ease, repetitions FROM review_items WHERE id = ?`,
+    [item.id],
+  );
+
+  if (current.length === 0) return;
+
   const next = scheduleNext(
     {
-      intervalDays: item.intervalDays,
-      ease: item.ease,
-      repetitions: item.repetitions,
+      intervalDays: current[0].interval_days,
+      ease: current[0].ease,
+      repetitions: current[0].repetitions,
     },
     correct,
     now,
