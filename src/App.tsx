@@ -23,6 +23,7 @@ import {
 
 import GrammarLesson from "./components/GrammarLesson";
 import ListeningLesson from "./components/ListeningLesson";
+import SpeakingLesson from "./components/SpeakingLesson";
 import PronunciationLesson from "./components/PronunciationLesson";
 import VocabularyLesson from "./components/VocabularyLesson";
 
@@ -206,6 +207,18 @@ function App() {
         onFinish={() =>
           finishLesson("vocab-001")
         }
+      />
+    );
+  }
+
+  if (activeLessonId === "speaking-001") {
+    return (
+      <SpeakingLesson
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("speaking-001", score, total)
+        }
+        onFinish={() => finishLesson("speaking-001")}
       />
     );
   }
@@ -595,7 +608,8 @@ function TodayView({
                 {selectedTask.id === "vocab-001" ||
                 selectedTask.id === "pronunciation-001" ||
                 selectedTask.id === "grammar-001" ||
-                selectedTask.id === "listening-001" ? (
+                selectedTask.id === "listening-001" ||
+                selectedTask.id === "speaking-001" ? (
                   <button
                     type="button"
                     onClick={() =>
