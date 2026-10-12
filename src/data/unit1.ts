@@ -249,4 +249,12 @@ export const starterTasks: LessonTask[] = [
     type: "speaking",
     minutes: 5,
   },
+  {
+    id: "checkpoint-001",
+    title: "Week 1 Checkpoint",
+    description:
+      "Test your Week 1 vocabulary, grammar, listening and spoken introduction.",
+    type: "review",
+    minutes: 22,
+  },
 ];

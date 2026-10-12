@@ -27,6 +27,7 @@ import GrammarLesson from "./components/GrammarLesson";
 import ListeningLesson from "./components/ListeningLesson";
 import ReviewView, { formatReviewDate } from "./components/ReviewView";
 import SpeakingLesson from "./components/SpeakingLesson";
+import WeekCheckpoint from "./components/WeekCheckpoint";
 import QuestionsLesson from "./components/QuestionsLesson";
 import RegularVerbsLesson from "./components/RegularVerbsLesson";
 import PronunciationLesson from "./components/PronunciationLesson";
@@ -46,10 +47,16 @@ import {
   initialiseDatabase,
   markTaskComplete,
   markTaskIncomplete,
+  saveCheckpointAttempt,
   saveLessonAttempt,
   setStudyMinutes,
   type PlannerData,
 } from "./lib/db";
+
+import {
+  CHECKPOINT_ID,
+  isWeek1Mastered,
+} from "./lib/checkpointScoring";
 
 import {
   DEFAULT_STUDY_MINUTES,
@@ -83,6 +90,7 @@ function App() {
 
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [planData, setPlanData] = useState<PlannerData>({
+    attemptedCheckpointIds: [],
     dueReviewCount: 0,
     dueReviewKeys: [],
     unresolvedMistakes: [],
@@ -151,6 +159,7 @@ function App() {
         dueReviewKeys: planData.dueReviewKeys,
         unresolvedMistakes: planData.unresolvedMistakes,
         dismissedMistakeIds: dismissedMistakes,
+        attemptedCheckpointIds: planData.attemptedCheckpointIds,
         budgetMinutes: studyMinutes,
       }),
     [completedTasks, planData, dismissedMistakes, studyMinutes],
@@ -306,6 +315,33 @@ function App() {
           saveLessonAttempt("listening-001", score, total)
         }
         onFinish={() => finishLesson("listening-001")}
+      />
+    );
+  }
+
+  if (activeLessonId === CHECKPOINT_ID) {
+    return (
+      <WeekCheckpoint
+        unfinishedLessons={
+          starterTasks.filter(
+            (task) =>
+              task.id !== CHECKPOINT_ID && !completedTasks.includes(task.id),
+          ).length
+        }
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(result) =>
+          saveCheckpointAttempt(CHECKPOINT_ID, result)
+        }
+        onFinish={() => finishLesson(CHECKPOINT_ID)}
+        onOpenTarget={(target) => {
+          if (target.type === "review") {
+            setReviewLimit(null);
+            setActiveLessonId(null);
+            setView("review");
+          } else {
+            setActiveLessonId(target.taskId);
+          }
+        }}
       />
     );
   }
@@ -469,6 +505,7 @@ function App() {
                 setActiveLessonId(taskId)
               }
               plan={plan}
+              week1Mastered={isWeek1Mastered(completedTasks)}
               nextReviewAt={planData.nextDueAt}
               studyMinutes={studyMinutes}
               setStudyMinutes={(minutes) =>
@@ -513,6 +550,7 @@ interface TodayViewProps {
   ) => void;
 
   plan: DailyPlan;
+  week1Mastered: boolean;
   nextReviewAt: string | null;
   studyMinutes: number;
   setStudyMinutes: (minutes: number) => void;
@@ -528,6 +566,7 @@ function TodayView({
   toggleTask,
   startLesson,
   plan,
+  week1Mastered,
   nextReviewAt,
   studyMinutes,
   setStudyMinutes,
@@ -583,7 +622,7 @@ function TodayView({
           <div className="mb-4 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium">
-                Week 1 progress
+                Week 1 progress{week1Mastered ? " · Mastered" : ""}
               </p>
 
               <p className="mt-1 text-sm text-neutral-400">
@@ -824,6 +863,7 @@ function TodayView({
                 selectedTask.id === "grammar-001" ||
                 selectedTask.id === "grammar-002" ||
                 selectedTask.id === "grammar-003" ||
+                selectedTask.id === CHECKPOINT_ID ||
                 selectedTask.id === "listening-001" ||
                 selectedTask.id === "speaking-001" ? (
                   <button

@@ -25,6 +25,8 @@ interface CoursePracticeProps {
   question: CourseQuestion;
   isLast: boolean;
   disabled?: boolean;
+  /** When false, correct answers don't enter Review (wrong ones always do). */
+  trackCorrect?: boolean;
   /** Called once when the answer is submitted. */
   onAnswered: (correct: boolean) => void;
   onNext: () => void;
@@ -38,6 +40,7 @@ export default function CoursePractice({
   question,
   isLast,
   disabled = false,
+  trackCorrect = true,
   onAnswered,
   onNext,
 }: CoursePracticeProps) {
@@ -101,7 +104,7 @@ export default function CoursePractice({
       expected: result.expected,
       userAnswer: answer,
       correct: result.correct,
-      enterOnCorrect: true,
+      enterOnCorrect: trackCorrect,
     });
   };
 

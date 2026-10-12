@@ -1,5 +1,12 @@
 import Database from "@tauri-apps/plugin-sql";
 
+import {
+  parseSections,
+  serializeSections,
+  type CheckpointResult,
+  type SectionScores,
+} from "./checkpointScoring";
+
 import { buildReviewExercise, lessonIdFor } from "./reviewExercises";
 
 import type { PlannerMistake } from "./dailyPlanner";
@@ -90,6 +97,18 @@ export async function initialiseDatabase() {
       last_result TEXT,
       updated_at TEXT NOT NULL,
       UNIQUE (source_type, source_id)
+    )
+  `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS checkpoint_attempts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      checkpoint_id TEXT NOT NULL,
+      total_score INTEGER NOT NULL,
+      total_possible INTEGER NOT NULL,
+      section_scores_json TEXT NOT NULL,
+      passed INTEGER NOT NULL,
+      completed_at TEXT NOT NULL
     )
   `);
 
@@ -520,6 +539,8 @@ export async function getMistakes(): Promise<MistakeRow[]> {
  */
 
 export interface PlannerData {
+  /** Checkpoints the learner has attempted at least once. */
+  attemptedCheckpointIds: string[];
   dueReviewCount: number;
   dueReviewKeys: string[];
   unresolvedMistakes: PlannerMistake[];
@@ -554,7 +575,12 @@ export async function getPlannerData(): Promise<PlannerData> {
     `,
   );
 
+  const attempted = await db.select<{ checkpoint_id: string }[]>(
+    `SELECT DISTINCT checkpoint_id FROM checkpoint_attempts`,
+  );
+
   return {
+    attemptedCheckpointIds: attempted.map((row) => row.checkpoint_id),
     dueReviewCount: stats.dueToday,
     dueReviewKeys: dueRows.map(
       (row) => `${row.source_type}:${row.source_id}`,
@@ -596,4 +622,80 @@ export async function setStudyMinutes(minutes: number) {
     `,
     [STUDY_MINUTES_KEY, String(minutes)],
   );
+}
+
+/*
+ * Checkpoint attempts (every attempt is kept; nothing is overwritten)
+ */
+
+export interface CheckpointAttemptRow {
+  id: number;
+  checkpointId: string;
+  total: number;
+  possible: number;
+  sections: SectionScores | null;
+  passed: boolean;
+  completedAt: string;
+}
+
+export async function saveCheckpointAttempt(
+  checkpointId: string,
+  result: CheckpointResult,
+) {
+  const db = await getDatabase();
+
+  await db.execute(
+    `
+      INSERT INTO checkpoint_attempts (
+        checkpoint_id, total_score, total_possible,
+        section_scores_json, passed, completed_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?)
+    `,
+    [
+      checkpointId,
+      result.total,
+      result.possible,
+      serializeSections(result),
+      result.passed ? 1 : 0,
+      new Date().toISOString(),
+    ],
+  );
+}
+
+export async function getCheckpointAttempts(
+  checkpointId: string,
+): Promise<CheckpointAttemptRow[]> {
+  const db = await getDatabase();
+
+  const rows = await db.select<
+    {
+      id: number;
+      checkpoint_id: string;
+      total_score: number;
+      total_possible: number;
+      section_scores_json: string;
+      passed: number;
+      completed_at: string;
+    }[]
+  >(
+    `
+      SELECT id, checkpoint_id, total_score, total_possible,
+             section_scores_json, passed, completed_at
+      FROM checkpoint_attempts
+      WHERE checkpoint_id = ?
+      ORDER BY id ASC
+    `,
+    [checkpointId],
+  );
+
+  return rows.map((row) => ({
+    id: row.id,
+    checkpointId: row.checkpoint_id,
+    total: row.total_score,
+    possible: row.total_possible,
+    sections: parseSections(row.section_scores_json),
+    passed: row.passed === 1,
+    completedAt: row.completed_at,
+  }));
 }

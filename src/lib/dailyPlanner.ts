@@ -16,6 +16,7 @@ const MINUTES_PER_REVIEW = 0.6;
 /** Share of the time budget reviews may take. */
 const REVIEW_BUDGET_SHARE = 0.6;
 const WEAK_AREA_MINUTES = 4;
+const CHECKPOINT_PREFIX = "checkpoint-";
 const MAX_LESSONS_PER_DAY = 2;
 
 export type PlanTarget =
@@ -56,6 +57,8 @@ export interface PlannerInput {
   unresolvedMistakes: PlannerMistake[];
   /** Mistakes already practised today, so they stop being suggested. */
   dismissedMistakeIds?: number[];
+  /** Checkpoints attempted at least once (a failed one is deferred, see below). */
+  attemptedCheckpointIds?: string[];
   budgetMinutes: number;
 }
 
@@ -104,6 +107,7 @@ export function generateDailyPlan(input: PlannerInput): DailyPlan {
     dueReviewKeys,
     unresolvedMistakes,
     dismissedMistakeIds = [],
+    attemptedCheckpointIds = [],
     budgetMinutes,
   } = input;
 
@@ -187,6 +191,20 @@ export function generateDailyPlan(input: PlannerInput): DailyPlan {
 
   for (const task of unfinished) {
     if (lessons >= MAX_LESSONS_PER_DAY) break;
+
+    if (task.id.startsWith(CHECKPOINT_PREFIX)) {
+      // Only once every instructional lesson is done...
+      const lessonsLeft = unfinished.some(
+        (other) => !other.id.startsWith(CHECKPOINT_PREFIX),
+      );
+      if (lessonsLeft) break;
+
+      // ...and after a failed attempt, reviews / weak areas come first
+      // rather than pushing the checkpoint to the top every session.
+      const failedBefore = attemptedCheckpointIds.includes(task.id);
+      const otherWork = items.some((item) => item.kind !== "lesson");
+      if (failedBefore && otherWork) break;
+    }
 
     const fits = task.minutes <= remaining;
     const allowed = lessons === 0 ? fits || items.length === 0 : fits;
