@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "test:agent": "bash scripts/test-agent.sh",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",

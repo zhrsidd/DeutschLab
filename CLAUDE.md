@@ -1,94 +1,79 @@
-# DeutschLab
+# DeutschLab — Claude Code Instructions
 
-Native macOS German-learning app for one user.
+## Project
+DeutschLab is a **local-first macOS German-learning app** built with **Tauri v2, React, TypeScript, Tailwind CSS v4, and SQLite** (`@tauri-apps/plugin-sql`). No account, cloud backend, or AI service is required for core learning.
 
-## Stack
-- Tauri v2
-- React
-- TypeScript
-- Tailwind CSS v4
-- lucide-react
-- SQLite via @tauri-apps/plugin-sql
-- Local-only; no auth/backend/cloud
-- Vitest + React Testing Library + Playwright (dev only)
+**Learner goal:** A0 → strong A1 by January 2027; eventual C1 and academic German for Physics at ETH Zürich by March 2028. Keep workload realistic alongside school.
 
-## Goal
-Teach German from A0 toward C1 for eventual Physics study at ETH Zürich.
-Current scope: Unit 1 only, A0 → strong A1, Oct 2026–Jan 2027.
+**Current implementation:** Weeks **1 and 2** of Unit 1 are implemented, including lessons, checkpoints, mistakes, active-recall spaced review, and the daily planner. **Week 3 is partially implemented** (`vocab-003`, `grammar-006`); see `CURRICULUM.md` for the remaining Week 3 lessons. An implemented feature is **not** automatically verified in the native macOS window.
 
-## Current architecture
-- `src/App.tsx`: main dashboard/navigation and lesson routing
-- `src/data/unit1.ts`: Unit 1 curriculum + starter tasks
-- `src/data/lessons/week1Vocabulary.ts`: Week 1 vocabulary
-- `src/components/VocabularyLesson.tsx`: working vocabulary lesson
-- `src/lib/db.ts`: SQLite initialization, task progress, lesson attempts
+## Curriculum: source of truth
+- **`CURRICULUM.md` is authoritative** for scope, sequence, prerequisites, vocabulary targets, mastery, and longer-term progression.
+- Before editing lesson content, **read only the relevant sections** of `CURRICULUM.md`. **Do not import or preload the entire file** into this `CLAUDE.md`.
+- Do not casually teach concepts assigned to later weeks. Reuse previously taught language where possible.
+- When changing curriculum scope, lesson order, IDs, or implementation status, update `CURRICULUM.md` in the same change and explain the reason.
+- Keep German natural and accurate: check conjugation, V2/question order, articles, plurals, spelling, umlauts, and formal **Sie**.
+- Prefer **teach → contextualise → recall → assess → review**, with meaningful typed production rather than only multiple choice.
+- Writing/speaking self-checks are honest self-assessment; **never claim automatic linguistic grading** without a real grader.
 
-## Current working behavior
-- Dashboard and Unit 1 curriculum UI work
-- SQLite persistence works across restarts
-- `vocab-001` opens a real lesson
-- Vocabulary lesson flow:
-  intro → learn → quiz → results
-- Passing score is 80%
-- Attempts are saved
-- Passed lesson is persisted as complete
+## Key code locations
+- `src/App.tsx` — navigation, lesson routing, dashboard/Today
+- `src/data/unit1.ts` — curriculum tasks and stable IDs
+- `src/data/lessons/` — lesson content and assessment data
+- `src/components/` — lesson UIs, Review, checkpoints
+- `src/components/lesson/` — shared presentation primitives
+- `src/hooks/` — German speech and timers
+- `src/lib/` — SQLite, scoring, answer grading, planner, review scheduler
+- `src-tauri/` — native Tauri integration
+- Existing Vitest/Testing Library and Playwright tests — product regression suite
 
-## Curriculum source of truth
+Discover exact paths from the repo before assuming a file exists.
 
-Before creating or materially changing lesson content, read `CURRICULUM.md`.
+## Non-negotiable engineering rules
+1. Preserve existing learner progress, completion records, review/mistake history, and writing drafts.
+2. **Never recycle or rename existing lesson/item IDs** without an explicit backward-compatible migration.
+3. SQLite migrations must be additive, idempotent, and safe on existing on-disk databases.
+4. Keep Review creation structured and compatible with legacy review items; don't change SRS intervals without approval.
+5. Keep the Today planner deterministic; persist preferences and learning data, **not** a generated daily plan.
+6. Remain local/offline for core features; no new cloud services, dependencies, or major abstractions without clear need.
+7. Preserve working lessons and UI. Avoid unrelated refactors and broad formatting churn.
+8. Follow the current minimal, consistent macOS-style UI and accessible keyboard interactions.
 
-`CURRICULUM.md` defines:
-- curriculum sequence
-- permitted grammar/vocabulary scope
-- CEFR progression
-- lesson IDs
-- mastery targets
-- Physics German progression
+## Token-efficient working style
+- Start with `git status` and identify the smallest set of relevant files.
+- Prefer targeted search, symbol/reference navigation (Serena if available), and small file ranges over reading entire large files.
+- Read a whole file when genuinely needed; prefer normal reads for small lesson-data files.
+- Use Context7/on-demand documentation **only** for uncertain or changing APIs. Don't fetch docs by default.
+- Avoid printing whole files, full diffs, or passing test logs into conversation context.
+- Keep implementation focused; avoid speculative framework-building.
+- Respect existing ECC, context reducer, and model-router configuration; don't install overlapping memory/router tools unless requested.
+- After finishing a milestone, provide a concise summary rather than code dumps.
 
-Do not introduce later curriculum concepts or change lesson sequencing without checking and, when appropriate, updating `CURRICULUM.md`.
+## Testing: mandatory gate
+During development, run **focused tests** for changed behavior. Add/update regression tests for any product bug found.
 
-- Read the relevant `CURRICULUM.md` sections before adding or changing lesson content.
-- Do not introduce later concepts casually (for example in example sentences, reading texts or answer keys).
-- When a lesson's status or scope changes, update `CURRICULUM.md` in the same change.
+Before committing, run the existing full gate **through the quiet wrapper**:
 
-## Development rules
-- Keep UI minimal, clean, monochrome, macOS-like
-- Preserve existing working behavior
-- Avoid unrelated refactors
-- Prefer reusable lesson primitives over duplicated logic
-- Keep everything local/offline unless explicitly requested
-- No Supabase/auth/server
-- Do not add packages unless necessary
-- TypeScript must compile cleanly
-- Keep Tailwind IntelliSense warnings clean where practical
+```bash
+bash scripts/test-agent.sh
+```
 
-## Learning design
-Use:
-teach → contextualise → recall → assess
+If the `test:agent` npm alias is configured, `npm run test:agent` is equivalent. This wrapper executes **`npm run test:all`** (TypeScript, Vitest, production build, Playwright) and writes full output to a temporary log.
 
-Do not build a Duolingo clone.
-Prioritise explanation, production, listening, speaking, and mistake-aware review.
-## Testing
+- **Do not** run the noisy `npm run test:all` directly unless debugging the runner itself.
+- On success, use the short summary; **do not read the full log**.
+- On failure, inspect the excerpt, run the smallest relevant focused test, fix, then rerun the full gate. Read more of the log only if necessary.
+- **Do not commit or push unless the full gate exits 0.**
+- Do not delete or weaken useful tests merely to obtain a pass.
+- Report actual Vitest/Playwright totals. Distinguish **automated tests passed** from **native Tauri runtime verified**; mocked SQLite, speech, and browser tests are not native verification.
 
-Commands:
-- `npm run test:unit` (or `npm test`): Vitest. Logic, content integrity, DB (real SQL via `node:sqlite`) and React component tests live next to the code as `*.test.ts(x)`.
-- `npm run test:e2e`: Playwright smoke tests in `e2e/`, against the production bundle served by `vite preview`.
-- `npm run test:all`: `tsc --noEmit` → Vitest → `vite build` → Playwright. This is the full gate.
+## Git and delivery
+- Canonical repository: **`zhrsidd/DeutschLab`**, remote **`origin`**, usual branch **`main`**.
+- Inspect status/remotes and fetch/pull safely. Preserve uncommitted user changes; never discard or overwrite them.
+- Never force-push or rewrite shared history.
+- Before commit, inspect the diff and staged files. Never commit secrets, `node_modules`, `dist`, `src-tauri/target`, local SQLite databases, or Playwright/Vitest artifacts.
+- Commit and push only when the user/task explicitly requests it **and** validation passes.
+- Final report: concise changed-file/behavior summary, exact test counts, commit/push status (if applicable), and any native-runtime caveat.
 
-Rules for every feature, before committing:
-1. Write or update tests for the change, and run the relevant focused tests (e.g. `npx vitest run src/lib/dailyPlanner.test.ts`).
-2. Run `npm run test:all`.
-3. Fix failures caused by the change. Do not weaken or delete a test to make it pass unless the product behaviour was deliberately changed.
-4. Only then commit and push.
-
-Reporting honestly:
-- Do not claim a feature is tested unless the relevant automated test actually ran in this session. Quote the pass/fail counts.
-- Distinguish **automated test passed** from **native Tauri runtime manually verified**. Automated tests do not verify the native app.
-- Native-only, never covered by automation (list these as "needs manual check" when a change touches them): the real Tauri SQL plugin and on-disk `deutschlab.db`, WKWebView rendering, real macOS German speech voices and `speechSynthesis` audio, window/menu behaviour.
-
-Test conventions:
-- Speech is faked (`src/test/fakeSpeech.ts`); tests must never depend on a real macOS voice. Use `removeGermanVoices()` to test the no-voice path.
-- DB tests mock only `@tauri-apps/plugin-sql` with `src/test/fakeSqlPlugin.ts` (Node SQLite, in-memory). Production queries run for real.
-- E2E replaces only the Tauri IPC boundary (`e2e/fixtures.ts`) with an in-memory SQLite database.
-- Review shuffles items with `Math.random`; component tests pin it. Anything randomised in production code should be seedable or pinned in tests.
-- Generated output (`test-results/`, `playwright-report/`) is gitignored. Never commit it.
+## Next curriculum work
+Weeks **1 and 2 are implementation-complete**; Week 3 is in progress. Before implementing more Week 3 work, consult its section of `CURRICULUM.md` for what is implemented and what is still planned. Do not jump ahead or silently alter earlier mastery rules.
