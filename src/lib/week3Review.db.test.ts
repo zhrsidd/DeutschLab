@@ -238,3 +238,122 @@ describe("case-aware Review records", () => {
     ]);
   });
 });
+
+describe("checkpoint-003 attempts and Week 3 Review independence", () => {
+  const result = (
+    scores: [number, number, number, number, number],
+    passed: boolean,
+  ) => {
+    const keys = ["vocabulary", "grammar", "reading", "listening", "writing"] as const;
+    const max = [8, 10, 4, 4, 6];
+    const required = [6, 7, 0, 2, 4];
+    const total = scores.reduce((sum, value) => sum + value, 0);
+
+    return {
+      total,
+      possible: 32,
+      percent: Math.round((total / 32) * 100),
+      sections: keys.map((key, i) => ({
+        key,
+        label: key,
+        score: scores[i],
+        max: max[i],
+        required: required[i],
+        passed: scores[i] >= required[i],
+      })),
+      overallPassed: passed,
+      passed,
+      weakSections: [],
+    };
+  };
+
+  it("saves each attempt as a new row with Week 3 section scores", async () => {
+    await db.saveCheckpointAttempt("checkpoint-003", result([5, 6, 3, 3, 4], false));
+    await db.saveCheckpointAttempt("checkpoint-003", result([7, 8, 4, 3, 5], true));
+
+    const attempts = await db.getCheckpointAttempts("checkpoint-003");
+
+    expect(attempts).toHaveLength(2);
+    expect(attempts[0]).toMatchObject({ total: 21, possible: 32, passed: false });
+    expect(attempts[1]).toMatchObject({ total: 27, passed: true });
+    expect(attempts[1].sections).toEqual({
+      vocabulary: 7, grammar: 8, reading: 4, listening: 3, writing: 5,
+    });
+    expect(attempts[0].id).not.toBe(attempts[1].id);
+  });
+
+  it("preserves existing checkpoint-001 and checkpoint-002 histories", async () => {
+    await db.saveCheckpointAttempt("checkpoint-002", result([6, 7, 4, 3, 6], true));
+    const before = await db.getCheckpointAttempts("checkpoint-002");
+
+    await db.saveCheckpointAttempt("checkpoint-003", result([5, 6, 3, 3, 4], false));
+
+    expect(await db.getCheckpointAttempts("checkpoint-002")).toEqual(before);
+    expect(await db.getCheckpointAttempts("checkpoint-001")).toEqual([]);
+    expect(await db.getCheckpointAttempts("checkpoint-003")).toHaveLength(1);
+  });
+
+  it("does not mark checkpoint-003 complete by saving an attempt, and tells the planner", async () => {
+    await db.saveCheckpointAttempt("checkpoint-003", result([7, 8, 4, 3, 5], true));
+
+    expect(await db.getCompletedTaskIds()).toEqual([]);
+    expect((await db.getPlannerData()).attemptedCheckpointIds).toEqual(["checkpoint-003"]);
+
+    await db.markTaskComplete("checkpoint-003");
+    expect(await db.getCompletedTaskIds()).toEqual(["checkpoint-003"]);
+  });
+
+  it("tracks gender, plural, accusative and negation as four independent review items", async () => {
+    const base = { category: "x", correct: false, userAnswer: "wrong" };
+
+    await db.recordAnswer({ ...base, sourceType: "vocabulary", sourceId: "tisch#article", prompt: "a", expected: "der Tisch" });
+    await db.recordAnswer({ ...base, sourceType: "vocabulary", sourceId: "tisch#plural", prompt: "b", expected: "die Tische" });
+    await db.recordAnswer({ ...base, sourceType: "grammar", sourceId: "c3-acc-5a", prompt: "c", expected: "den" });
+    await db.recordAnswer({ ...base, sourceType: "grammar", sourceId: "c3-neg-7b", prompt: "d", expected: "keinen" });
+
+    const lessons = rows<{ item_key: string; lesson_id: string }>(
+      `SELECT item_key, lesson_id FROM mistakes ORDER BY item_key`,
+    );
+    expect(lessons).toEqual([
+      { item_key: "grammar:c3-acc-5a", lesson_id: "grammar-007" },
+      { item_key: "grammar:c3-neg-7b", lesson_id: "grammar-008" },
+      { item_key: "vocabulary:tisch#article", lesson_id: "vocab-003" },
+      { item_key: "vocabulary:tisch#plural", lesson_id: "vocab-003" },
+    ]);
+    expect(rows(`SELECT * FROM review_items`)).toHaveLength(4);
+
+    // Repeating one miss leaves the other three untouched.
+    await db.recordAnswer({ ...base, sourceType: "grammar", sourceId: "c3-acc-5a", prompt: "c", expected: "den" });
+    expect(
+      rows<{ item_key: string; times_missed: number }>(
+        `SELECT item_key, times_missed FROM mistakes ORDER BY item_key`,
+      ).map((r) => r.times_missed),
+    ).toEqual([2, 1, 1, 1]);
+  });
+
+  it("keeps SRS intervals and mistake resolution unchanged for Week 3 items", async () => {
+    await db.recordAnswer({
+      sourceType: "vocabulary", sourceId: "buch#plural", category: "x",
+      prompt: "p", expected: "die Bücher", userAnswer: "z", correct: false,
+    });
+    getTestDatabase()
+      .prepare(`UPDATE review_items SET due_at = ?`)
+      .run(new Date(Date.now() - 1000).toISOString());
+
+    const [item] = await db.getDueReviewItems();
+    expect(item.sourceId).toBe("buch#plural");
+
+    // Same scheduler as every other item: two correct reviews resolve the mistake.
+    await db.applyReviewResult(item, true);
+    expect(rows<{ resolved_at: string | null }>(`SELECT resolved_at FROM mistakes`)[0].resolved_at).toBeNull();
+
+    await db.applyReviewResult(item, true);
+    expect(rows<{ resolved_at: string | null }>(`SELECT resolved_at FROM mistakes`)[0].resolved_at).not.toBeNull();
+
+    const [row] = rows<{ interval_days: number; repetitions: number }>(
+      `SELECT interval_days, repetitions FROM review_items`,
+    );
+    expect(row.repetitions).toBe(2);
+    expect(row.interval_days).toBeGreaterThan(1);
+  });
+});

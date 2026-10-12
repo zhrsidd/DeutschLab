@@ -2,6 +2,10 @@ import { expect, test } from "./fixtures";
 import { WEEK_1_MASTERED, WEEK_2_INSTRUCTIONAL, planSection, seedCompleted } from "./helpers";
 
 const WEEK_2_MASTERED = [...WEEK_1_MASTERED, ...WEEK_2_INSTRUCTIONAL, "checkpoint-002"];
+const WEEK_3_THROUGH_GRAMMAR = ["vocab-003", "grammar-006", "grammar-007", "grammar-008"];
+const WEEK_3_INSTRUCTIONAL = [
+  ...WEEK_3_THROUGH_GRAMMAR, "reading-002", "listening-003", "writing-002",
+];
 
 test.describe("Week 3 (browser, mocked Tauri SQL)", () => {
   test("Today offers Week 3 vocabulary once Week 2 is mastered", async ({ page, db }) => {
@@ -184,12 +188,112 @@ test.describe("Week 3 (browser, mocked Tauri SQL)", () => {
     await expect(page.getByText("Correct.")).toBeVisible();
   });
 
-  test("Today has nothing more to plan once grammar-008 is done", async ({ page, db }) => {
-    seedCompleted(db, [
-      ...WEEK_2_MASTERED, "vocab-003", "grammar-006", "grammar-007", "grammar-008",
-    ]);
+  test("reading-002 follows grammar-008 and shows evidence after an answer", async ({ page, db }) => {
+    seedCompleted(db, [...WEEK_2_MASTERED, ...WEEK_3_THROUGH_GRAMMAR]);
     await page.goto("/");
 
+    await planSection(page).getByRole("button", { name: /Objects and descriptions/ }).click();
+    await expect(page.getByRole("heading", { name: "Objects and descriptions" })).toBeVisible();
+
+    await page.getByRole("button", { name: "Begin lesson" }).click();
+    await expect(page.getByText(/Mona hat ein Zimmer/)).toBeVisible();
+
+    await page.getByRole("button", { name: "A computer" }).click();
+    await expect(page.getByText("Correct.")).toBeVisible();
+    await expect(page.getByText(/“Sie hat keinen Computer\.”/)).toBeVisible();
+  });
+
+  test("listening-003 opens with Play and Slower and a hidden transcript", async ({ page, db }) => {
+    seedCompleted(db, [...WEEK_2_MASTERED, ...WEEK_3_THROUGH_GRAMMAR, "reading-002"]);
+    await page.goto("/");
+
+    await planSection(page).getByRole("button", { name: /Objects and possession/ }).click();
+    await expect(page.getByRole("heading", { name: "Objects and possession" })).toBeVisible();
+    await page.getByRole("button", { name: "Begin lesson" }).click();
+
+    // The browser has no German voice, so the lesson explains it instead of asking questions.
+    const play = page.getByRole("button", { name: "Play audio" });
+    const noVoice = page.getByText(/Listening needs a German voice/);
+    await expect(play.or(noVoice)).toBeVisible();
+    await expect(page.getByText("Transcript")).toHaveCount(0);
+  });
+
+  test("writing-002 keeps its draft after a reload", async ({ page, db }) => {
+    seedCompleted(db, [...WEEK_2_MASTERED, ...WEEK_3_THROUGH_GRAMMAR, "reading-002", "listening-003"]);
+    await page.goto("/");
+
+    await planSection(page).getByRole("button", { name: /My room and belongings/ }).click();
+    await page.getByRole("button", { name: "Begin lesson" }).click();
+    await expect(page.getByText("Das ist mein Zimmer.")).toBeVisible();
+    await page.getByRole("button", { name: "Plan my paragraph" }).click();
+    await page.getByRole("button", { name: "Start writing" }).click();
+
+    const box = page.getByLabel("Your paragraph");
+    await box.fill("Das ist mein Zimmer. Der Tisch ist groß.");
+    await expect(page.getByText("8 words")).toBeVisible();
+    await expect(page.getByText("Compare your paragraph")).toHaveCount(0);
+
+    // Wait until the debounced save has reached the database, then reopen the app.
+    await expect
+      .poll(() => {
+        const row = db
+          .prepare("SELECT value FROM app_state WHERE key = ?")
+          .get("writing_draft:writing-002") as { value: string } | undefined;
+        return row?.value;
+      })
+      .toBe("Das ist mein Zimmer. Der Tisch ist groß.");
+    await page.reload();
+
+    await page.getByRole("button", { name: /My room and belongings/ }).first().click();
+    await expect(page.getByText(/saved draft \(8 words\)/)).toBeVisible();
+  });
+
+  test("checkpoint-003 is offered only after every Week 3 lesson, and warns if opened early", async ({
+    page,
+    db,
+  }) => {
+    seedCompleted(db, [...WEEK_2_MASTERED, ...WEEK_3_THROUGH_GRAMMAR, "reading-002", "listening-003"]);
+    await page.goto("/");
+
+    await expect(
+      planSection(page).getByRole("button", { name: /Week 3 Checkpoint/ }),
+    ).toHaveCount(0);
+
+    // Opening it early from the curriculum is allowed, with a warning.
+    await page.getByRole("button", { name: /Test your Week 3 vocabulary/ }).click();
+    await page.getByRole("button", { name: "Start lesson" }).click();
+    await expect(page.getByRole("heading", { name: "Week 3 Checkpoint" })).toBeVisible();
+    await expect(page.getByText(/You still have unfinished Week 3 lessons/)).toBeVisible();
+    await expect(page.getByRole("button", { name: "Begin checkpoint" })).toBeEnabled();
+  });
+
+  test("Today prioritises checkpoint-003 once all Week 3 lessons are done", async ({ page, db }) => {
+    seedCompleted(db, [...WEEK_2_MASTERED, ...WEEK_3_INSTRUCTIONAL]);
+    await page.goto("/");
+
+    await expect(page.getByText(/7 of 8 Week 3 activities complete/)).toBeVisible();
+    await planSection(page).getByRole("button", { name: /Week 3 Checkpoint/ }).click();
+
+    await expect(page.getByRole("heading", { name: "Week 3 Checkpoint" })).toBeVisible();
+    await expect(page.getByText(/unfinished Week 3 lessons/)).toHaveCount(0);
+    await expect(page.getByText("Week 3 · Checkpoint")).toBeVisible();
+  });
+
+  test("shows Week 3 Mastered and nothing more to plan after checkpoint-003", async ({ page, db }) => {
+    seedCompleted(db, [...WEEK_2_MASTERED, ...WEEK_3_INSTRUCTIONAL, "checkpoint-003"]);
+    await page.goto("/");
+
+    await expect(page.getByText("Week 3 progress · Mastered")).toBeVisible();
+    await expect(page.getByText(/8 of 8 Week 3 activities complete/)).toBeVisible();
+    await expect(page.getByText("Week 2 progress · Mastered")).toBeVisible();
     await expect(planSection(page).getByText("You're done for today.")).toBeVisible();
+  });
+
+  test("Week 3 stays unmastered before checkpoint-003", async ({ page, db }) => {
+    seedCompleted(db, [...WEEK_2_MASTERED, ...WEEK_3_INSTRUCTIONAL]);
+    await page.goto("/");
+
+    await expect(page.getByText("Week 3 progress", { exact: false })).toBeVisible();
+    await expect(page.getByText("Week 3 progress · Mastered")).toHaveCount(0);
   });
 });

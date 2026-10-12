@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -48,8 +48,17 @@ import WeekCheckpoint from "./WeekCheckpoint";
 
 type User = ReturnType<typeof userEvent.setup>;
 
-const click = (user: User, name: string | RegExp) =>
-  user.click(screen.getByRole("button", { name }));
+/*
+ * Waits for the button to be enabled first: answering saves asynchronously
+ * and the continue button stays disabled until that settles, so a click
+ * made too early is silently ignored.
+ */
+const click = async (user: User, name: string | RegExp) => {
+  const button = screen.getByRole("button", { name });
+
+  await waitFor(() => expect(button).toBeEnabled());
+  await user.click(button);
+};
 
 function setup(unfinishedLessons = 0) {
   const user = userEvent.setup({ delay: null });

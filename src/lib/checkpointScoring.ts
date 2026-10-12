@@ -70,7 +70,27 @@ export const WEEK2_CHECKPOINT: CheckpointConfig = {
   overallPassFraction: OVERALL_PASS_FRACTION,
 };
 
+export const WEEK3_CHECKPOINT_ID = "checkpoint-003";
+
+/** Week 3 uses the same marks as Week 2 with its own checkpoint id. */
+export const WEEK3_SECTION_RULES: SectionRule[] = [
+  { key: "vocabulary", label: "Vocabulary", max: 8, minFraction: 0.75 },
+  { key: "grammar", label: "Grammar", max: 10, minFraction: 0.7 },
+  { key: "reading", label: "Reading", max: 4, minFraction: 0 },
+  { key: "listening", label: "Listening", max: 4, minFraction: 0.5 },
+  { key: "writing", label: "Writing self-check", max: 6, minFraction: 4 / 6 },
+];
+
+export const WEEK3_CHECKPOINT_TOTAL = totalOf(WEEK3_SECTION_RULES);
+
+export const WEEK3_CHECKPOINT: CheckpointConfig = {
+  id: WEEK3_CHECKPOINT_ID,
+  rules: WEEK3_SECTION_RULES,
+  overallPassFraction: OVERALL_PASS_FRACTION,
+};
+
 export function checkpointConfigFor(id: string): CheckpointConfig {
+  if (id === WEEK3_CHECKPOINT_ID) return WEEK3_CHECKPOINT;
   return id === WEEK2_CHECKPOINT_ID ? WEEK2_CHECKPOINT : WEEK1_CHECKPOINT;
 }
 
@@ -193,4 +213,9 @@ export function isWeek1Mastered(completedTaskIds: string[]): boolean {
 /** Week 2 is mastered once checkpoint-002 has been completed (passed). */
 export function isWeek2Mastered(completedTaskIds: string[]): boolean {
   return completedTaskIds.includes(WEEK2_CHECKPOINT_ID);
+}
+
+/** Week 3 is mastered once checkpoint-003 has been completed (passed). */
+export function isWeek3Mastered(completedTaskIds: string[]): boolean {
+  return completedTaskIds.includes(WEEK3_CHECKPOINT_ID);
 }

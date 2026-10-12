@@ -37,7 +37,13 @@ import CommonVerbsLesson from "./components/CommonVerbsLesson";
 import WritingLesson from "./components/WritingLesson";
 import Week2ListeningLesson from "./components/Week2ListeningLesson";
 import Week2ReadingLesson from "./components/Week2ReadingLesson";
-import { week2CheckpointDefinition } from "./lib/checkpointDefinitions";
+import Week3ListeningLesson from "./components/Week3ListeningLesson";
+import Week3ReadingLesson from "./components/Week3ReadingLesson";
+import { roomWriting } from "./data/lessons/week3Writing";
+import {
+  week2CheckpointDefinition,
+  week3CheckpointDefinition,
+} from "./lib/checkpointDefinitions";
 import AccusativeLesson from "./components/AccusativeLesson";
 import ArticlesLesson from "./components/ArticlesLesson";
 import HabenLesson from "./components/HabenLesson";
@@ -71,8 +77,10 @@ import {
 import {
   CHECKPOINT_ID,
   WEEK2_CHECKPOINT_ID,
+  WEEK3_CHECKPOINT_ID,
   isWeek1Mastered,
   isWeek2Mastered,
+  isWeek3Mastered,
 } from "./lib/checkpointScoring";
 
 import {
@@ -466,6 +474,73 @@ function App() {
     );
   }
 
+  if (activeLessonId === "reading-002") {
+    return (
+      <Week3ReadingLesson
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("reading-002", score, total)
+        }
+        onFinish={() => finishLesson("reading-002")}
+      />
+    );
+  }
+
+  if (activeLessonId === "listening-003") {
+    return (
+      <Week3ListeningLesson
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("listening-003", score, total)
+        }
+        onFinish={() => finishLesson("listening-003")}
+      />
+    );
+  }
+
+  if (activeLessonId === "writing-002") {
+    return (
+      <WritingLesson
+        config={roomWriting}
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("writing-002", score, total)
+        }
+        onFinish={() => finishLesson("writing-002")}
+      />
+    );
+  }
+
+  if (activeLessonId === WEEK3_CHECKPOINT_ID) {
+    return (
+      <WeekCheckpoint
+        definition={week3CheckpointDefinition}
+        unfinishedLessons={
+          starterTasks.filter(
+            (task) =>
+              taskWeek(task) === 3 &&
+              task.id !== WEEK3_CHECKPOINT_ID &&
+              !completedTasks.includes(task.id),
+          ).length
+        }
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(result) =>
+          saveCheckpointAttempt(WEEK3_CHECKPOINT_ID, result)
+        }
+        onFinish={() => finishLesson(WEEK3_CHECKPOINT_ID)}
+        onOpenTarget={(target) => {
+          if (target.type === "review") {
+            setReviewLimit(null);
+            setActiveLessonId(null);
+            setView("review");
+          } else {
+            setActiveLessonId(target.taskId);
+          }
+        }}
+      />
+    );
+  }
+
   if (activeLessonId === WEEK2_CHECKPOINT_ID) {
     return (
       <WeekCheckpoint
@@ -685,6 +760,7 @@ function App() {
               plan={plan}
               week1Mastered={isWeek1Mastered(completedTasks)}
               week2Mastered={isWeek2Mastered(completedTasks)}
+              week3Mastered={isWeek3Mastered(completedTasks)}
               nextReviewAt={planData.nextDueAt}
               studyMinutes={studyMinutes}
               setStudyMinutes={(minutes) =>
@@ -730,6 +806,7 @@ interface TodayViewProps {
   plan: DailyPlan;
   week1Mastered: boolean;
   week2Mastered: boolean;
+  week3Mastered: boolean;
   nextReviewAt: string | null;
   studyMinutes: number;
   setStudyMinutes: (minutes: number) => void;
@@ -746,6 +823,7 @@ function TodayView({
   plan,
   week1Mastered,
   week2Mastered,
+  week3Mastered,
   nextReviewAt,
   studyMinutes,
   setStudyMinutes,
@@ -809,6 +887,13 @@ function TodayView({
           tasks={starterTasks.filter((task) => taskWeek(task) === 2)}
           completedTasks={completedTasks}
           mastered={week2Mastered}
+        />
+
+        <WeekProgressCard
+          label="Week 3"
+          tasks={starterTasks.filter((task) => taskWeek(task) === 3)}
+          completedTasks={completedTasks}
+          mastered={week3Mastered}
         />
 
         <section className="mb-8">

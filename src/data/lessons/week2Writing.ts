@@ -61,3 +61,43 @@ export const checkpoint2Writing = {
   sample:
     "Ich heiße Karim, und ich wohne in Doha. Die Familie ist groß: Ich habe drei Geschwister. Der Vater arbeitet in der Stadt, und die Mutter ist Lehrerin. Ich bin Schüler. Ich spreche Urdu und Englisch, und ich lerne Deutsch. Ich mag Physik. Heute spiele ich Fußball, und morgen lese ich.",
 };
+
+/** Everything a guided writing lesson (writing-001, writing-002, ...) shows. */
+export interface WritingLessonConfig {
+  taskId: string;
+  kicker: string;
+  title: string;
+  intro: string;
+  lengthLabel: string;
+  prompt: string;
+  targetWords: { min: number; max: number };
+  cues: string[];
+  checklist: string[];
+  passScore: number;
+  sample: string;
+  prepHeading: string;
+  prepText: string;
+  frames: string[];
+  planText: string;
+}
+
+export const dailyLifeLesson: WritingLessonConfig = {
+  taskId: dailyLifeWriting.taskId,
+  kicker: "Week 2 · Writing",
+  title: "My daily life",
+  intro:
+    "Write a short paragraph about yourself and your daily life, using what you've learned in Weeks 1 and 2. You can't be marked automatically here, so you'll compare with an example and check your own work honestly.",
+  lengthLabel: "40–50 words",
+  prompt: dailyLifeWriting.prompt,
+  targetWords: dailyLifeWriting.targetWords,
+  cues: dailyLifeWriting.cues,
+  checklist: dailyLifeWriting.checklist,
+  passScore: dailyLifeWriting.passScore,
+  sample: dailyLifeWriting.sample,
+  prepHeading: "Sentence frames you already know",
+  prepText:
+    "Finish each frame with your own information. Remember the verb is in position 2, and that you can start a sentence with a time word: Heute spiele ich Fußball.",
+  frames: writingFrames,
+  planText:
+    "Tick the topics you'd like to cover. You don't need all of them; aim for at least four.",
+};

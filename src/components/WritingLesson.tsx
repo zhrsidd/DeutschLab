@@ -3,8 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, Check, RotateCcw } from "lucide-react";
 
 import {
-  dailyLifeWriting,
-  writingFrames,
+  dailyLifeLesson,
+  type WritingLessonConfig,
 } from "../data/lessons/week2Writing";
 
 import {
@@ -21,13 +21,13 @@ import WritingSection from "./checkpoint/WritingSection";
 type Stage = "intro" | "prep" | "plan" | "write" | "results";
 
 interface WritingLessonProps {
+  /** Which writing task to run; defaults to writing-001. */
+  config?: WritingLessonConfig;
   onBack: () => void;
   onFinish: () => Promise<void>;
   onSaveAttempt: (score: number, total: number) => Promise<void>;
 }
 
-const TASK_ID = dailyLifeWriting.taskId;
-const TOTAL = dailyLifeWriting.checklist.length;
 const SAVE_DELAY_MS = 400;
 
 /*
@@ -36,10 +36,14 @@ const SAVE_DELAY_MS = 400;
  * submitting never erases it, and only "Clear and start again" does.
  */
 export default function WritingLesson({
+  config = dailyLifeLesson,
   onBack,
   onFinish,
   onSaveAttempt,
 }: WritingLessonProps) {
+  const TASK_ID = config.taskId;
+  const TOTAL = config.checklist.length;
+
   const [stage, setStage] = useState<Stage>("intro");
   const [loaded, setLoaded] = useState(false);
   const [draftWords, setDraftWords] = useState(0);
@@ -70,7 +74,7 @@ export default function WritingLesson({
       console.error("Failed to save writing draft:", saveError);
       setError("Your draft could not be saved on this device.");
     }
-  }, []);
+  }, [TASK_ID]);
 
   // Load the saved draft once.
   useEffect(() => {
@@ -92,7 +96,7 @@ export default function WritingLesson({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [TASK_ID]);
 
   // Don't lose unsaved typing when the learner leaves the lesson.
   useEffect(() => {
@@ -103,7 +107,7 @@ export default function WritingLesson({
 
       if (timerRef.current !== null) window.clearTimeout(timerRef.current);
     };
-  }, []);
+  }, [TASK_ID]);
 
   const onTextChange = (text: string) => {
     draftRef.current = text;
@@ -158,7 +162,7 @@ export default function WritingLesson({
     }
   };
 
-  const passed = score >= dailyLifeWriting.passScore;
+  const passed = score >= config.passScore;
 
   if (!loaded) {
     return (
@@ -179,24 +183,21 @@ export default function WritingLesson({
       <LessonShell onBack={onBack}>
         <div className="mx-auto max-w-2xl px-8 py-12">
           <p className="text-sm font-medium text-neutral-400">
-            Week 2 · Writing
+            {config.kicker}
           </p>
 
           <h1 className="mt-3 text-4xl font-semibold tracking-tight">
-            My daily life
+            {config.title}
           </h1>
 
           <p className="mt-4 max-w-xl text-lg leading-8 text-neutral-500">
-            Write a short paragraph about yourself and your daily life, using
-            what you've learned in Weeks 1 and 2. You can't be marked
-            automatically here, so you'll compare with an example and check
-            your own work honestly.
+            {config.intro}
           </p>
 
           <div className="mt-10 grid grid-cols-3 gap-3">
-            <Stat label="Length" value="40–50 words" />
+            <Stat label="Length" value={config.lengthLabel} />
             <Stat label="Self-check" value={`${TOTAL} points`} />
-            <Stat label="Pass" value={`${dailyLifeWriting.passScore}/${TOTAL}`} />
+            <Stat label="Pass" value={`${config.passScore}/${TOTAL}`} />
           </div>
 
           {draftWords > 0 ? (
@@ -230,17 +231,13 @@ export default function WritingLesson({
           <p className="text-sm font-medium text-neutral-400">Preparation</p>
 
           <h2 className="mt-4 text-3xl font-semibold tracking-tight">
-            Sentence frames you already know
+            {config.prepHeading}
           </h2>
 
-          <p className="mt-3 leading-7 text-neutral-500">
-            Finish each frame with your own information. Remember the verb is
-            in position 2, and that you can start a sentence with a time word:
-            Heute spiele ich Fußball.
-          </p>
+          <p className="mt-3 leading-7 text-neutral-500">{config.prepText}</p>
 
           <div className="mt-6 grid grid-cols-2 gap-3">
-            {writingFrames.map((frame) => (
+            {config.frames.map((frame) => (
               <div
                 key={frame}
                 className="rounded-xl border border-black/5 bg-white px-5 py-4 font-medium"
@@ -277,13 +274,10 @@ export default function WritingLesson({
             What will you write about?
           </h2>
 
-          <p className="mt-3 leading-7 text-neutral-500">
-            Tick the topics you'd like to cover. You don't need all of them;
-            aim for at least four.
-          </p>
+          <p className="mt-3 leading-7 text-neutral-500">{config.planText}</p>
 
           <div className="mt-6 grid grid-cols-2 gap-3">
-            {dailyLifeWriting.cues.map((cue) => {
+            {config.cues.map((cue) => {
               const on = planned.includes(cue);
 
               return (
@@ -350,11 +344,11 @@ export default function WritingLesson({
           <WritingSection
             key={editRound}
             content={{
-              prompt: dailyLifeWriting.prompt,
-              targetWords: dailyLifeWriting.targetWords,
-              cues: dailyLifeWriting.cues,
-              checklist: dailyLifeWriting.checklist,
-              sample: dailyLifeWriting.sample,
+              prompt: config.prompt,
+              targetWords: config.targetWords,
+              cues: config.cues,
+              checklist: config.checklist,
+              sample: config.sample,
               continueLabel: "See results",
             }}
             initialText={draftRef.current}
@@ -389,7 +383,7 @@ export default function WritingLesson({
         <p className="mx-auto mt-3 max-w-md leading-7 text-neutral-500">
           {passed
             ? "You rated your paragraph at the target level. Keep your draft and read it aloud once."
-            : `You need at least ${dailyLifeWriting.passScore}/${TOTAL}. Your paragraph is saved. Go back, improve it, and check it again.`}
+            : `You need at least ${config.passScore}/${TOTAL}. Your paragraph is saved. Go back, improve it, and check it again.`}
         </p>
 
         {error ? <ErrorMessage>{error}</ErrorMessage> : null}

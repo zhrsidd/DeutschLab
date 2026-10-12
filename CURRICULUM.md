@@ -340,12 +340,16 @@ Learner should begin producing sentences such as:
 | `grammar-006` | Nouns, articles and plurals | Implemented |
 | `grammar-007` | The accusative case | Implemented |
 | `grammar-008` | Negation — nicht and kein | Implemented |
-| `reading-002` | Week 3 reading | Planned |
-| `listening-003` | Week 3 listening | Planned |
-| `writing-002` | Week 3 writing | Planned |
-| `checkpoint-003` | Week 3 checkpoint | Planned |
+| `reading-002` | Objects and descriptions | Implemented |
+| `listening-003` | Objects and possession | Implemented |
+| `writing-002` | My room and belongings | Implemented |
+| `checkpoint-003` | Week 3 checkpoint | Implemented |
 
-Week 3 order in the app so far: `vocab-003` → `grammar-006` → `grammar-007` → `grammar-008`. New Week 3 content is offered on Today once Week 2 is mastered (`checkpoint-002` passed); there is no Week 3 mastery rule yet.
+Week 3 order in the app: `vocab-003` → `grammar-006` → `grammar-007` → `grammar-008` → `reading-002` → `listening-003` → `writing-002` → `checkpoint-003`. New Week 3 content is offered on Today once Week 2 is mastered (`checkpoint-002` passed).
+
+Week 3 is mastered when:
+
+`checkpoint-003` is passed.
 
 Implementation notes:
 
@@ -355,6 +359,9 @@ Implementation notes:
 - `grammar-006` teaches gender, der/die/das, ein/eine, the nominative as "the subject" and plurals. It has 16 questions (pass 13/16) and does **not** teach der → den or ein → einen; those belong to `grammar-007`.
 - `grammar-007` teaches subject vs direct object and only the masculine change (der → den, ein → einen; feminine, neuter and plural unchanged). 15 questions, pass 12/15. Accusative pronouns, dative and prepositions stay out of scope.
 - `grammar-008` teaches `kein` (nominative and accusative: kein/keine/kein/keine and keinen) versus `nicht` for verbs and adjectives. 14 questions, pass 12/14.
+- `reading-002` (2 texts, 8 questions, pass 7/8) and `listening-003` (4 clips, 8 questions, pass 7/8) create Review items only for questions that map to a reusable word or grammar item (for example `fenster#article`, `neg-c-stift`), never for facts about the passage.
+- `writing-002` is self-assessed (6 points, pass 5/6; 50–70 words) and keeps the learner's draft locally; it never creates mistakes or Review items. It uses *Das ist mein Zimmer.* as a fixed phrase: possessives are not taught until later.
+- `checkpoint-003` assesses vocabulary (8, including article and plural questions), grammar (10: gender, nominative and indefinite articles, plurals, the accusative, subject vs object, kein forms, nicht vs kein), reading (4), listening (4) and a writing self-check (6): **32 marks**, pass at 80% (26/32) plus section minimums (vocabulary 6/8, grammar 7/10, listening 2/4, writing 4/6; no reading minimum). It uses fresh questions, and attempts are saved in `checkpoint_attempts`.
 - Review keeps the accusative (`acc-…`) and negation (`neg-…`) grammar questions as concepts separate from the vocabulary `#article` target, so knowing that Tisch is masculine is tracked apart from saying *den* Tisch.
 
 ---

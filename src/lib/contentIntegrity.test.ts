@@ -88,8 +88,13 @@ describe("curriculum", () => {
       "grammar-006",
       "grammar-007",
       "grammar-008",
+      "reading-002",
+      "listening-003",
+      "writing-002",
+      "checkpoint-003",
     ]);
-    expect(starterTasks.filter((task) => task.week === 3)).toHaveLength(4);
+    expect(starterTasks.filter((task) => task.week === 3)).toHaveLength(8);
+    expect(Math.max(...starterTasks.map((task) => task.week ?? 1))).toBe(3);
     expect(new Set(ids).size).toBe(ids.length);
     expect(starterTasks.find((t) => t.id === "vocab-003")?.minutes).toBe(25);
     expect(starterTasks.find((t) => t.id === "grammar-006")?.minutes).toBe(15);
@@ -326,7 +331,7 @@ describe("CURRICULUM.md stays in step with the code", () => {
     }
   });
 
-  it("lists vocab-003 and grammar-006 as Implemented and later Week 3 tasks as Planned", () => {
+  it("lists every Week 3 task as Implemented", () => {
     const status = Object.fromEntries(rows.map((m) => [m[1], m[2]]));
 
     expect(status["vocab-003"]).toBe("Implemented");
@@ -335,7 +340,7 @@ describe("CURRICULUM.md stays in step with the code", () => {
     expect(status["grammar-008"]).toBe("Implemented");
 
     for (const id of ["reading-002", "listening-003", "writing-002", "checkpoint-003"]) {
-      expect(status[id], id).toBe("Planned");
+      expect(status[id], id).toBe("Implemented");
     }
   });
 

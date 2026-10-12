@@ -5,7 +5,7 @@ DeutschLab is a **local-first macOS German-learning app** built with **Tauri v2,
 
 **Learner goal:** A0 → strong A1 by January 2027; eventual C1 and academic German for Physics at ETH Zürich by March 2028. Keep workload realistic alongside school.
 
-**Current implementation:** Weeks **1 and 2** of Unit 1 are implemented, including lessons, checkpoints, mistakes, active-recall spaced review, and the daily planner. **Week 3 is partially implemented** (`vocab-003`, `grammar-006`, `grammar-007`, `grammar-008`); see `CURRICULUM.md` for the remaining Week 3 lessons. An implemented feature is **not** automatically verified in the native macOS window.
+**Current implementation:** Weeks **1, 2 and 3** of Unit 1 are implemented, including lessons, checkpoints, mistakes, active-recall spaced review, and the daily planner. Week 3 ends with `checkpoint-003`; Week 4 has not been started. An implemented feature is **not** automatically verified in the native macOS window.
 
 ## Curriculum: source of truth
 - **`CURRICULUM.md` is authoritative** for scope, sequence, prerequisites, vocabulary targets, mastery, and longer-term progression.
@@ -76,4 +76,4 @@ If the `test:agent` npm alias is configured, `npm run test:agent` is equivalent.
 - Final report: concise changed-file/behavior summary, exact test counts, commit/push status (if applicable), and any native-runtime caveat.
 
 ## Next curriculum work
-Weeks **1 and 2 are implementation-complete**; Week 3 is in progress. Before implementing more Week 3 work, consult its section of `CURRICULUM.md` for what is implemented and what is still planned. Do not jump ahead or silently alter earlier mastery rules.
+Weeks **1, 2 and 3 are implementation-complete**. Before implementing Week 4 (accusative consolidation and irregular verbs), consult its section of `CURRICULUM.md`. Do not jump ahead or silently alter earlier mastery rules. Do not jump ahead or silently alter earlier mastery rules.

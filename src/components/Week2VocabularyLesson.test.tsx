@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -16,8 +16,17 @@ import VocabularyLesson from "./VocabularyLesson";
 type User = ReturnType<typeof userEvent.setup>;
 type Question = { answer: string; options: string[] };
 
-const click = (user: User, name: string | RegExp) =>
-  user.click(screen.getByRole("button", { name }));
+/*
+ * Waits for the button to be enabled first: answering saves asynchronously
+ * and the continue button stays disabled until that settles, so a click
+ * made too early is silently ignored.
+ */
+const click = async (user: User, name: string | RegExp) => {
+  const button = screen.getByRole("button", { name });
+
+  await waitFor(() => expect(button).toBeEnabled());
+  await user.click(button);
+};
 
 function setup(set: VocabularySet = week2VocabularySet) {
   const onSaveAttempt = vi.fn().mockResolvedValue(undefined);

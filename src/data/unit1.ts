@@ -358,4 +358,39 @@ export const starterTasks: LessonTask[] = [
     minutes: 13,
     week: 3,
   },
+  {
+    id: "reading-002",
+    title: "Objects and descriptions",
+    description: "Read two short texts about a room and school belongings.",
+    type: "reading",
+    minutes: 12,
+    week: 3,
+  },
+  {
+    id: "listening-003",
+    title: "Objects and possession",
+    description:
+      "Listen to short clips about objects, what people have and what they do not have.",
+    type: "listening",
+    minutes: 12,
+    week: 3,
+  },
+  {
+    id: "writing-002",
+    title: "My room and belongings",
+    description:
+      "Write a short paragraph about your room, school objects or belongings.",
+    type: "writing",
+    minutes: 15,
+    week: 3,
+  },
+  {
+    id: "checkpoint-003",
+    title: "Week 3 Checkpoint",
+    description:
+      "Test your Week 3 vocabulary, grammar, reading, listening and writing.",
+    type: "review",
+    minutes: 25,
+    week: 3,
+  },
 ];

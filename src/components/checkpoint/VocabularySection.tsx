@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { trackAnswer } from "../../lib/db";
 import {
+  mistakeExpected,
   mistakePrompt,
   type VocabQuestion,
 } from "../../lib/vocabularyExercises";
@@ -44,10 +45,10 @@ export default function VocabularySection({
           if (!correct) {
             trackAnswer({
               sourceType: "vocabulary",
-              sourceId: question.itemId,
+              sourceId: question.reviewId,
               category: "vocabulary",
               prompt: mistakePrompt(question),
-              expected: question.answer,
+              expected: mistakeExpected(question),
               userAnswer: answer,
               correct: false,
               audioText: question.audioText,

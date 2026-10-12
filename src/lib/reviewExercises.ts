@@ -13,6 +13,7 @@ import { week2GrammarSlots } from "../data/lessons/week2Checkpoint";
 import { week2HabenQuiz } from "../data/lessons/week2Haben";
 import { week3AccusativeQuiz } from "../data/lessons/week3Accusative";
 import { week3ArticlesQuiz } from "../data/lessons/week3Articles";
+import { week3GrammarSlots } from "../data/lessons/week3Checkpoint";
 import { week3NegationQuiz } from "../data/lessons/week3Negation";
 import { week1SeinQuiz } from "../data/lessons/week1Sein";
 import { week1PronunciationQuiz } from "../data/lessons/week1Pronunciation";
@@ -102,6 +103,10 @@ export function lessonIdFor(
   if (sourceId.startsWith("qn-")) return "grammar-003";
   if (sourceId.startsWith("art-")) return "grammar-006";
   if (sourceId.startsWith("acc-")) return "grammar-007";
+  // Week 3 checkpoint questions trace back to the skill they test.
+  if (sourceId.startsWith("c3-art-")) return "grammar-006";
+  if (sourceId.startsWith("c3-acc-")) return "grammar-007";
+  if (sourceId.startsWith("c3-neg-")) return "grammar-008";
   if (sourceId.startsWith("neg-")) return "grammar-008";
   if (sourceId.startsWith("hb-")) return "grammar-004";
   if (sourceId.startsWith("cv-")) return "grammar-005";
@@ -123,6 +128,7 @@ const courseQuestions: CourseQuestion[] = [
   ...week3ArticlesQuiz,
   ...week3AccusativeQuiz,
   ...week3NegationQuiz,
+  ...week3GrammarSlots.flat(),
 ];
 
 const CONCEPT_LABEL = {

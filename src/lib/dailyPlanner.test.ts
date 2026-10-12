@@ -456,42 +456,63 @@ describe("Week 3 progression", () => {
     "vocab-002", "grammar-004", "grammar-005",
     "writing-001", "reading-001", "listening-002", "checkpoint-002",
   ];
+  const week3Order = [
+    "vocab-003", "grammar-006", "grammar-007", "grammar-008",
+    "reading-002", "listening-003", "writing-002", "checkpoint-003",
+  ];
+  const week3Instructional = week3Order.slice(0, 7);
 
   const next = (completed: string[], budgetMinutes = 30) =>
     generateDailyPlan({ ...base, budgetMinutes, completedTaskIds: completed }).items.map(
       (item) => item.sourceId,
     );
 
-  it("offers vocab-003 first once Week 2 is mastered", () => {
-    expect(next(week2Done)[0]).toBe("vocab-003");
+  it("offers each Week 3 task in order as the previous one is completed", () => {
+    for (let i = 0; i < week3Order.length; i += 1) {
+      expect(next([...week2Done, ...week3Order.slice(0, i)], 15)[0], week3Order[i]).toBe(
+        week3Order[i],
+      );
+    }
   });
 
-  it("offers grammar-006 right after vocab-003", () => {
-    expect(next([...week2Done, "vocab-003"])[0]).toBe("grammar-006");
+  it("offers checkpoint-003 only after all seven Week 3 instructional tasks", () => {
+    for (let missing = 0; missing < 7; missing += 1) {
+      const partial = week3Instructional.filter((_, i) => i !== missing);
+
+      expect(next([...week2Done, ...partial], 60), week3Instructional[missing]).not.toContain(
+        "checkpoint-003",
+      );
+    }
+
+    expect(next([...week2Done, ...week3Instructional], 30)).toEqual(["checkpoint-003"]);
   });
 
-  it("offers grammar-007 then grammar-008 in order", () => {
-    expect(next([...week2Done, "vocab-003", "grammar-006"], 15)[0]).toBe("grammar-007");
-    expect(next([...week2Done, "vocab-003", "grammar-006", "grammar-007"], 15)[0]).toBe(
-      "grammar-008",
-    );
-  });
-
-  it("has nothing left to plan after grammar-008 (no Week 3 checkpoint yet)", () => {
+  it("has nothing left to plan once checkpoint-003 is done (no Week 4 yet)", () => {
     const plan = generateDailyPlan({
       ...base,
-      completedTaskIds: [...week2Done, "vocab-003", "grammar-006", "grammar-007", "grammar-008"],
+      completedTaskIds: [...week2Done, ...week3Order],
     });
 
     expect(plan.done).toBe(true);
+    expect(starterTasks.every((task) => (task.week ?? 1) <= 3)).toBe(true);
+  });
+
+  it("defers a failed checkpoint-003 behind reviews", () => {
+    const plan = generateDailyPlan({
+      ...base,
+      completedTaskIds: [...week2Done, ...week3Instructional],
+      attemptedCheckpointIds: ["checkpoint-003"],
+      dueReviewCount: 3,
+    });
+
+    expect(plan.items.map((item) => item.kind)).toEqual(["review"]);
   });
 
   it("withholds Week 3 until checkpoint-002 is passed", () => {
     const beforeCheckpoint = week2Done.filter((id) => id !== "checkpoint-002");
     const planned = next(beforeCheckpoint, 60);
 
-    expect(planned).not.toContain("vocab-003");
-    expect(planned).not.toContain("grammar-006");
+    for (const id of week3Order) expect(planned).not.toContain(id);
     expect(planned[0]).toBe("checkpoint-002");
   });
 
@@ -503,7 +524,7 @@ describe("Week 3 progression", () => {
     const plan = generateDailyPlan({
       ...base,
       budgetMinutes: 60,
-      completedTaskIds: [...week2Done, "vocab-003", "grammar-006", "grammar-007", "grammar-008"],
+      completedTaskIds: [...week2Done, ...week3Order],
       dueReviewCount: 4,
       dueReviewKeys: ["vocabulary:tisch#plural"],
       unresolvedMistakes: [
