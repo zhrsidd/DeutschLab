@@ -8,6 +8,8 @@ import type {
   ReviewStats,
 } from "../data/reviewTypes";
 
+import { resolveReviewLimit } from "../lib/dailyPlanner";
+
 import { useGermanSpeech } from "../hooks/useGermanSpeech";
 
 import {
@@ -21,6 +23,8 @@ import { ErrorMessage, ProgressBar } from "./lesson/LessonParts";
 import { shuffleArray } from "./lesson/shuffle";
 
 interface ReviewViewProps {
+  /** Items planned by Today; omit/null to use the default maximum. */
+  sessionLimit?: number | null;
   /** Lets the app refresh its due-count after reviews change. */
   onChange: () => void;
 }
@@ -40,7 +44,10 @@ export function formatReviewDate(iso: string): string {
   });
 }
 
-export default function ReviewView({ onChange }: ReviewViewProps) {
+export default function ReviewView({
+  sessionLimit,
+  onChange,
+}: ReviewViewProps) {
   const [stats, setStats] = useState<ReviewStats | null>(null);
   const [mistakes, setMistakes] = useState<MistakeRow[]>([]);
   const [session, setSession] = useState<ReviewItem[] | null>(null);
@@ -68,7 +75,15 @@ export default function ReviewView({ onChange }: ReviewViewProps) {
   const startSession = async () => {
     try {
       setError(null);
-      const due = await getDueReviewItems();
+      const due = await getDueReviewItems(resolveReviewLimit(sessionLimit));
+
+      if (due.length === 0) {
+        // Nothing is due after all (e.g. data changed); just refresh.
+        await load();
+        onChange();
+        return;
+      }
+
       setSession(shuffleArray(due));
     } catch (startError) {
       console.error("Failed to start review:", startError);

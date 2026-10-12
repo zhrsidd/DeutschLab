@@ -90,6 +90,8 @@ function App() {
     DEFAULT_STUDY_MINUTES,
   );
   // Weak-area items practised this session; kept in memory only.
+  // Review-session size requested by a Today plan card (null = default).
+  const [reviewLimit, setReviewLimit] = useState<number | null>(null);
   const [dismissedMistakes, setDismissedMistakes] = useState<number[]>([]);
 
   useEffect(() => {
@@ -169,6 +171,7 @@ function App() {
     }
 
     if (item.target.type === "review") {
+      setReviewLimit(item.reviewLimit ?? null);
       setView("review");
     } else {
       setActiveLessonId(item.target.taskId);
@@ -377,7 +380,10 @@ function App() {
 
             <SidebarButton
               active={view === "review"}
-              onClick={() => setView("review")}
+              onClick={() => {
+                setReviewLimit(null);
+                setView("review");
+              }}
             >
               <RotateCcw size={18} />
               Review
@@ -445,7 +451,13 @@ function App() {
               startPlanItem={startPlanItem}
             />
           ) : view === "review" ? (
-            <ReviewView onChange={() => void refreshPlanData()} />
+            <ReviewView
+              sessionLimit={reviewLimit}
+              onChange={() => {
+                setReviewLimit(null);
+                void refreshPlanData();
+              }}
+            />
           ) : (
             <CurriculumView />
           )}

@@ -34,6 +34,8 @@ export interface PlanItem {
   target: PlanTarget;
   /** Set for weak-area items so the UI can dismiss them once practised. */
   mistakeId?: number;
+  /** For review blocks: how many items the session should load. */
+  reviewLimit?: number;
 }
 
 export interface PlannerMistake {
@@ -75,6 +77,13 @@ const WEAK_AREA_TITLE: Record<string, string> = {
 
 function sourceTypeOf(itemKey: string): string {
   return itemKey.split(":")[0];
+}
+
+/** Items a Review session loads: the planned count, or the default max. */
+export function resolveReviewLimit(requested?: number | null): number {
+  return requested && requested > 0
+    ? Math.min(requested, MAX_REVIEWS_PER_DAY)
+    : MAX_REVIEWS_PER_DAY;
 }
 
 export function reviewMinutes(count: number): number {
@@ -124,6 +133,7 @@ export function generateDailyPlan(input: PlannerInput): DailyPlan {
           ? `Today's session covers ${count} of them.`
           : "Quick recall of items you've learned or missed.",
       minutes: reviewMinutes(count),
+      reviewLimit: count,
       reason:
         dueReviewCount === 1
           ? "1 review is due"
