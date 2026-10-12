@@ -10,6 +10,7 @@ Native macOS German-learning app for one user.
 - lucide-react
 - SQLite via @tauri-apps/plugin-sql
 - Local-only; no auth/backend/cloud
+- Vitest + React Testing Library + Playwright (dev only)
 
 ## Goal
 Teach German from A0 toward C1 for eventual Physics study at ETH Zürich.
@@ -49,3 +50,27 @@ teach → contextualise → recall → assess
 
 Do not build a Duolingo clone.
 Prioritise explanation, production, listening, speaking, and mistake-aware review.
+## Testing
+
+Commands:
+- `npm run test:unit` (or `npm test`): Vitest. Logic, content integrity, DB (real SQL via `node:sqlite`) and React component tests live next to the code as `*.test.ts(x)`.
+- `npm run test:e2e`: Playwright smoke tests in `e2e/`, against the production bundle served by `vite preview`.
+- `npm run test:all`: `tsc --noEmit` → Vitest → `vite build` → Playwright. This is the full gate.
+
+Rules for every feature, before committing:
+1. Write or update tests for the change, and run the relevant focused tests (e.g. `npx vitest run src/lib/dailyPlanner.test.ts`).
+2. Run `npm run test:all`.
+3. Fix failures caused by the change. Do not weaken or delete a test to make it pass unless the product behaviour was deliberately changed.
+4. Only then commit and push.
+
+Reporting honestly:
+- Do not claim a feature is tested unless the relevant automated test actually ran in this session. Quote the pass/fail counts.
+- Distinguish **automated test passed** from **native Tauri runtime manually verified**. Automated tests do not verify the native app.
+- Native-only, never covered by automation (list these as "needs manual check" when a change touches them): the real Tauri SQL plugin and on-disk `deutschlab.db`, WKWebView rendering, real macOS German speech voices and `speechSynthesis` audio, window/menu behaviour.
+
+Test conventions:
+- Speech is faked (`src/test/fakeSpeech.ts`); tests must never depend on a real macOS voice. Use `removeGermanVoices()` to test the no-voice path.
+- DB tests mock only `@tauri-apps/plugin-sql` with `src/test/fakeSqlPlugin.ts` (Node SQLite, in-memory). Production queries run for real.
+- E2E replaces only the Tauri IPC boundary (`e2e/fixtures.ts`) with an in-memory SQLite database.
+- Review shuffles items with `Math.random`; component tests pin it. Anything randomised in production code should be seedable or pinned in tests.
+- Generated output (`test-results/`, `playwright-report/`) is gitignored. Never commit it.

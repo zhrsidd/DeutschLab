@@ -60,7 +60,8 @@ export interface CheckpointResult {
 }
 
 export function requiredMarks(rule: SectionRule): number {
-  return Math.ceil(rule.minFraction * rule.max - 1e-9);
+  // Math.max avoids a stray -0 when there is no minimum.
+  return Math.max(0, Math.ceil(rule.minFraction * rule.max - 1e-9));
 }
 
 function clamp(value: number, max: number): number {
