@@ -3,7 +3,7 @@
  * Pure: no database or React imports.
  */
 
-import { week1Vocabulary } from "../data/lessons/week1Vocabulary";
+import { week1Vocabulary, type VocabularyItem } from "../data/lessons/week1Vocabulary";
 import { week1SeinQuiz } from "../data/lessons/week1Sein";
 import { week1PronunciationQuiz } from "../data/lessons/week1Pronunciation";
 import { week1ListeningQuiz } from "../data/lessons/week1Listening";
@@ -22,7 +22,7 @@ export function normaliseEnglish(text: string): string {
     .trim()
     .toLowerCase()
     .replace(/[’‘]/g, "'")
-    .replace(/[.,!?;:"“”]/g, "")
+    .replace(/[.,!?;:"“”()]/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -33,21 +33,27 @@ function stripTerminalPunctuation(text: string): string {
 
 /* ---------- vocabulary variants ---------- */
 
-/** Extra English answers that are clearly correct for a word. */
-const ENGLISH_EXTRAS: Record<string, string[]> = {
-  hallo: ["Hi"],
-  tschuss: ["Bye bye", "See you"],
-  danke: ["Thanks"],
-  bitte: ["You are welcome", "Welcome"],
-};
-
-function englishVariants(id: string, english: string): string[] {
-  const parts = english
+/** The "/"-separated parts of the displayed English meaning. */
+function englishParts(english: string): string[] {
+  return english
     .split("/")
     .map((part) => part.trim())
     .filter(Boolean);
+}
 
-  return [...new Set([english, ...parts, ...(ENGLISH_EXTRAS[id] ?? [])])];
+function englishVariants(item: VocabularyItem): string[] {
+  const base = [
+    item.english,
+    ...englishParts(item.english),
+    ...(item.acceptedEnglish ?? []),
+  ];
+
+  // "to learn" is also fine as "learn".
+  const withoutTo = base
+    .filter((variant) => /^to\s+/i.test(variant))
+    .map((variant) => variant.replace(/^to\s+/i, ""));
+
+  return [...new Set([...base, ...withoutTo])];
 }
 
 /* ---------- building ---------- */
@@ -60,24 +66,32 @@ export function buildReviewExercise(
     const item = week1Vocabulary.find((entry) => entry.id === sourceId);
     if (!item) return null;
 
-    const englishAnswers = englishVariants(item.id, item.english);
-    const mine = new Set(englishAnswers.map(normaliseEnglish));
+    const englishAnswers = englishVariants(item);
+    const myParts = new Set(englishParts(item.english).map(normaliseEnglish));
 
-    // Any word sharing a translation is an acceptable German answer.
+    // Words sharing a displayed meaning (e.g. "Hello") are also valid
+    // German answers; so are explicitly accepted alternatives.
     const germanAnswers = week1Vocabulary
       .filter((other) =>
-        englishVariants(other.id, other.english).some((variant) =>
-          mine.has(normaliseEnglish(variant)),
+        englishParts(other.english).some((part) =>
+          myParts.has(normaliseEnglish(part)),
         ),
       )
-      .map((other) => other.german);
+      .flatMap((other) => [other.german, ...(other.acceptedGerman ?? [])]);
 
     return {
       kind: "vocab",
       german: item.german,
       english: item.english,
       englishAnswers,
-      germanAnswers: [...new Set([item.german, ...germanAnswers])],
+      germanAnswers: [
+        ...new Set([
+          item.german,
+          ...(item.acceptedGerman ?? []),
+          ...germanAnswers,
+        ]),
+      ],
+      audioText: item.audioText,
     };
   }
 
@@ -301,7 +315,7 @@ export function toTypedQuestion(
         label: "Vocabulary · German → English",
         instruction: "Type the English meaning.",
         prompt: exercise.german,
-        audioText: exercise.german,
+        audioText: exercise.audioText ?? exercise.german,
         grade: (input) => {
           const typed = normaliseEnglish(input);
           const correct =
@@ -319,7 +333,7 @@ export function toTypedQuestion(
       label: "Vocabulary · English → German",
       instruction: "Type this in German.",
       prompt: exercise.english,
-      audioText: exercise.german,
+      audioText: exercise.audioText ?? exercise.german,
       grade: (input) =>
         gradeGerman(input, exercise.germanAnswers, exercise.german),
     };

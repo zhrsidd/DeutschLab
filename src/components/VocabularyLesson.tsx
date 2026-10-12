@@ -1,16 +1,24 @@
 import { useMemo, useState } from "react";
 
-import {
-  ArrowRight,
-  Check,
-  RotateCcw,
-  X,
-} from "lucide-react";
+import { ArrowRight, RotateCcw, Volume2 } from "lucide-react";
 
 import {
+  categoryLabels,
+  vocabularyBatches,
   week1Vocabulary,
   type VocabularyItem,
 } from "../data/lessons/week1Vocabulary";
+
+import { useGermanSpeech } from "../hooks/useGermanSpeech";
+
+import { trackAnswer } from "../lib/db";
+
+import {
+  buildBatchCheck,
+  buildFinalQuiz,
+  mistakePrompt,
+  type VocabQuestion,
+} from "../lib/vocabularyExercises";
 
 import {
   ErrorMessage,
@@ -19,23 +27,26 @@ import {
   Stat,
 } from "./lesson/LessonParts";
 
-import { trackAnswer } from "../lib/db";
-
-import { shuffleArray } from "./lesson/shuffle";
+import RecallQuestion from "./vocabulary/RecallQuestion";
 
 type Stage =
   | "intro"
+  | "batchIntro"
   | "learn"
+  | "check"
   | "quiz"
   | "results";
 
 interface VocabularyLessonProps {
   onBack: () => void;
   onFinish: () => Promise<void>;
-  onSaveAttempt: (
-    score: number,
-    total: number,
-  ) => Promise<void>;
+  onSaveAttempt: (score: number, total: number) => Promise<void>;
+}
+
+function itemsForBatch(batchIndex: number): VocabularyItem[] {
+  return vocabularyBatches[batchIndex].itemIds
+    .map((id) => week1Vocabulary.find((item) => item.id === id))
+    .filter((item): item is VocabularyItem => item !== undefined);
 }
 
 export default function VocabularyLesson({
@@ -43,237 +54,164 @@ export default function VocabularyLesson({
   onFinish,
   onSaveAttempt,
 }: VocabularyLessonProps) {
-  const [stage, setStage] =
-    useState<Stage>("intro");
+  const [stage, setStage] = useState<Stage>("intro");
+  const [batchIndex, setBatchIndex] = useState(0);
+  const [learnIndex, setLearnIndex] = useState(0);
+  const [checkIndex, setCheckIndex] = useState(0);
+  const [checkScore, setCheckScore] = useState(0);
+  const [quizAttempt, setQuizAttempt] = useState(1);
+  const [quizIndex, setQuizIndex] = useState(0);
+  const [quizScore, setQuizScore] = useState(0);
+  const [savingAttempt, setSavingAttempt] = useState(false);
+  const [finishing, setFinishing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [learnIndex, setLearnIndex] =
-    useState(0);
+  const speech = useGermanSpeech();
 
-  const [quizIndex, setQuizIndex] =
-    useState(0);
-
-  const [score, setScore] =
-    useState(0);
-
-  const [
-    selectedAnswer,
-    setSelectedAnswer,
-  ] = useState<string | null>(null);
-
-  const [
-    answerWasCorrect,
-    setAnswerWasCorrect,
-  ] = useState<boolean | null>(null);
-
-  const [
-    savingAttempt,
-    setSavingAttempt,
-  ] = useState(false);
-
-  const [
-    finishing,
-    setFinishing,
-  ] = useState(false);
-
-  const [error, setError] =
-    useState<string | null>(null);
-
-  const currentLearnItem =
-    week1Vocabulary[learnIndex];
-
-  const currentQuizItem =
-    week1Vocabulary[quizIndex];
-
-  const passingScore = Math.ceil(
-    week1Vocabulary.length * 0.8,
+  const batch = vocabularyBatches[batchIndex];
+  const batchItems = useMemo(() => itemsForBatch(batchIndex), [batchIndex]);
+  const checkQuestions = useMemo(() => buildBatchCheck(batch), [batch]);
+  const quizQuestions = useMemo(
+    () => buildFinalQuiz(quizAttempt),
+    [quizAttempt],
   );
 
-  const passed =
-    score >= passingScore;
+  const batchCount = vocabularyBatches.length;
+  const quizTotal = quizQuestions.length;
+  const passingScore = Math.ceil(quizTotal * 0.8);
+  const passed = quizScore >= passingScore;
+  const isLastBatch = batchIndex === batchCount - 1;
 
-  const quizOptions = useMemo(() => {
-    if (
-      stage !== "quiz" ||
-      !currentQuizItem
-    ) {
-      return [];
-    }
+  const learnItem = batchItems[learnIndex];
+  const checkQuestion = checkQuestions[checkIndex];
+  const quizQuestion = quizQuestions[quizIndex];
 
-    return createOptions(
-      currentQuizItem,
-    );
-  }, [
-    currentQuizItem,
-    stage,
-  ]);
-
-  const learnProgress =
-    week1Vocabulary.length === 0
-      ? 0
-      : ((learnIndex + 1) /
-          week1Vocabulary.length) *
-        100;
-
-  const quizProgress =
-    week1Vocabulary.length === 0
-      ? 0
-      : ((quizIndex + 1) /
-          week1Vocabulary.length) *
-        100;
-
-  const startLearning = () => {
-    setError(null);
+  const goToBatch = (index: number) => {
+    speech.stop();
+    setBatchIndex(index);
     setLearnIndex(0);
-    setQuizIndex(0);
-    setScore(0);
-    setSelectedAnswer(null);
-    setAnswerWasCorrect(null);
-    setStage("learn");
+    setCheckIndex(0);
+    setCheckScore(0);
+    setStage("batchIntro");
   };
 
-  const nextLearnItem = () => {
-    if (
-      learnIndex <
-      week1Vocabulary.length - 1
-    ) {
-      setLearnIndex(
-        (current) => current + 1,
-      );
-
-      return;
-    }
-
+  const startQuiz = (attempt: number) => {
+    speech.stop();
+    setError(null);
+    setQuizAttempt(attempt);
     setQuizIndex(0);
-    setScore(0);
-    setSelectedAnswer(null);
-    setAnswerWasCorrect(null);
+    setQuizScore(0);
     setStage("quiz");
   };
 
-  const chooseAnswer = (
-    answer: string,
-  ) => {
-    if (
-      selectedAnswer !== null ||
-      !currentQuizItem
-    ) {
-      return;
-    }
+  const nextLearn = () => {
+    speech.stop();
 
-    const correct =
-      answer ===
-      currentQuizItem.english;
-
-    setSelectedAnswer(answer);
-    setAnswerWasCorrect(correct);
-
-    trackAnswer({
-      sourceType: "vocabulary",
-      sourceId: currentQuizItem.id,
-      category: "vocabulary",
-      prompt: `What does "${currentQuizItem.german}" mean?`,
-      expected: currentQuizItem.english,
-      userAnswer: answer,
-      correct,
-      audioText: currentQuizItem.german,
-      enterOnCorrect: true,
-    });
-
-    if (correct) {
-      setScore(
-        (current) => current + 1,
-      );
+    if (learnIndex < batchItems.length - 1) {
+      setLearnIndex((current) => current + 1);
+    } else {
+      setCheckIndex(0);
+      setCheckScore(0);
+      setStage("check");
     }
   };
 
-  const nextQuestion = async () => {
-    if (selectedAnswer === null) {
+  const recordCheck = (question: VocabQuestion, correct: boolean, answer: string) => {
+    if (correct) {
+      setCheckScore((current) => current + 1);
       return;
     }
 
+    // Missed recall is worth tracking; correct checks don't enter review.
+    trackAnswer({
+      sourceType: "vocabulary",
+      sourceId: question.itemId,
+      category: "vocabulary",
+      prompt: mistakePrompt(question),
+      expected: question.answer,
+      userAnswer: answer,
+      correct: false,
+      audioText: question.audioText,
+    });
+  };
+
+  const nextCheck = () => {
+    speech.stop();
+
+    if (checkIndex < checkQuestions.length - 1) {
+      setCheckIndex((current) => current + 1);
+    } else if (isLastBatch) {
+      startQuiz(quizAttempt);
+    } else {
+      goToBatch(batchIndex + 1);
+    }
+  };
+
+  const recordQuiz = (question: VocabQuestion, correct: boolean, answer: string) => {
+    if (correct) setQuizScore((current) => current + 1);
+
+    trackAnswer({
+      sourceType: "vocabulary",
+      sourceId: question.itemId,
+      category: "vocabulary",
+      prompt: mistakePrompt(question),
+      expected: question.answer,
+      userAnswer: answer,
+      correct,
+      audioText: question.audioText,
+      enterOnCorrect: true,
+    });
+  };
+
+  const nextQuiz = async () => {
+    speech.stop();
     setError(null);
 
-    if (
-      quizIndex <
-      week1Vocabulary.length - 1
-    ) {
-      setQuizIndex(
-        (current) => current + 1,
-      );
-
-      setSelectedAnswer(null);
-      setAnswerWasCorrect(null);
-
+    if (quizIndex < quizTotal - 1) {
+      setQuizIndex((current) => current + 1);
       return;
     }
 
     try {
       setSavingAttempt(true);
-
-      await onSaveAttempt(
-        score,
-        week1Vocabulary.length,
-      );
-
+      await onSaveAttempt(quizScore, quizTotal);
       setStage("results");
     } catch (saveError) {
-      console.error(
-        "Failed to save lesson attempt:",
-        saveError,
-      );
-
-      setError(
-        "Your score could not be saved. Please try again.",
-      );
+      console.error("Failed to save lesson attempt:", saveError);
+      setError("Your score could not be saved. Please try again.");
     } finally {
       setSavingAttempt(false);
     }
-  };
-
-  const restartQuiz = () => {
-    setError(null);
-
-    setQuizIndex(0);
-    setScore(0);
-
-    setSelectedAnswer(null);
-    setAnswerWasCorrect(null);
-
-    setStage("quiz");
-  };
-
-  const restartWholeLesson = () => {
-    setError(null);
-
-    setLearnIndex(0);
-    setQuizIndex(0);
-    setScore(0);
-
-    setSelectedAnswer(null);
-    setAnswerWasCorrect(null);
-
-    setStage("learn");
   };
 
   const finishLesson = async () => {
     try {
       setError(null);
       setFinishing(true);
-
       await onFinish();
     } catch (finishError) {
-      console.error(
-        "Failed to finish lesson:",
-        finishError,
-      );
-
+      console.error("Failed to finish lesson:", finishError);
       setError(
         "DeutschLab could not mark the lesson as complete. Please try again.",
       );
-
       setFinishing(false);
     }
   };
+
+  const audioMissing = speech.checked && !speech.available;
+
+  /* Overall progress across batches (each batch: learn → check). */
+  const batchProgress = (() => {
+    let within = 0;
+
+    if (stage === "learn") {
+      within = (learnIndex / batchItems.length) * 0.7;
+    } else if (stage === "check") {
+      within = 0.7 + (checkIndex / checkQuestions.length) * 0.3;
+    }
+
+    return ((batchIndex + within) / batchCount) * 100;
+  })();
 
   /*
    * INTRO
@@ -288,59 +226,82 @@ export default function VocabularyLesson({
           </p>
 
           <h1 className="mt-3 text-4xl font-semibold tracking-tight">
-            First vocabulary
+            Week 1 vocabulary
           </h1>
 
           <p className="mt-4 max-w-xl text-lg leading-8 text-neutral-500">
-            Learn your first German
-            greetings and everyday
-            expressions, then test
-            yourself without looking at
-            the translations.
+            Build your first {week1Vocabulary.length} words and phrases in
+            small batches: greetings, pronouns, verbs, countries, languages,
+            school subjects and numbers. Each batch ends with a short check,
+            and a mixed quiz closes the lesson.
           </p>
 
           <div className="mt-10 grid grid-cols-3 gap-3">
-            <Stat
-              label="Words"
-              value={String(
-                week1Vocabulary.length,
-              )}
-            />
-
-            <Stat
-              label="Learn"
-              value="~5 min"
-            />
-
-            <Stat
-              label="Quiz"
-              value={`${week1Vocabulary.length} Qs`}
-            />
+            <Stat label="Words" value={String(week1Vocabulary.length)} />
+            <Stat label="Batches" value={String(batchCount)} />
+            <Stat label="Final quiz" value={`${quizTotal} Qs`} />
           </div>
 
           <div className="mt-10 rounded-2xl border border-black/5 bg-neutral-50 p-5">
-            <p className="text-sm font-medium">
-              Goal
-            </p>
+            <p className="text-sm font-medium">Goal</p>
 
             <p className="mt-2 text-sm leading-6 text-neutral-500">
-              Score at least{" "}
-              {passingScore}/
-              {week1Vocabulary.length}{" "}
-              to complete this lesson.
-              A lower score is still
-              recorded, but you'll need
-              to retry before the lesson
-              is marked complete.
+              Score at least {passingScore}/{quizTotal} on the final quiz to complete this
+              lesson. Batch checks are practice and don't affect your score.
             </p>
           </div>
 
+          {audioMissing ? <AudioNotice /> : null}
+
           <button
             type="button"
-            onClick={startLearning}
+            onClick={() => goToBatch(0)}
             className="mt-8 flex items-center gap-2 rounded-xl bg-neutral-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-neutral-800"
           >
             Begin lesson
+            <ArrowRight size={17} />
+          </button>
+        </div>
+      </LessonShell>
+    );
+  }
+
+  /*
+   * BATCH INTRO
+   */
+
+  if (stage === "batchIntro") {
+    return (
+      <LessonShell onBack={onBack}>
+        <ProgressBar value={batchProgress} />
+
+        <div className="mx-auto max-w-2xl px-8 py-12">
+          <p className="text-sm font-medium text-neutral-400">
+            Batch {batchIndex + 1} of {batchCount}
+          </p>
+
+          <h2 className="mt-4 text-4xl font-semibold tracking-tight">
+            {batch.title}
+          </h2>
+
+          <p className="mt-4 leading-7 text-neutral-500">{batch.intro}</p>
+
+          <div className="mt-8 grid grid-cols-2 gap-3">
+            <Stat label="Words" value={String(batchItems.length)} />
+            <Stat label="Then" value={`${checkQuestions.length}-question check`} />
+          </div>
+
+          {audioMissing ? <AudioNotice /> : null}
+
+          <button
+            type="button"
+            onClick={() => {
+              setLearnIndex(0);
+              setStage("learn");
+            }}
+            className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 px-5 py-3.5 text-sm font-medium text-white transition hover:bg-neutral-800"
+          >
+            Start batch
             <ArrowRight size={17} />
           </button>
         </div>
@@ -355,78 +316,70 @@ export default function VocabularyLesson({
   if (stage === "learn") {
     return (
       <LessonShell onBack={onBack}>
-        <ProgressBar
-          value={learnProgress}
-        />
+        <ProgressBar value={batchProgress} />
 
         <div className="mx-auto max-w-2xl px-8 py-12">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-neutral-400">
-              Learn · {learnIndex + 1}{" "}
-              of{" "}
-              {
-                week1Vocabulary.length
-              }
-            </p>
-
-            <p className="text-sm text-neutral-400">
-              {Math.round(
-                learnProgress,
-              )}
-              %
-            </p>
-          </div>
+          <BatchHeader
+            batchIndex={batchIndex}
+            batchCount={batchCount}
+            title={batch.title}
+            position={learnIndex + 1}
+            total={batchItems.length}
+          />
 
           <div className="mt-8 rounded-3xl border border-black/5 bg-white p-10">
             <p className="text-sm font-medium uppercase tracking-wider text-neutral-400">
-              German
+              {categoryLabels[learnItem.category]}
             </p>
 
-            <h2 className="mt-4 text-5xl font-semibold tracking-tight">
-              {
-                currentLearnItem.german
-              }
-            </h2>
+            <div className="mt-4 flex items-center justify-between gap-4">
+              <h2 className="text-5xl font-semibold tracking-tight">
+                {learnItem.german}
+              </h2>
 
-            <p className="mt-5 text-xl text-neutral-500">
-              {
-                currentLearnItem.english
-              }
-            </p>
-
-            <div className="my-8 h-px bg-black/5" />
-
-            <p className="text-lg font-medium">
-              {
-                currentLearnItem.exampleGerman
-              }
-            </p>
-
-            <p className="mt-2 leading-6 text-neutral-400">
-              {
-                currentLearnItem.exampleEnglish
-              }
-            </p>
-
-            {currentLearnItem.note ? (
-              <div className="mt-6 rounded-xl bg-neutral-50 px-4 py-3 text-sm leading-6 text-neutral-500">
-                {
-                  currentLearnItem.note
+              <button
+                type="button"
+                disabled={!speech.available}
+                onClick={() =>
+                  speech.speak(learnItem.audioText ?? learnItem.german)
                 }
+                aria-label={`Play ${learnItem.german}`}
+                className="flex shrink-0 items-center gap-2 rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition enabled:hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <Volume2 size={16} />
+                Play
+              </button>
+            </div>
+
+            <p className="mt-5 text-xl text-neutral-500">{learnItem.english}</p>
+
+            {learnItem.exampleGerman ? (
+              <>
+                <div className="my-8 h-px bg-black/5" />
+
+                <p className="text-lg font-medium">{learnItem.exampleGerman}</p>
+
+                {learnItem.exampleEnglish ? (
+                  <p className="mt-2 leading-6 text-neutral-400">
+                    {learnItem.exampleEnglish}
+                  </p>
+                ) : null}
+              </>
+            ) : null}
+
+            {learnItem.note ? (
+              <div className="mt-6 rounded-xl bg-neutral-50 px-4 py-3 text-sm leading-6 text-neutral-500">
+                {learnItem.note}
               </div>
             ) : null}
           </div>
 
           <button
             type="button"
-            onClick={nextLearnItem}
+            onClick={nextLearn}
             className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 px-5 py-3.5 text-sm font-medium text-white transition hover:bg-neutral-800"
           >
-            {learnIndex ===
-            week1Vocabulary.length - 1
-              ? "Start quiz"
-              : "Next word"}
-
+            {learnIndex === batchItems.length - 1 ? "Quick check" : "Next word"}
             <ArrowRight size={17} />
           </button>
         </div>
@@ -435,173 +388,88 @@ export default function VocabularyLesson({
   }
 
   /*
-   * QUIZ
+   * BATCH CHECK
+   */
+
+  if (stage === "check") {
+    const lastCheck = checkIndex === checkQuestions.length - 1;
+
+    return (
+      <LessonShell onBack={onBack}>
+        <ProgressBar value={batchProgress} />
+
+        <div className="mx-auto max-w-2xl px-8 py-12">
+          <BatchHeader
+            batchIndex={batchIndex}
+            batchCount={batchCount}
+            title={`${batch.title} · check`}
+            position={checkIndex + 1}
+            total={checkQuestions.length}
+            trailing={`${checkScore} correct`}
+          />
+
+          <div className="mt-8">
+            <RecallQuestion
+              key={checkQuestion.id}
+              question={checkQuestion}
+              speech={speech}
+              continueLabel={
+                lastCheck
+                  ? isLastBatch
+                    ? "Start final quiz"
+                    : "Next batch"
+                  : "Next question"
+              }
+              onAnswered={(correct, answer) =>
+                recordCheck(checkQuestion, correct, answer)
+              }
+              onNext={nextCheck}
+            />
+          </div>
+        </div>
+      </LessonShell>
+    );
+  }
+
+  /*
+   * FINAL QUIZ
    */
 
   if (stage === "quiz") {
     return (
       <LessonShell onBack={onBack}>
-        <ProgressBar
-          value={quizProgress}
-        />
+        <ProgressBar value={((quizIndex + 1) / quizTotal) * 100} />
 
         <div className="mx-auto max-w-2xl px-8 py-12">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-neutral-400">
-              Quiz · {quizIndex + 1}{" "}
-              of{" "}
-              {
-                week1Vocabulary.length
+              Final quiz · {quizIndex + 1} of {quizTotal}
+            </p>
+
+            <p className="text-sm text-neutral-400">Score {quizScore}</p>
+          </div>
+
+          <div className="mt-8">
+            <RecallQuestion
+              key={quizQuestion.id}
+              question={quizQuestion}
+              speech={speech}
+              disabled={savingAttempt}
+              continueLabel={
+                savingAttempt
+                  ? "Saving…"
+                  : quizIndex === quizTotal - 1
+                    ? "See results"
+                    : "Next question"
               }
-            </p>
-
-            <p className="text-sm text-neutral-400">
-              Score {score}
-            </p>
+              onAnswered={(correct, answer) =>
+                recordQuiz(quizQuestion, correct, answer)
+              }
+              onNext={() => void nextQuiz()}
+            />
           </div>
 
-          <h2 className="mt-10 text-center text-5xl font-semibold tracking-tight">
-            {
-              currentQuizItem.german
-            }
-          </h2>
-
-          <p className="mt-4 text-center text-neutral-400">
-            What does this mean?
-          </p>
-
-          <div className="mt-10 grid gap-3">
-            {quizOptions.map(
-              (option) => {
-                const isSelected =
-                  selectedAnswer ===
-                  option;
-
-                const isCorrect =
-                  option ===
-                  currentQuizItem.english;
-
-                let appearance =
-                  "border-black/5 bg-white hover:bg-neutral-50";
-
-                if (
-                  selectedAnswer !==
-                  null
-                ) {
-                  if (isCorrect) {
-                    appearance =
-                      "border-emerald-200 bg-emerald-50 text-emerald-900";
-                  } else if (
-                    isSelected
-                  ) {
-                    appearance =
-                      "border-red-200 bg-red-50 text-red-900";
-                  } else {
-                    appearance =
-                      "border-black/5 bg-white text-neutral-400";
-                  }
-                }
-
-                return (
-                  <button
-                    key={option}
-                    type="button"
-                    disabled={
-                      selectedAnswer !==
-                      null
-                    }
-                    onClick={() =>
-                      chooseAnswer(
-                        option,
-                      )
-                    }
-                    className={`flex min-h-14 items-center justify-between rounded-xl border px-5 py-4 text-left transition ${appearance}`}
-                  >
-                    <span className="font-medium">
-                      {option}
-                    </span>
-
-                    {selectedAnswer !==
-                      null &&
-                    isCorrect ? (
-                      <Check
-                        size={18}
-                      />
-                    ) : null}
-
-                    {selectedAnswer !==
-                      null &&
-                    isSelected &&
-                    !isCorrect ? (
-                      <X size={18} />
-                    ) : null}
-                  </button>
-                );
-              },
-            )}
-          </div>
-
-          {selectedAnswer !== null ? (
-            <div
-              className={[
-                "mt-6 rounded-xl px-5 py-4",
-                answerWasCorrect
-                  ? "bg-emerald-50 text-emerald-900"
-                  : "bg-red-50 text-red-900",
-              ].join(" ")}
-            >
-              <p className="font-medium">
-                {answerWasCorrect
-                  ? "Correct."
-                  : "Not quite."}
-              </p>
-
-              {!answerWasCorrect ? (
-                <p className="mt-1 text-sm leading-6 opacity-80">
-                  {
-                    currentQuizItem.german
-                  }{" "}
-                  means{" "}
-                  <strong>
-                    {
-                      currentQuizItem.english
-                    }
-                  </strong>
-                  .
-                </p>
-              ) : null}
-            </div>
-          ) : null}
-
-          {error ? (
-            <ErrorMessage>
-              {error}
-            </ErrorMessage>
-          ) : null}
-
-          <button
-            type="button"
-            disabled={
-              selectedAnswer === null ||
-              savingAttempt
-            }
-            onClick={() =>
-              void nextQuestion()
-            }
-            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 px-5 py-3.5 text-sm font-medium text-white transition enabled:hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-30"
-          >
-            {savingAttempt
-              ? "Saving…"
-              : quizIndex ===
-                  week1Vocabulary.length -
-                    1
-                ? "See results"
-                : "Next question"}
-
-            {!savingAttempt ? (
-              <ArrowRight size={17} />
-            ) : null}
-          </button>
+          {error ? <ErrorMessage>{error}</ErrorMessage> : null}
         </div>
       </LessonShell>
     );
@@ -619,111 +487,112 @@ export default function VocabularyLesson({
         </p>
 
         <div className="mt-8 text-7xl font-semibold tracking-tighter">
-          {score}/
-          {week1Vocabulary.length}
+          {quizScore}/{quizTotal}
         </div>
 
         <div className="mx-auto mt-5 h-2 max-w-xs overflow-hidden rounded-full bg-neutral-100">
           <div
             className="h-full rounded-full bg-neutral-900 transition-all duration-300"
-            style={{
-              width: `${
-                (score /
-                  week1Vocabulary.length) *
-                100
-              }%`,
-            }}
+            style={{ width: `${(quizScore / quizTotal) * 100}%` }}
           />
         </div>
 
         <h1 className="mt-7 text-3xl font-semibold tracking-tight">
-          {passed
-            ? "Nice work."
-            : "One more pass."}
+          {passed ? "Nice work." : "One more pass."}
         </h1>
 
         <p className="mx-auto mt-3 max-w-md leading-7 text-neutral-500">
           {passed
-            ? "You've reached the target for this lesson. Later, these words will automatically enter your spaced-repetition review system."
-            : `You need at least ${passingScore}/${week1Vocabulary.length} before this lesson is marked complete. Review the vocabulary and try the quiz again.`}
+            ? "You've reached the target for this lesson. Words you missed will come back in Review."
+            : `You need at least ${passingScore}/${quizTotal} before this lesson is marked complete. Review the batches and try the quiz again; it draws a fresh mix of words.`}
         </p>
 
-        {error ? (
-          <ErrorMessage>
-            {error}
-          </ErrorMessage>
-        ) : null}
+        {error ? <ErrorMessage>{error}</ErrorMessage> : null}
 
         {passed ? (
           <div className="mt-8 flex items-center justify-center gap-3">
             <button
               type="button"
-              onClick={
-                restartWholeLesson
-              }
+              onClick={() => goToBatch(0)}
               disabled={finishing}
               className="flex items-center gap-2 rounded-xl border border-black/10 bg-white px-5 py-3.5 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50 disabled:opacity-40"
             >
-              <RotateCcw
-                size={17}
-              />
-
+              <RotateCcw size={17} />
               Review again
             </button>
 
             <button
               type="button"
-              onClick={() =>
-                void finishLesson()
-              }
+              onClick={() => void finishLesson()}
               disabled={finishing}
               className="rounded-xl bg-neutral-900 px-6 py-3.5 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:opacity-40"
             >
-              {finishing
-                ? "Finishing…"
-                : "Finish lesson"}
+              {finishing ? "Finishing…" : "Finish lesson"}
             </button>
           </div>
         ) : (
-          <button
-            type="button"
-            onClick={restartQuiz}
-            className="mx-auto mt-8 flex items-center gap-2 rounded-xl bg-neutral-900 px-6 py-3.5 text-sm font-medium text-white transition hover:bg-neutral-800"
-          >
-            <RotateCcw size={17} />
+          <div className="mt-8 flex items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => goToBatch(0)}
+              className="rounded-xl border border-black/10 bg-white px-5 py-3.5 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+            >
+              Review batches
+            </button>
 
-            Retry quiz
-          </button>
+            <button
+              type="button"
+              onClick={() => startQuiz(quizAttempt + 1)}
+              className="flex items-center gap-2 rounded-xl bg-neutral-900 px-6 py-3.5 text-sm font-medium text-white transition hover:bg-neutral-800"
+            >
+              <RotateCcw size={17} />
+              Retry quiz
+            </button>
+          </div>
         )}
       </div>
     </LessonShell>
   );
 }
 
-function createOptions(
-  correctItem: VocabularyItem,
-): string[] {
-  const uniqueDistractors = [
-    ...new Set(
-      week1Vocabulary
-        .map(
-          (item) => item.english,
-        )
-        .filter(
-          (answer) =>
-            answer !==
-            correctItem.english,
-        ),
-    ),
-  ];
+function BatchHeader({
+  batchIndex,
+  batchCount,
+  title,
+  position,
+  total,
+  trailing,
+}: {
+  batchIndex: number;
+  batchCount: number;
+  title: string;
+  position: number;
+  total: number;
+  trailing?: string;
+}) {
+  return (
+    <div className="flex items-end justify-between gap-4">
+      <div>
+        <p className="text-sm font-medium text-neutral-400">
+          Batch {batchIndex + 1} of {batchCount}
+        </p>
+        <p className="mt-1 font-medium">{title}</p>
+      </div>
 
-  const shuffledDistractors =
-    shuffleArray(
-      uniqueDistractors,
-    ).slice(0, 3);
+      <p className="text-sm text-neutral-400">
+        {position} / {total}
+        {trailing ? ` · ${trailing}` : ""}
+      </p>
+    </div>
+  );
+}
 
-  return shuffleArray([
-    correctItem.english,
-    ...shuffledDistractors,
-  ]);
+function AudioNotice() {
+  return (
+    <p className="mt-6 rounded-xl bg-neutral-50 px-4 py-3 text-sm leading-6 text-neutral-500">
+      No German voice is available on this system, so audio is turned off. You
+      can add one in System Settings → Accessibility → Spoken Content → System
+      Voice → Manage Voices.
+    </p>
+  );
 }

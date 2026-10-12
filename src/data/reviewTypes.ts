@@ -48,6 +48,8 @@ export type ReviewExercise =
       englishAnswers: string[];
       /** Accepted German answers for English → German. */
       germanAnswers: string[];
+      /** What the speech engine should say, if not `german`. */
+      audioText?: string;
     }
   | {
       kind: "typed";
