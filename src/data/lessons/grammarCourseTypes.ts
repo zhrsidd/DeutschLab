@@ -18,9 +18,13 @@ export interface TeachingPage {
   blocks: TeachingBlock[];
 }
 
+/** Distinct learning target a question trains (shown on Review cards). */
+export type CourseConcept = "accusative" | "negation";
+
 interface QuestionBase {
   id: string;
   explanation: string;
+  concept?: CourseConcept;
 }
 
 export interface CourseChoiceQuestion extends QuestionBase {

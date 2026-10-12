@@ -137,4 +137,59 @@ test.describe("Week 3 (browser, mocked Tauri SQL)", () => {
       page.getByRole("heading", { name: "School, home and everyday objects" }),
     ).toBeVisible();
   });
+
+  test("grammar-007 follows grammar-006 and teaches the masculine change", async ({ page, db }) => {
+    seedCompleted(db, [...WEEK_2_MASTERED, "vocab-003", "grammar-006"]);
+    await page.goto("/");
+
+    const plan = planSection(page);
+    await expect(plan.getByRole("button", { name: /Nouns, articles and plurals/ })).toHaveCount(0);
+    await plan.getByRole("button", { name: /The accusative case/ }).click();
+
+    await expect(page.getByRole("heading", { name: "The accusative case" })).toBeVisible();
+    await page.getByRole("button", { name: "Begin lesson" }).click();
+    await expect(page.getByRole("heading", { name: "Subject and direct object" })).toBeVisible();
+    await page.getByRole("button", { name: "Continue" }).click();
+    await expect(page.getByText("Only masculine changes")).toBeVisible();
+    await page.getByRole("button", { name: "Continue" }).click();
+    await page.getByRole("button", { name: "Continue" }).click();
+    await page.getByRole("button", { name: "Start practice" }).click();
+
+    // A wrong answer shows its explanation and the lesson carries on.
+    await page.getByRole("button", { name: "Der Junge" }).click();
+    await expect(page.getByText(/The boy \(der Junge\) is the subject/)).toBeVisible();
+    await page.getByRole("button", { name: "Next question" }).click();
+    await expect(page.getByText(/Ich esse den Apfel/)).toBeVisible();
+  });
+
+  test("grammar-008 follows grammar-007 and accepts a typed answer with Enter", async ({ page, db }) => {
+    seedCompleted(db, [...WEEK_2_MASTERED, "vocab-003", "grammar-006", "grammar-007"]);
+    await page.goto("/");
+
+    await planSection(page).getByRole("button", { name: /Negation/ }).click();
+    await expect(page.getByRole("heading", { name: "Negation — nicht and kein" })).toBeVisible();
+
+    await page.getByRole("button", { name: "Begin lesson" }).click();
+    for (let i = 0; i < 3; i += 1) await page.getByRole("button", { name: "Continue" }).click();
+    await page.getByRole("button", { name: "Start practice" }).click();
+
+    // Seven choice questions come first; answer them to reach the typed ones.
+    for (const answer of ["keine", "kein", "keinen", "nicht", "nicht", "keine", "keine"]) {
+      await page.getByRole("button", { name: answer, exact: true }).click();
+      await page.getByRole("button", { name: "Next question" }).click();
+    }
+
+    await page.getByLabel("Your answer").fill("Das ist kein Buch.");
+    await page.getByLabel("Your answer").press("Enter");
+    await expect(page.getByText("Correct.")).toBeVisible();
+  });
+
+  test("Today has nothing more to plan once grammar-008 is done", async ({ page, db }) => {
+    seedCompleted(db, [
+      ...WEEK_2_MASTERED, "vocab-003", "grammar-006", "grammar-007", "grammar-008",
+    ]);
+    await page.goto("/");
+
+    await expect(planSection(page).getByText("You're done for today.")).toBeVisible();
+  });
 });

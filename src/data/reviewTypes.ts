@@ -1,3 +1,9 @@
+export type ReviewConcept =
+  | "noun_article"
+  | "noun_plural"
+  | "accusative"
+  | "negation";
+
 export type ReviewSourceType =
   | "vocabulary"
   | "pronunciation"
@@ -61,8 +67,8 @@ export type ReviewExercise =
       explanation: string;
       /** Card label; defaults to "Grammar". */
       label?: string;
-      /** Noun learning target for article-aware vocabulary (Week 3+). */
-      concept?: "noun_article" | "noun_plural";
+      /** Distinct learning target (Week 3+), kept apart in Review. */
+      concept?: ReviewConcept;
     }
   | {
       kind: "choice";
@@ -72,6 +78,7 @@ export type ReviewExercise =
       options: string[];
       answer: string;
       explanation: string;
+      concept?: ReviewConcept;
       audioText: string;
       /** Revealed only after answering. */
       transcript?: string;

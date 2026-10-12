@@ -89,6 +89,8 @@ const WEAK_AREA_TITLE_BY_LESSON: Record<string, string> = {
   "vocab-002": "Revisit Week 2 vocabulary",
   "vocab-003": "Revisit Week 3 nouns and articles",
   "grammar-006": "Review articles and plurals",
+  "grammar-007": "Review the accusative case",
+  "grammar-008": "Review nicht and kein",
 };
 
 function sourceTypeOf(itemKey: string): string {

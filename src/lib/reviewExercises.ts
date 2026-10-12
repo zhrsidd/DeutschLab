@@ -11,7 +11,9 @@ import {
 import { week2CommonVerbsQuiz } from "../data/lessons/week2CommonVerbs";
 import { week2GrammarSlots } from "../data/lessons/week2Checkpoint";
 import { week2HabenQuiz } from "../data/lessons/week2Haben";
+import { week3AccusativeQuiz } from "../data/lessons/week3Accusative";
 import { week3ArticlesQuiz } from "../data/lessons/week3Articles";
+import { week3NegationQuiz } from "../data/lessons/week3Negation";
 import { week1SeinQuiz } from "../data/lessons/week1Sein";
 import { week1PronunciationQuiz } from "../data/lessons/week1Pronunciation";
 import { week1ListeningQuiz } from "../data/lessons/week1Listening";
@@ -99,6 +101,8 @@ export function lessonIdFor(
   if (sourceId.startsWith("rv-")) return "grammar-002";
   if (sourceId.startsWith("qn-")) return "grammar-003";
   if (sourceId.startsWith("art-")) return "grammar-006";
+  if (sourceId.startsWith("acc-")) return "grammar-007";
+  if (sourceId.startsWith("neg-")) return "grammar-008";
   if (sourceId.startsWith("hb-")) return "grammar-004";
   if (sourceId.startsWith("cv-")) return "grammar-005";
   // Week 2 checkpoint questions trace back to the skill they test.
@@ -117,12 +121,23 @@ const courseQuestions: CourseQuestion[] = [
   ...week2CommonVerbsQuiz,
   ...week2GrammarSlots.flat(),
   ...week3ArticlesQuiz,
+  ...week3AccusativeQuiz,
+  ...week3NegationQuiz,
 ];
+
+const CONCEPT_LABEL = {
+  accusative: "Grammar · Accusative",
+  negation: "Grammar · Negation",
+} as const;
 
 /** Turns a data-driven grammar question into a structured review exercise. */
 export function exerciseFromCourseQuestion(
   question: CourseQuestion,
 ): ReviewExercise {
+  const tag = question.concept
+    ? { concept: question.concept, label: CONCEPT_LABEL[question.concept] }
+    : {};
+
   if (question.kind === "choice") {
     return {
       kind: "choice",
@@ -130,6 +145,7 @@ export function exerciseFromCourseQuestion(
       options: question.options,
       answer: question.answer,
       explanation: question.explanation,
+      ...(question.concept ? { concept: question.concept } : {}),
       audioText: "",
       audioRequired: false,
     };
@@ -138,6 +154,7 @@ export function exerciseFromCourseQuestion(
   if (question.kind === "fill") {
     return {
       kind: "typed",
+      ...tag,
       instruction: "Type the missing word.",
       prompt: question.hint
         ? `${question.sentence} ${question.hint}`
@@ -151,6 +168,7 @@ export function exerciseFromCourseQuestion(
   if (question.kind === "reorder") {
     return {
       kind: "typed",
+      ...tag,
       instruction: "Put the words in the correct order.",
       prompt: question.words.join(" / "),
       accepted: question.accepted,
@@ -161,6 +179,7 @@ export function exerciseFromCourseQuestion(
 
   return {
     kind: "typed",
+    ...tag,
     instruction: question.instruction,
     prompt: question.prompt,
     accepted: question.accepted,

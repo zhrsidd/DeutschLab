@@ -338,14 +338,14 @@ Learner should begin producing sentences such as:
 |---|---|---|
 | `vocab-003` | School, home and everyday objects | Implemented |
 | `grammar-006` | Nouns, articles and plurals | Implemented |
-| `grammar-007` | Accusative introduction | Planned |
-| `grammar-008` | nicht vs kein | Planned |
+| `grammar-007` | The accusative case | Implemented |
+| `grammar-008` | Negation — nicht and kein | Implemented |
 | `reading-002` | Week 3 reading | Planned |
 | `listening-003` | Week 3 listening | Planned |
 | `writing-002` | Week 3 writing | Planned |
 | `checkpoint-003` | Week 3 checkpoint | Planned |
 
-Week 3 order in the app so far: `vocab-003` → `grammar-006`. New Week 3 content is offered on Today once Week 2 is mastered (`checkpoint-002` passed); there is no Week 3 mastery rule yet.
+Week 3 order in the app so far: `vocab-003` → `grammar-006` → `grammar-007` → `grammar-008`. New Week 3 content is offered on Today once Week 2 is mastered (`checkpoint-002` passed); there is no Week 3 mastery rule yet.
 
 Implementation notes:
 
@@ -353,6 +353,9 @@ Implementation notes:
 - `vocab-003` has 65 new nouns in 7 batches (school objects, computers and everyday things, rooms, furniture, food and the table, drinks and mass nouns, people). Its 20-question final quiz rotates meaning, noun + article, article, plural and typed noun + article (pass 16/20). The lesson remembers the batch position so it can be resumed.
 - Review keeps meaning/noun recall (`<id>`), article (`<id>#article`) and plural (`<id>#plural`) as separate concepts using the existing scheduler.
 - `grammar-006` teaches gender, der/die/das, ein/eine, the nominative as "the subject" and plurals. It has 16 questions (pass 13/16) and does **not** teach der → den or ein → einen; those belong to `grammar-007`.
+- `grammar-007` teaches subject vs direct object and only the masculine change (der → den, ein → einen; feminine, neuter and plural unchanged). 15 questions, pass 12/15. Accusative pronouns, dative and prepositions stay out of scope.
+- `grammar-008` teaches `kein` (nominative and accusative: kein/keine/kein/keine and keinen) versus `nicht` for verbs and adjectives. 14 questions, pass 12/14.
+- Review keeps the accusative (`acc-…`) and negation (`neg-…`) grammar questions as concepts separate from the vocabulary `#article` target, so knowing that Tisch is masculine is tracked apart from saying *den* Tisch.
 
 ---
 

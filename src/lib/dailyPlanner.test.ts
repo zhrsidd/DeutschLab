@@ -470,10 +470,17 @@ describe("Week 3 progression", () => {
     expect(next([...week2Done, "vocab-003"])[0]).toBe("grammar-006");
   });
 
-  it("has nothing left to plan after grammar-006 (no Week 3 checkpoint yet)", () => {
+  it("offers grammar-007 then grammar-008 in order", () => {
+    expect(next([...week2Done, "vocab-003", "grammar-006"], 15)[0]).toBe("grammar-007");
+    expect(next([...week2Done, "vocab-003", "grammar-006", "grammar-007"], 15)[0]).toBe(
+      "grammar-008",
+    );
+  });
+
+  it("has nothing left to plan after grammar-008 (no Week 3 checkpoint yet)", () => {
     const plan = generateDailyPlan({
       ...base,
-      completedTaskIds: [...week2Done, "vocab-003", "grammar-006"],
+      completedTaskIds: [...week2Done, "vocab-003", "grammar-006", "grammar-007", "grammar-008"],
     });
 
     expect(plan.done).toBe(true);
@@ -496,7 +503,7 @@ describe("Week 3 progression", () => {
     const plan = generateDailyPlan({
       ...base,
       budgetMinutes: 60,
-      completedTaskIds: [...week2Done, "vocab-003", "grammar-006"],
+      completedTaskIds: [...week2Done, "vocab-003", "grammar-006", "grammar-007", "grammar-008"],
       dueReviewCount: 4,
       dueReviewKeys: ["vocabulary:tisch#plural"],
       unresolvedMistakes: [

@@ -138,3 +138,103 @@ describe("article-aware Review records", () => {
     expect(rows<{ lesson_id: string }>(`SELECT lesson_id FROM mistakes`)[0].lesson_id).toBe("vocab-002");
   });
 });
+
+describe("case-aware Review records", () => {
+  const accusative = {
+    sourceType: "grammar" as const,
+    sourceId: "acc-c-den-tisch",
+    category: "grammar · choice",
+    prompt: "Ich habe ___ Tisch.",
+    expected: "den",
+    userAnswer: "der",
+    correct: false,
+  };
+
+  it("a wrong accusative creates its own mistake, apart from #article", async () => {
+    await db.recordAnswer(article);
+    await db.recordAnswer(accusative);
+
+    const mistakes = rows<{ item_key: string; lesson_id: string }>(
+      `SELECT item_key, lesson_id FROM mistakes ORDER BY item_key`,
+    );
+    expect(mistakes).toEqual([
+      { item_key: "grammar:acc-c-den-tisch", lesson_id: "grammar-007" },
+      { item_key: "vocabulary:tisch#article", lesson_id: "vocab-003" },
+    ]);
+
+    const reviews = rows<{ source_type: string; source_id: string }>(
+      `SELECT source_type, source_id FROM review_items ORDER BY source_id`,
+    );
+    expect(reviews).toHaveLength(2);
+
+    const stored = rows<{ exercise_json: string }>(
+      `SELECT exercise_json FROM review_items WHERE source_id = 'acc-c-den-tisch'`,
+    )[0];
+    expect(JSON.parse(stored.exercise_json)).toMatchObject({
+      kind: "choice",
+      concept: "accusative",
+      answer: "den",
+    });
+  });
+
+  it("missing the accusative does not touch the article review item", async () => {
+    await db.recordAnswer(article);
+    const before = rows(`SELECT * FROM review_items WHERE source_id = 'tisch#article'`);
+
+    await db.recordAnswer(accusative);
+    await db.recordAnswer({ ...accusative, userAnswer: "das" });
+
+    expect(rows(`SELECT * FROM review_items WHERE source_id = 'tisch#article'`)).toEqual(before);
+    expect(
+      rows<{ times_missed: number }>(
+        `SELECT times_missed FROM mistakes WHERE item_key = 'grammar:acc-c-den-tisch'`,
+      ),
+    ).toEqual([{ times_missed: 2 }]);
+  });
+
+  it("a wrong kein form creates a negation review item", async () => {
+    await db.recordAnswer({
+      sourceType: "grammar",
+      sourceId: "neg-c-stift",
+      category: "grammar · choice",
+      prompt: "Ich habe ___ Stift.",
+      expected: "keinen",
+      userAnswer: "kein",
+      correct: false,
+    });
+
+    const [item] = rows<{ exercise_json: string; repetitions: number; interval_days: number }>(
+      `SELECT exercise_json, repetitions, interval_days FROM review_items`,
+    );
+    expect(JSON.parse(item.exercise_json)).toMatchObject({ concept: "negation", answer: "keinen" });
+    expect(item.repetitions).toBe(0);
+    expect(item.interval_days).toBe(1);
+    expect(rows<{ lesson_id: string }>(`SELECT lesson_id FROM mistakes`)).toEqual([
+      { lesson_id: "grammar-008" },
+    ]);
+  });
+
+  it("keeps the scheduling of older grammar items unchanged", async () => {
+    await db.recordAnswer({
+      sourceType: "grammar",
+      sourceId: "hb-c-er",
+      category: "grammar · choice",
+      prompt: "Er ___ Physik. (haben)",
+      expected: "hat",
+      userAnswer: "habe",
+      correct: false,
+    });
+    await db.recordAnswer(accusative);
+
+    const items = rows<{ source_id: string; interval_days: number; repetitions: number }>(
+      `SELECT source_id, interval_days, repetitions FROM review_items ORDER BY source_id`,
+    );
+    expect(items).toEqual([
+      { source_id: "acc-c-den-tisch", interval_days: 1, repetitions: 0 },
+      { source_id: "hb-c-er", interval_days: 1, repetitions: 0 },
+    ]);
+    expect(rows<{ lesson_id: string }>(`SELECT lesson_id FROM mistakes WHERE item_key = 'grammar:hb-c-er'`)).toEqual([
+      { lesson_id: "grammar-004" },
+    ]);
+  });
+});

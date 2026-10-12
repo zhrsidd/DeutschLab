@@ -340,4 +340,22 @@ export const starterTasks: LessonTask[] = [
     minutes: 15,
     week: 3,
   },
+  {
+    id: "grammar-007",
+    title: "The accusative case",
+    description:
+      "Learn how German articles change when a noun is the direct object of a sentence.",
+    type: "grammar",
+    minutes: 15,
+    week: 3,
+  },
+  {
+    id: "grammar-008",
+    title: "Negation — nicht and kein",
+    description:
+      "Learn how to make negative German sentences using nicht and kein.",
+    type: "grammar",
+    minutes: 13,
+    week: 3,
+  },
 ];

@@ -38,8 +38,10 @@ import WritingLesson from "./components/WritingLesson";
 import Week2ListeningLesson from "./components/Week2ListeningLesson";
 import Week2ReadingLesson from "./components/Week2ReadingLesson";
 import { week2CheckpointDefinition } from "./lib/checkpointDefinitions";
+import AccusativeLesson from "./components/AccusativeLesson";
 import ArticlesLesson from "./components/ArticlesLesson";
 import HabenLesson from "./components/HabenLesson";
+import NegationLesson from "./components/NegationLesson";
 import QuestionsLesson from "./components/QuestionsLesson";
 import RegularVerbsLesson from "./components/RegularVerbsLesson";
 import PronunciationLesson from "./components/PronunciationLesson";
@@ -332,6 +334,30 @@ function App() {
           saveLessonAttempt("grammar-006", score, total)
         }
         onFinish={() => finishLesson("grammar-006")}
+      />
+    );
+  }
+
+  if (activeLessonId === "grammar-007") {
+    return (
+      <AccusativeLesson
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("grammar-007", score, total)
+        }
+        onFinish={() => finishLesson("grammar-007")}
+      />
+    );
+  }
+
+  if (activeLessonId === "grammar-008") {
+    return (
+      <NegationLesson
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("grammar-008", score, total)
+        }
+        onFinish={() => finishLesson("grammar-008")}
       />
     );
   }
