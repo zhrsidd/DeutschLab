@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -15,6 +16,7 @@ import {
   GraduationCap,
   Headphones,
   Languages,
+  RotateCcw,
   Mic,
   NotebookPen,
   Target,
@@ -23,6 +25,7 @@ import {
 
 import GrammarLesson from "./components/GrammarLesson";
 import ListeningLesson from "./components/ListeningLesson";
+import ReviewView from "./components/ReviewView";
 import SpeakingLesson from "./components/SpeakingLesson";
 import PronunciationLesson from "./components/PronunciationLesson";
 import VocabularyLesson from "./components/VocabularyLesson";
@@ -36,13 +39,14 @@ import {
 
 import {
   getCompletedTaskIds,
+  getReviewStats,
   initialiseDatabase,
   markTaskComplete,
   markTaskIncomplete,
   saveLessonAttempt,
 } from "./lib/db";
 
-type View = "today" | "curriculum";
+type View = "today" | "curriculum" | "review";
 
 const iconForType: Record<LessonType, ElementType> = {
   vocabulary: Languages,
@@ -65,6 +69,7 @@ function App() {
   );
 
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
+  const [reviewsDue, setReviewsDue] = useState(0);
 
   useEffect(() => {
     async function loadProgress() {
@@ -85,6 +90,22 @@ function App() {
 
     void loadProgress();
   }, []);
+
+  const refreshReviews = useCallback(async () => {
+    try {
+      const stats = await getReviewStats();
+      setReviewsDue(stats.dueToday);
+    } catch (error) {
+      console.error("Failed to load review stats:", error);
+    }
+  }, []);
+
+  // Refresh the due count on load and whenever we return from a lesson.
+  useEffect(() => {
+    if (databaseReady && activeLessonId === null) {
+      void refreshReviews();
+    }
+  }, [databaseReady, activeLessonId, refreshReviews]);
 
   const totalMinutes = useMemo(
     () =>
@@ -304,6 +325,19 @@ function App() {
               <BookOpen size={18} />
               Unit 1
             </SidebarButton>
+
+            <SidebarButton
+              active={view === "review"}
+              onClick={() => setView("review")}
+            >
+              <RotateCcw size={18} />
+              Review
+              {reviewsDue > 0 ? (
+                <span className="ml-auto rounded-full bg-neutral-900 px-2 py-0.5 text-xs font-medium text-white">
+                  {reviewsDue}
+                </span>
+              ) : null}
+            </SidebarButton>
           </nav>
 
           <div className="mt-10 border-t border-black/5 pt-6">
@@ -359,7 +393,11 @@ function App() {
               startLesson={(taskId) =>
                 setActiveLessonId(taskId)
               }
+              reviewsDue={reviewsDue}
+              openReview={() => setView("review")}
             />
+          ) : view === "review" ? (
+            <ReviewView onChange={() => void refreshReviews()} />
           ) : (
             <CurriculumView />
           )}
@@ -392,6 +430,9 @@ interface TodayViewProps {
   startLesson: (
     taskId: string,
   ) => void;
+
+  reviewsDue: number;
+  openReview: () => void;
 }
 
 function TodayView({
@@ -404,6 +445,8 @@ function TodayView({
   toggleTask,
   nextIncompleteTask,
   startLesson,
+  reviewsDue,
+  openReview,
 }: TodayViewProps) {
   const remainingMinutes = Math.max(
     0,
@@ -431,11 +474,22 @@ function TodayView({
             </p>
           </div>
 
-          <div className="flex items-center gap-2 rounded-xl border border-black/5 bg-white px-4 py-3 text-sm text-neutral-500">
-            <Clock3 size={16} />
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={openReview}
+              className="flex items-center gap-2 rounded-xl border border-black/5 bg-white px-4 py-3 text-sm text-neutral-500 transition hover:bg-neutral-50"
+            >
+              <RotateCcw size={16} />
+              Reviews due: {reviewsDue}
+            </button>
 
-            {remainingMinutes} min
-            remaining
+            <div className="flex items-center gap-2 rounded-xl border border-black/5 bg-white px-4 py-3 text-sm text-neutral-500">
+              <Clock3 size={16} />
+
+              {remainingMinutes} min
+              remaining
+            </div>
           </div>
         </header>
 

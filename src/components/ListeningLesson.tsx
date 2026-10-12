@@ -17,6 +17,8 @@ import {
 
 import { useGermanSpeech } from "../hooks/useGermanSpeech";
 
+import { trackAnswer } from "../lib/db";
+
 import {
   ErrorMessage,
   LessonShell,
@@ -84,8 +86,21 @@ export default function ListeningLesson({
   const choose = (option: string) => {
     if (answered) return;
 
+    const isCorrect = option === question.answer;
+
     setChosen(option);
-    if (option === question.answer) setScore((current) => current + 1);
+    if (isCorrect) setScore((current) => current + 1);
+
+    trackAnswer({
+      sourceType: "listening",
+      sourceId: question.id,
+      category: `listening · ${question.kind}`,
+      prompt: `Listen: ${question.prompt}`,
+      expected: `${question.answer} (“${question.audio}”)`,
+      userAnswer: option,
+      correct: isCorrect,
+      audioText: question.audio,
+    });
   };
 
   const next = async () => {

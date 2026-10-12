@@ -1,5 +1,21 @@
 import Database from "@tauri-apps/plugin-sql";
 
+import {
+  REPETITIONS_TO_RESOLVE,
+  START_EASE,
+  endOfToday,
+  initialSchedule,
+  scheduleNext,
+} from "./reviewScheduler";
+
+import type {
+  AnswerRecord,
+  MistakeRow,
+  ReviewItem,
+  ReviewSourceType,
+  ReviewStats,
+} from "../data/reviewTypes";
+
 const DATABASE_URL = "sqlite:deutschlab.db";
 
 let databasePromise: Promise<Database> | null = null;
@@ -39,6 +55,39 @@ export async function initialiseDatabase() {
     completed_at TEXT NOT NULL
   )
 `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS mistakes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      lesson_id TEXT NOT NULL,
+      item_key TEXT NOT NULL,
+      category TEXT NOT NULL,
+      prompt TEXT NOT NULL,
+      expected_answer TEXT NOT NULL,
+      user_answer TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      resolved_at TEXT,
+      times_missed INTEGER NOT NULL DEFAULT 1
+    )
+  `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS review_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      source_type TEXT NOT NULL,
+      source_id TEXT NOT NULL,
+      prompt TEXT NOT NULL,
+      answer TEXT NOT NULL,
+      audio_text TEXT,
+      due_at TEXT NOT NULL,
+      interval_days INTEGER NOT NULL DEFAULT 1,
+      ease REAL NOT NULL DEFAULT 2.5,
+      repetitions INTEGER NOT NULL DEFAULT 0,
+      last_result TEXT,
+      updated_at TEXT NOT NULL,
+      UNIQUE (source_type, source_id)
+    )
+  `);
 }
 
 interface TaskProgressRow {
@@ -111,4 +160,324 @@ export async function saveLessonAttempt(
     `,
     [taskId, score, total, new Date().toISOString()],
   );
+}
+/*
+ * Mistakes + review scheduling
+ */
+
+const LESSON_FOR_SOURCE: Record<ReviewSourceType, string> = {
+  vocabulary: "vocab-001",
+  pronunciation: "pronunciation-001",
+  grammar: "grammar-001",
+  listening: "listening-001",
+};
+
+function itemKey(sourceType: ReviewSourceType, sourceId: string) {
+  return `${sourceType}:${sourceId}`;
+}
+
+async function upsertMistake(
+  sourceType: ReviewSourceType,
+  sourceId: string,
+  category: string,
+  prompt: string,
+  expected: string,
+  userAnswer: string,
+) {
+  const db = await getDatabase();
+  const key = itemKey(sourceType, sourceId);
+
+  const existing = await db.select<{ id: number }[]>(
+    `
+      SELECT id FROM mistakes
+      WHERE item_key = ? AND resolved_at IS NULL
+      LIMIT 1
+    `,
+    [key],
+  );
+
+  if (existing.length > 0) {
+    await db.execute(
+      `
+        UPDATE mistakes
+        SET times_missed = times_missed + 1,
+            user_answer = ?,
+            prompt = ?,
+            expected_answer = ?
+        WHERE id = ?
+      `,
+      [userAnswer, prompt, expected, existing[0].id],
+    );
+
+    return;
+  }
+
+  await db.execute(
+    `
+      INSERT INTO mistakes (
+        lesson_id, item_key, category, prompt,
+        expected_answer, user_answer, created_at, times_missed
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+    `,
+    [
+      LESSON_FOR_SOURCE[sourceType],
+      key,
+      category,
+      prompt,
+      expected,
+      userAnswer,
+      new Date().toISOString(),
+    ],
+  );
+}
+
+/**
+ * Called after an assessed answer. A wrong answer records a mistake and
+ * (re)schedules the item for tomorrow. A correct answer only adds the item
+ * to review the first time, and only when `enterOnCorrect` is set.
+ */
+export async function recordAnswer(input: AnswerRecord) {
+  const db = await getDatabase();
+  const now = new Date();
+  const schedule = initialSchedule(now);
+
+  if (input.correct) {
+    if (!input.enterOnCorrect) return;
+
+    await db.execute(
+      `
+        INSERT INTO review_items (
+          source_type, source_id, prompt, answer, audio_text,
+          due_at, interval_days, ease, repetitions, last_result, updated_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 'correct', ?)
+        ON CONFLICT(source_type, source_id) DO NOTHING
+      `,
+      [
+        input.sourceType,
+        input.sourceId,
+        input.prompt,
+        input.expected,
+        input.audioText ?? null,
+        schedule.dueAt,
+        schedule.intervalDays,
+        START_EASE,
+        now.toISOString(),
+      ],
+    );
+
+    return;
+  }
+
+  await upsertMistake(
+    input.sourceType,
+    input.sourceId,
+    input.category,
+    input.prompt,
+    input.expected,
+    input.userAnswer,
+  );
+
+  await db.execute(
+    `
+      INSERT INTO review_items (
+        source_type, source_id, prompt, answer, audio_text,
+        due_at, interval_days, ease, repetitions, last_result, updated_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 'wrong', ?)
+      ON CONFLICT(source_type, source_id) DO UPDATE SET
+        prompt = excluded.prompt,
+        answer = excluded.answer,
+        audio_text = excluded.audio_text,
+        due_at = excluded.due_at,
+        interval_days = 1,
+        ease = MAX(1.3, review_items.ease - 0.2),
+        repetitions = 0,
+        last_result = 'wrong',
+        updated_at = excluded.updated_at
+    `,
+    [
+      input.sourceType,
+      input.sourceId,
+      input.prompt,
+      input.expected,
+      input.audioText ?? null,
+      schedule.dueAt,
+      schedule.intervalDays,
+      START_EASE,
+      now.toISOString(),
+    ],
+  );
+}
+
+/** Fire-and-forget wrapper so tracking never blocks or breaks a lesson. */
+export function trackAnswer(input: AnswerRecord): void {
+  recordAnswer(input).catch((error) => {
+    console.error("Failed to record answer for review:", error);
+  });
+}
+
+interface ReviewItemDbRow {
+  id: number;
+  source_type: ReviewSourceType;
+  source_id: string;
+  prompt: string;
+  answer: string;
+  audio_text: string | null;
+  due_at: string;
+  interval_days: number;
+  ease: number;
+  repetitions: number;
+}
+
+function toReviewItem(row: ReviewItemDbRow): ReviewItem {
+  return {
+    id: row.id,
+    sourceType: row.source_type,
+    sourceId: row.source_id,
+    prompt: row.prompt,
+    answer: row.answer,
+    audioText: row.audio_text,
+    dueAt: row.due_at,
+    intervalDays: row.interval_days,
+    ease: row.ease,
+    repetitions: row.repetitions,
+  };
+}
+
+export async function getDueReviewItems(limit = 20): Promise<ReviewItem[]> {
+  const db = await getDatabase();
+
+  const rows = await db.select<ReviewItemDbRow[]>(
+    `
+      SELECT id, source_type, source_id, prompt, answer, audio_text,
+             due_at, interval_days, ease, repetitions
+      FROM review_items
+      WHERE due_at <= ?
+      ORDER BY due_at ASC
+      LIMIT ?
+    `,
+    [endOfToday(), limit],
+  );
+
+  return rows.map(toReviewItem);
+}
+
+export async function getReviewStats(): Promise<ReviewStats> {
+  const db = await getDatabase();
+
+  const due = await db.select<{ count: number }[]>(
+    `SELECT COUNT(*) AS count FROM review_items WHERE due_at <= ?`,
+    [endOfToday()],
+  );
+
+  const unresolved = await db.select<{ count: number }[]>(
+    `SELECT COUNT(*) AS count FROM mistakes WHERE resolved_at IS NULL`,
+  );
+
+  const next = await db.select<{ due_at: string | null }[]>(
+    `SELECT MIN(due_at) AS due_at FROM review_items WHERE due_at > ?`,
+    [endOfToday()],
+  );
+
+  return {
+    dueToday: due[0]?.count ?? 0,
+    unresolvedMistakes: unresolved[0]?.count ?? 0,
+    nextDueAt: next[0]?.due_at ?? null,
+  };
+}
+
+/** Apply a Correct / Again result and reschedule the item. */
+export async function applyReviewResult(
+  item: ReviewItem,
+  correct: boolean,
+) {
+  const db = await getDatabase();
+  const now = new Date();
+
+  const next = scheduleNext(
+    {
+      intervalDays: item.intervalDays,
+      ease: item.ease,
+      repetitions: item.repetitions,
+    },
+    correct,
+    now,
+  );
+
+  await db.execute(
+    `
+      UPDATE review_items
+      SET due_at = ?, interval_days = ?, ease = ?, repetitions = ?,
+          last_result = ?, updated_at = ?
+      WHERE id = ?
+    `,
+    [
+      next.dueAt,
+      next.intervalDays,
+      next.ease,
+      next.repetitions,
+      correct ? "correct" : "wrong",
+      now.toISOString(),
+      item.id,
+    ],
+  );
+
+  if (!correct) {
+    await upsertMistake(
+      item.sourceType,
+      item.sourceId,
+      item.sourceType,
+      item.prompt,
+      item.answer,
+      "(marked Again in review)",
+    );
+
+    return;
+  }
+
+  if (next.repetitions >= REPETITIONS_TO_RESOLVE) {
+    await db.execute(
+      `
+        UPDATE mistakes
+        SET resolved_at = ?
+        WHERE item_key = ? AND resolved_at IS NULL
+      `,
+      [now.toISOString(), itemKey(item.sourceType, item.sourceId)],
+    );
+  }
+}
+
+interface MistakeDbRow {
+  id: number;
+  lesson_id: string;
+  category: string;
+  prompt: string;
+  expected_answer: string;
+  times_missed: number;
+  resolved_at: string | null;
+}
+
+export async function getMistakes(): Promise<MistakeRow[]> {
+  const db = await getDatabase();
+
+  const rows = await db.select<MistakeDbRow[]>(
+    `
+      SELECT id, lesson_id, category, prompt, expected_answer,
+             times_missed, resolved_at
+      FROM mistakes
+      ORDER BY (resolved_at IS NOT NULL) ASC, times_missed DESC, id DESC
+    `,
+  );
+
+  return rows.map((row) => ({
+    id: row.id,
+    lessonId: row.lesson_id,
+    category: row.category,
+    prompt: row.prompt,
+    expected: row.expected_answer,
+    timesMissed: row.times_missed,
+    resolved: row.resolved_at !== null,
+  }));
 }

@@ -19,6 +19,8 @@ import {
   Stat,
 } from "./lesson/LessonParts";
 
+import { trackAnswer } from "../lib/db";
+
 import { shuffleArray } from "./lesson/shuffle";
 
 type Stage =
@@ -164,6 +166,18 @@ export default function VocabularyLesson({
 
     setSelectedAnswer(answer);
     setAnswerWasCorrect(correct);
+
+    trackAnswer({
+      sourceType: "vocabulary",
+      sourceId: currentQuizItem.id,
+      category: "vocabulary",
+      prompt: `What does "${currentQuizItem.german}" mean?`,
+      expected: currentQuizItem.english,
+      userAnswer: answer,
+      correct,
+      audioText: currentQuizItem.german,
+      enterOnCorrect: true,
+    });
 
     if (correct) {
       setScore(

@@ -20,6 +20,8 @@ import {
   Stat,
 } from "./lesson/LessonParts";
 
+import { trackAnswer } from "../lib/db";
+
 import { shuffleArray } from "./lesson/shuffle";
 
 type Stage =
@@ -103,16 +105,39 @@ export default function GrammarLesson({
     setStage("practice");
   };
 
-  const record = (correct: boolean) => {
+  const record = (correct: boolean, userAnswer: string) => {
     setWasCorrect(correct);
     setSubmitted(true);
     if (correct) setScore((current) => current + 1);
+
+    const prompt =
+      question.kind === "choice"
+        ? question.prompt
+        : question.kind === "fill"
+          ? `Complete: ${question.sentence}`
+          : `Translate into German: ${question.english}`;
+
+    const expected =
+      question.kind === "translate"
+        ? question.accepted[0]
+        : question.answer;
+
+    trackAnswer({
+      sourceType: "grammar",
+      sourceId: question.id,
+      category: `grammar · ${question.kind}`,
+      prompt,
+      expected,
+      userAnswer,
+      correct,
+      enterOnCorrect: true,
+    });
   };
 
   const chooseOption = (option: string) => {
     if (submitted || question.kind !== "choice") return;
     setChosen(option);
-    record(option === question.answer);
+    record(option === question.answer, option);
   };
 
   const submitTyped = () => {
@@ -121,9 +146,10 @@ export default function GrammarLesson({
     if (question.kind === "fill") {
       record(
         normaliseGerman(typed) === normaliseGerman(question.answer),
+        typed,
       );
     } else if (question.kind === "translate") {
-      record(isCorrectTyped(typed, question.accepted));
+      record(isCorrectTyped(typed, question.accepted), typed);
     }
   };
 

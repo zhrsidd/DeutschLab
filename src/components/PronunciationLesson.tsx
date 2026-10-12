@@ -22,6 +22,8 @@ import {
 
 import { useGermanSpeech } from "../hooks/useGermanSpeech";
 
+import { trackAnswer } from "../lib/db";
+
 import { shuffleArray } from "./lesson/shuffle";
 
 type Stage = "intro" | "learn" | "quiz" | "results";
@@ -92,8 +94,23 @@ export default function PronunciationLesson({
   const choose = (answer: string) => {
     if (answered) return;
 
+    const isCorrect = answer === question.answer;
+
     setSelectedAnswer(answer);
-    if (answer === question.answer) setScore((current) => current + 1);
+    if (isCorrect) setScore((current) => current + 1);
+
+    trackAnswer({
+      sourceType: "pronunciation",
+      sourceId: question.id,
+      category: "pronunciation",
+      prompt: question.word
+        ? `${question.prompt} (${question.word})`
+        : question.prompt,
+      expected: question.answer,
+      userAnswer: answer,
+      correct: isCorrect,
+      audioText: question.word,
+    });
   };
 
   const nextQuestion = async () => {
