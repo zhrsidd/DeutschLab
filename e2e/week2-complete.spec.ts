@@ -177,7 +177,10 @@ test.describe("Finishing Week 2 (browser, mocked Tauri SQL)", () => {
     await expect(page.getByText("Week 1 progress · Mastered")).toBeVisible();
     await expect(page.getByText("Week 2 progress · Mastered")).toBeVisible();
     await expect(page.getByText(/7 of 7 Week 2 activities complete/)).toBeVisible();
-    await expect(planSection(page).getByText("You're done for today.")).toBeVisible();
+    // Week 3 content is offered next once Week 2 is mastered.
+    await expect(
+      planSection(page).getByRole("button", { name: /School, home and everyday objects/ }),
+    ).toBeVisible();
   });
 
   test("Week 2 is not marked mastered before checkpoint-002", async ({ page, db }) => {

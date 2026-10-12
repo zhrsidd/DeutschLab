@@ -332,6 +332,28 @@ Learner should begin producing sentences such as:
 - `writing-002`
 - `checkpoint-003`
 
+### Current / planned DeutschLab implementation
+
+| ID | Lesson | Status |
+|---|---|---|
+| `vocab-003` | School, home and everyday objects | Implemented |
+| `grammar-006` | Nouns, articles and plurals | Implemented |
+| `grammar-007` | Accusative introduction | Planned |
+| `grammar-008` | nicht vs kein | Planned |
+| `reading-002` | Week 3 reading | Planned |
+| `listening-003` | Week 3 listening | Planned |
+| `writing-002` | Week 3 writing | Planned |
+| `checkpoint-003` | Week 3 checkpoint | Planned |
+
+Week 3 order in the app so far: `vocab-003` → `grammar-006`. New Week 3 content is offered on Today once Week 2 is mastered (`checkpoint-002` passed); there is no Week 3 mastery rule yet.
+
+Implementation notes:
+
+- **Week 3 begins systematic article-aware vocabulary learning.** Every `vocab-003` noun carries its article, its written-out plural (or an explicit "no ordinary plural" status for mass nouns such as `die Milch`) and `requireArticle`. Typed German answers and Review for these nouns must include the correct article; Week 1 and 2 vocabulary still accepts bare nouns.
+- `vocab-003` has 65 new nouns in 7 batches (school objects, computers and everyday things, rooms, furniture, food and the table, drinks and mass nouns, people). Its 20-question final quiz rotates meaning, noun + article, article, plural and typed noun + article (pass 16/20). The lesson remembers the batch position so it can be resumed.
+- Review keeps meaning/noun recall (`<id>`), article (`<id>#article`) and plural (`<id>#plural`) as separate concepts using the existing scheduler.
+- `grammar-006` teaches gender, der/die/das, ein/eine, the nominative as "the subject" and plurals. It has 16 questions (pass 13/16) and does **not** teach der → den or ein → einen; those belong to `grammar-007`.
+
 ---
 
 ## Week 4 — Accusative consolidation + irregular verbs

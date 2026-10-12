@@ -29,12 +29,16 @@ import ListeningLesson from "./components/ListeningLesson";
 import ReviewView, { formatReviewDate } from "./components/ReviewView";
 import SpeakingLesson from "./components/SpeakingLesson";
 import WeekCheckpoint from "./components/WeekCheckpoint";
-import { week2VocabularySet } from "./data/lessons/vocabularySets";
+import {
+  week2VocabularySet,
+  week3VocabularySet,
+} from "./data/lessons/vocabularySets";
 import CommonVerbsLesson from "./components/CommonVerbsLesson";
 import WritingLesson from "./components/WritingLesson";
 import Week2ListeningLesson from "./components/Week2ListeningLesson";
 import Week2ReadingLesson from "./components/Week2ReadingLesson";
 import { week2CheckpointDefinition } from "./lib/checkpointDefinitions";
+import ArticlesLesson from "./components/ArticlesLesson";
 import HabenLesson from "./components/HabenLesson";
 import QuestionsLesson from "./components/QuestionsLesson";
 import RegularVerbsLesson from "./components/RegularVerbsLesson";
@@ -303,6 +307,31 @@ function App() {
           saveLessonAttempt("vocab-002", score, total)
         }
         onFinish={() => finishLesson("vocab-002")}
+      />
+    );
+  }
+
+  if (activeLessonId === "vocab-003") {
+    return (
+      <VocabularyLesson
+        set={week3VocabularySet}
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("vocab-003", score, total)
+        }
+        onFinish={() => finishLesson("vocab-003")}
+      />
+    );
+  }
+
+  if (activeLessonId === "grammar-006") {
+    return (
+      <ArticlesLesson
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("grammar-006", score, total)
+        }
+        onFinish={() => finishLesson("grammar-006")}
       />
     );
   }

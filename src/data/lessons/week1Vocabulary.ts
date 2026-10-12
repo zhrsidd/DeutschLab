@@ -12,7 +12,13 @@ export type VocabularyCategory =
   | "adjectives"
   | "days"
   | "months"
-  | "time";
+  | "time"
+  | "school"
+  | "rooms"
+  | "furniture"
+  | "food"
+  | "objects"
+  | "people";
 
 export interface VocabularyItem {
   id: string;
@@ -38,6 +44,13 @@ export interface VocabularyItem {
     | "adverb";
   article?: "der" | "die" | "das";
   plural?: string;
+  /** Mass or collective noun with no ordinary plural (never assessed). */
+  noPlural?: boolean;
+  /**
+   * Article-aware item (Week 3 onwards): Review and typed answers must
+   * include the correct article. Older items keep accepting bare nouns.
+   */
+  requireArticle?: boolean;
 }
 
 export const categoryLabels: Record<VocabularyCategory, string> = {
@@ -55,6 +68,12 @@ export const categoryLabels: Record<VocabularyCategory, string> = {
   days: "Days",
   months: "Months",
   time: "Time words",
+  school: "School objects",
+  rooms: "Rooms and home",
+  furniture: "Furniture",
+  food: "Food and drink",
+  objects: "Everyday objects",
+  people: "People",
 };
 
 export const week1Vocabulary: VocabularyItem[] = [

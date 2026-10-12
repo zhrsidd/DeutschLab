@@ -449,3 +449,73 @@ describe("Week 2 order and checkpoint-002", () => {
     expect(generateDailyPlan({ ...base, completedTaskIds: ids }).done).toBe(true);
   });
 });
+
+describe("Week 3 progression", () => {
+  const week2Done = [
+    ...week1All,
+    "vocab-002", "grammar-004", "grammar-005",
+    "writing-001", "reading-001", "listening-002", "checkpoint-002",
+  ];
+
+  const next = (completed: string[], budgetMinutes = 30) =>
+    generateDailyPlan({ ...base, budgetMinutes, completedTaskIds: completed }).items.map(
+      (item) => item.sourceId,
+    );
+
+  it("offers vocab-003 first once Week 2 is mastered", () => {
+    expect(next(week2Done)[0]).toBe("vocab-003");
+  });
+
+  it("offers grammar-006 right after vocab-003", () => {
+    expect(next([...week2Done, "vocab-003"])[0]).toBe("grammar-006");
+  });
+
+  it("has nothing left to plan after grammar-006 (no Week 3 checkpoint yet)", () => {
+    const plan = generateDailyPlan({
+      ...base,
+      completedTaskIds: [...week2Done, "vocab-003", "grammar-006"],
+    });
+
+    expect(plan.done).toBe(true);
+  });
+
+  it("withholds Week 3 until checkpoint-002 is passed", () => {
+    const beforeCheckpoint = week2Done.filter((id) => id !== "checkpoint-002");
+    const planned = next(beforeCheckpoint, 60);
+
+    expect(planned).not.toContain("vocab-003");
+    expect(planned).not.toContain("grammar-006");
+    expect(planned[0]).toBe("checkpoint-002");
+  });
+
+  it("keeps Week 3 out of Today until Week 1 is mastered too", () => {
+    expect(next(instructional, 60)).not.toContain("vocab-003");
+  });
+
+  it("puts due reviews and Week 3 weak areas ahead of new Week 3 lessons", () => {
+    const plan = generateDailyPlan({
+      ...base,
+      budgetMinutes: 60,
+      completedTaskIds: [...week2Done, "vocab-003", "grammar-006"],
+      dueReviewCount: 4,
+      dueReviewKeys: ["vocabulary:tisch#plural"],
+      unresolvedMistakes: [
+        {
+          id: 9,
+          lessonId: "vocab-003",
+          itemKey: "vocabulary:buch#article",
+          prompt: 'What is the article of "Buch"?',
+          timesMissed: 2,
+        },
+      ],
+    });
+
+    expect(plan.items.map((item) => item.kind)).toEqual(["review", "mistake"]);
+    expect(plan.items[1].title).toBe("Revisit Week 3 nouns and articles");
+  });
+
+  it("leaves the Week 1 and Week 2 order unchanged", () => {
+    expect(next(week1All, 15)[0]).toBe("vocab-002");
+    expect(next([...week1All, "vocab-002"], 15)[0]).toBe("grammar-004");
+  });
+});

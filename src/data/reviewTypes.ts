@@ -59,6 +59,10 @@ export type ReviewExercise =
       accepted: string[];
       preferred: string;
       explanation: string;
+      /** Card label; defaults to "Grammar". */
+      label?: string;
+      /** Noun learning target for article-aware vocabulary (Week 3+). */
+      concept?: "noun_article" | "noun_plural";
     }
   | {
       kind: "choice";

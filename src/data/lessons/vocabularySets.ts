@@ -9,6 +9,10 @@ import {
   week2Vocabulary,
   week2VocabularyBatches,
 } from "./week2Vocabulary";
+import {
+  week3Vocabulary,
+  week3VocabularyBatches,
+} from "./week3Vocabulary";
 
 /*
  * A vocabulary set is one batch-based vocabulary lesson (vocab-001,
@@ -29,6 +33,15 @@ export interface VocabularySet {
   typedCategories: VocabularyCategory[];
   /** Prefix of the quiz seed (kept stable so quizzes stay reproducible). */
   seedPrefix: string;
+  /**
+   * Article-aware set (Week 3 onwards): quizzes also ask for the article and
+   * the plural, and German answers must include the article.
+   */
+  articleAware?: boolean;
+  /** Short reminder shown on the intro and learn cards. */
+  reminder?: string;
+  /** Remember the batch position so the lesson can be resumed later. */
+  resumable?: boolean;
 }
 
 export const week1VocabularySet: VocabularySet = {
@@ -73,9 +86,36 @@ export const week2VocabularySet: VocabularySet = {
   seedPrefix: "final-w2",
 };
 
+export const ARTICLE_REMINDER =
+  "Learn German nouns together with their articles. The article is part of the word you need to remember.";
+
+export const week3VocabularySet: VocabularySet = {
+  taskId: "vocab-003",
+  kicker: "Week 3 · Vocabulary",
+  title: "School, home and everyday objects",
+  intro:
+    "Learn {count} nouns with their article and plural: school objects, rooms, furniture, food and drink, everyday things and people. Each batch ends with a short check, and a mixed quiz closes the lesson. You can leave between batches and resume where you stopped.",
+  items: week3Vocabulary,
+  batches: week3VocabularyBatches,
+  finalQuota: [
+    ["school", 3],
+    ["objects", 4],
+    ["rooms", 3],
+    ["furniture", 3],
+    ["food", 4],
+    ["people", 3],
+  ],
+  typedCategories: ["school", "objects", "rooms", "furniture", "food", "people"],
+  seedPrefix: "final-w3",
+  articleAware: true,
+  reminder: ARTICLE_REMINDER,
+  resumable: true,
+};
+
 export const vocabularySets: VocabularySet[] = [
   week1VocabularySet,
   week2VocabularySet,
+  week3VocabularySet,
 ];
 
 /** Every vocabulary item across all sets (ids are unique across sets). */

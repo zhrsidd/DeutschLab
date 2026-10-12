@@ -323,4 +323,21 @@ export const starterTasks: LessonTask[] = [
     minutes: 24,
     week: 2,
   },
+  {
+    id: "vocab-003",
+    title: "School, home and everyday objects",
+    description: "Learn useful nouns with their articles and plurals.",
+    type: "vocabulary",
+    minutes: 25,
+    week: 3,
+  },
+  {
+    id: "grammar-006",
+    title: "Nouns, articles and plurals",
+    description:
+      "Understand grammatical gender, nominative articles and common plural patterns.",
+    type: "grammar",
+    minutes: 15,
+    week: 3,
+  },
 ];

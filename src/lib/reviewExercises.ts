@@ -11,6 +11,7 @@ import {
 import { week2CommonVerbsQuiz } from "../data/lessons/week2CommonVerbs";
 import { week2GrammarSlots } from "../data/lessons/week2Checkpoint";
 import { week2HabenQuiz } from "../data/lessons/week2Haben";
+import { week3ArticlesQuiz } from "../data/lessons/week3Articles";
 import { week1SeinQuiz } from "../data/lessons/week1Sein";
 import { week1PronunciationQuiz } from "../data/lessons/week1Pronunciation";
 import { week1ListeningQuiz } from "../data/lessons/week1Listening";
@@ -69,18 +70,35 @@ function englishVariants(item: VocabularyItem): string[] {
 
 /* ---------- grammar-002 / grammar-003 ---------- */
 
+/**
+ * Vocabulary review concepts: "<id>" is the word itself (meaning, and noun +
+ * article for article-aware items); "<id>#article" and "<id>#plural" are the
+ * separate Week 3+ learning targets for the same noun.
+ */
+export type NounConcept = "article" | "plural";
+
+export function parseVocabularySourceId(sourceId: string): {
+  itemId: string;
+  concept: NounConcept | null;
+} {
+  const [itemId, suffix] = sourceId.split("#");
+  const concept = suffix === "article" || suffix === "plural" ? suffix : null;
+  return { itemId, concept };
+}
+
 /** Which lesson a review concept came from (used for mistakes + planning). */
 export function lessonIdFor(
   sourceType: ReviewSourceType,
   sourceId: string,
 ): string {
   if (sourceType === "vocabulary") {
-    return vocabularySetForItem(sourceId).taskId;
+    return vocabularySetForItem(parseVocabularySourceId(sourceId).itemId).taskId;
   }
   if (sourceType === "pronunciation") return "pronunciation-001";
   if (sourceType === "listening") return "listening-001";
   if (sourceId.startsWith("rv-")) return "grammar-002";
   if (sourceId.startsWith("qn-")) return "grammar-003";
+  if (sourceId.startsWith("art-")) return "grammar-006";
   if (sourceId.startsWith("hb-")) return "grammar-004";
   if (sourceId.startsWith("cv-")) return "grammar-005";
   // Week 2 checkpoint questions trace back to the skill they test.
@@ -98,6 +116,7 @@ const courseQuestions: CourseQuestion[] = [
   ...week2HabenQuiz,
   ...week2CommonVerbsQuiz,
   ...week2GrammarSlots.flat(),
+  ...week3ArticlesQuiz,
 ];
 
 /** Turns a data-driven grammar question into a structured review exercise. */
@@ -150,6 +169,45 @@ export function exerciseFromCourseQuestion(
   };
 }
 
+/* ---------- article-aware noun concepts ---------- */
+
+function buildNounConceptExercise(
+  item: VocabularyItem,
+  concept: NounConcept,
+): ReviewExercise | null {
+  const bare = item.german.replace(/^(der|die|das)\s+/i, "");
+
+  if (concept === "article") {
+    if (!item.article) return null;
+
+    return {
+      kind: "typed",
+      label: "Vocabulary · Article",
+      concept: "noun_article",
+      instruction: "Type the article (der, die or das).",
+      prompt: `___ ${bare}`,
+      accepted: [item.article],
+      preferred: item.article,
+      explanation: `${item.german}: ${item.article} is the article to learn with ${bare}.`,
+    };
+  }
+
+  if (!item.plural || item.noPlural) return null;
+
+  const bareSpelling = item.plural.replace(/^die\s+/i, "");
+
+  return {
+    kind: "typed",
+    label: "Vocabulary · Plural",
+    concept: "noun_plural",
+    instruction: "Type the plural, with die.",
+    prompt: item.german,
+    accepted: [item.plural, bareSpelling],
+    preferred: item.plural,
+    explanation: `The plural of ${item.german} is ${item.plural}.`,
+  };
+}
+
 /* ---------- building ---------- */
 
 export function buildReviewExercise(
@@ -157,8 +215,11 @@ export function buildReviewExercise(
   sourceId: string,
 ): ReviewExercise | null {
   if (sourceType === "vocabulary") {
-    const item = findVocabularyItem(sourceId);
+    const { itemId, concept } = parseVocabularySourceId(sourceId);
+    const item = findVocabularyItem(itemId);
     if (!item) return null;
+
+    if (concept) return buildNounConceptExercise(item, concept);
 
     const englishAnswers = englishVariants(item);
     const myParts = new Set(englishParts(item.english).map(normaliseEnglish));
@@ -173,10 +234,13 @@ export function buildReviewExercise(
       )
       .flatMap((other) => [other.german, ...(other.acceptedGerman ?? [])]);
 
-    // "die Mutter" may also be typed without its article.
-    const withoutArticle = [item.german, ...germanAnswers]
-      .map((word) => word.replace(/^(der|die|das)\s+/i, ""))
-      .filter((word) => word.length > 0);
+    // "die Mutter" may also be typed without its article, except for
+    // article-aware items (Week 3+), where the article is being tested.
+    const withoutArticle = item.requireArticle
+      ? []
+      : [item.german, ...germanAnswers]
+          .map((word) => word.replace(/^(der|die|das)\s+/i, ""))
+          .filter((word) => word.length > 0);
 
     return {
       kind: "vocab",
@@ -444,7 +508,7 @@ export function toTypedQuestion(
 
   if (exercise.kind === "typed") {
     return {
-      label: "Grammar",
+      label: exercise.label ?? "Grammar",
       instruction: exercise.instruction,
       prompt: exercise.prompt,
       grade: (input) =>
@@ -497,6 +561,16 @@ export function describeReviewConcept(
       prompt: `What does "${exercise.german}" mean?`,
       expected: exercise.english,
       audioText: exercise.audioText ?? exercise.german,
+    };
+  }
+
+  if (exercise.kind === "typed" && exercise.concept) {
+    return {
+      prompt:
+        exercise.concept === "noun_article"
+          ? `What is the article of "${exercise.prompt.replace("___ ", "")}"?`
+          : `What is the plural of "${exercise.prompt}"?`,
+      expected: exercise.preferred,
     };
   }
 

@@ -18,6 +18,7 @@ import { trackAnswer } from "../lib/db";
 import {
   buildBatchCheck,
   buildFinalQuiz,
+  mistakeExpected,
   mistakePrompt,
   type VocabQuestion,
 } from "../lib/vocabularyExercises";
@@ -47,6 +48,36 @@ interface VocabularyLessonProps {
   onSaveAttempt: (score: number, total: number) => Promise<void>;
 }
 
+const RESUME_KEY_PREFIX = "deutschlab:vocab-resume:";
+
+/** Saved batch position for resumable sets (browser storage may be unavailable). */
+function readResumeBatch(set: VocabularySet): number {
+  if (!set.resumable) return 0;
+
+  try {
+    const stored = Number(
+      window.localStorage.getItem(`${RESUME_KEY_PREFIX}${set.taskId}`),
+    );
+    return Number.isInteger(stored) && stored > 0 && stored < set.batches.length
+      ? stored
+      : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function writeResumeBatch(set: VocabularySet, batchIndex: number | null) {
+  if (!set.resumable) return;
+
+  try {
+    const key = `${RESUME_KEY_PREFIX}${set.taskId}`;
+    if (batchIndex === null) window.localStorage.removeItem(key);
+    else window.localStorage.setItem(key, String(batchIndex));
+  } catch {
+    // Resuming is a convenience; ignore storage problems.
+  }
+}
+
 function itemsForBatch(set: VocabularySet, batchIndex: number): VocabularyItem[] {
   return set.batches[batchIndex].itemIds
     .map((id) => set.items.find((item) => item.id === id))
@@ -70,6 +101,7 @@ export default function VocabularyLesson({
   const [savingAttempt, setSavingAttempt] = useState(false);
   const [finishing, setFinishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resumeBatch] = useState(() => readResumeBatch(set));
 
   const speech = useGermanSpeech();
 
@@ -93,6 +125,7 @@ export default function VocabularyLesson({
 
   const goToBatch = (index: number) => {
     speech.stop();
+    writeResumeBatch(set, index);
     setBatchIndex(index);
     setLearnIndex(0);
     setCheckIndex(0);
@@ -130,10 +163,10 @@ export default function VocabularyLesson({
     // Missed recall is worth tracking; correct checks don't enter review.
     trackAnswer({
       sourceType: "vocabulary",
-      sourceId: question.itemId,
+      sourceId: question.reviewId,
       category: "vocabulary",
       prompt: mistakePrompt(question),
-      expected: question.answer,
+      expected: mistakeExpected(question),
       userAnswer: answer,
       correct: false,
       audioText: question.audioText,
@@ -157,10 +190,10 @@ export default function VocabularyLesson({
 
     trackAnswer({
       sourceType: "vocabulary",
-      sourceId: question.itemId,
+      sourceId: question.reviewId,
       category: "vocabulary",
       prompt: mistakePrompt(question),
-      expected: question.answer,
+      expected: mistakeExpected(question),
       userAnswer: answer,
       correct,
       audioText: question.audioText,
@@ -194,6 +227,7 @@ export default function VocabularyLesson({
       setError(null);
       setFinishing(true);
       await onFinish();
+      writeResumeBatch(set, null);
     } catch (finishError) {
       console.error("Failed to finish lesson:", finishError);
       setError(
@@ -253,16 +287,30 @@ export default function VocabularyLesson({
             </p>
           </div>
 
+          {set.reminder ? <Reminder text={set.reminder} /> : null}
+
           {audioMissing ? <AudioNotice /> : null}
 
-          <button
-            type="button"
-            onClick={() => goToBatch(0)}
-            className="mt-8 flex items-center gap-2 rounded-xl bg-neutral-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-neutral-800"
-          >
-            Begin lesson
-            <ArrowRight size={17} />
-          </button>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => goToBatch(0)}
+              className="flex items-center gap-2 rounded-xl bg-neutral-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-neutral-800"
+            >
+              Begin lesson
+              <ArrowRight size={17} />
+            </button>
+
+            {resumeBatch > 0 ? (
+              <button
+                type="button"
+                onClick={() => goToBatch(resumeBatch)}
+                className="flex items-center gap-2 rounded-xl border border-black/10 bg-white px-5 py-3 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+              >
+                Resume at batch {resumeBatch + 1}
+              </button>
+            ) : null}
+          </div>
         </div>
       </LessonShell>
     );
@@ -361,6 +409,12 @@ export default function VocabularyLesson({
               </p>
             ) : null}
 
+            {learnItem.noPlural ? (
+              <p className="mt-2 text-sm text-neutral-400">
+                Plural: none (no ordinary plural)
+              </p>
+            ) : null}
+
             {learnItem.exampleGerman ? (
               <>
                 <div className="my-8 h-px bg-black/5" />
@@ -381,6 +435,8 @@ export default function VocabularyLesson({
               </div>
             ) : null}
           </div>
+
+          {set.reminder ? <Reminder text={set.reminder} /> : null}
 
           <button
             type="button"
@@ -592,6 +648,14 @@ function BatchHeader({
         {trailing ? ` · ${trailing}` : ""}
       </p>
     </div>
+  );
+}
+
+function Reminder({ text }: { text: string }) {
+  return (
+    <p className="mt-6 rounded-xl bg-neutral-50 px-4 py-3 text-sm leading-6 text-neutral-500">
+      {text}
+    </p>
   );
 }
 
