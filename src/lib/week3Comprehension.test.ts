@@ -94,7 +94,7 @@ describe("listening-003 content", () => {
     expect(audio).toMatch(/keine Tasche/);
     expect(audio).toMatch(/Wohnzimmer/);
     expect(audio).toMatch(/Bücher sind/);
-    expect(audio).toMatch(/Das Buch ist/);
+    expect(audio).toMatch(/Das Heft ist/);
   });
 
   it("stays inside Weeks 1–3", () => {

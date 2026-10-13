@@ -26,6 +26,8 @@ interface NounRow {
   exampleGerman: string;
   exampleEnglish: string;
   acceptedEnglish?: string[];
+  /** Other correct German answers, written with the article. */
+  acceptedGerman?: string[];
   note?: string;
 }
 
@@ -35,21 +37,21 @@ const rows: NounRow[] = [
   // School objects
   { id: "stift", article: "der", noun: "Stift", plural: "Stifte", english: "pen", category: "school", exampleGerman: "Der Stift ist neu.", exampleEnglish: "The pen is new.", acceptedEnglish: ["marker"] },
   { id: "bleistift", article: "der", noun: "Bleistift", plural: "Bleistifte", english: "pencil", category: "school", exampleGerman: "Der Bleistift ist klein.", exampleEnglish: "The pencil is small." },
-  { id: "kugelschreiber", article: "der", noun: "Kugelschreiber", plural: "Kugelschreiber", english: "ballpoint pen", category: "school", exampleGerman: "Das ist ein Kugelschreiber.", exampleEnglish: "That is a ballpoint pen.", acceptedEnglish: ["biro"], note: "Plural is unchanged. Informal: der Kuli." },
+  { id: "kugelschreiber", article: "der", noun: "Kugelschreiber", plural: "Kugelschreiber", english: "ballpoint pen", category: "school", acceptedGerman: ["der Kuli"], exampleGerman: "Das ist ein Kugelschreiber.", exampleEnglish: "That is a ballpoint pen.", acceptedEnglish: ["biro", "pen", "ball pen", "ballpoint"], note: "Plural is unchanged. Informal: der Kuli." },
   { id: "heft", article: "das", noun: "Heft", plural: "Hefte", english: "exercise book", category: "school", exampleGerman: "Das Heft ist alt.", exampleEnglish: "The exercise book is old.", acceptedEnglish: ["notebook"] },
   { id: "buch", article: "das", noun: "Buch", plural: "Bücher", english: "book", category: "school", exampleGerman: "Das Buch ist interessant.", exampleEnglish: "The book is interesting.", note: "The plural has an umlaut and the ending -er." },
   { id: "tasche", article: "die", noun: "Tasche", plural: "Taschen", english: "bag", category: "school", exampleGerman: "Die Tasche ist groß.", exampleEnglish: "The bag is big." },
   { id: "rucksack", article: "der", noun: "Rucksack", plural: "Rucksäcke", english: "backpack", category: "school", exampleGerman: "Der Rucksack ist neu.", exampleEnglish: "The backpack is new.", acceptedEnglish: ["rucksack"] },
   { id: "lineal", article: "das", noun: "Lineal", plural: "Lineale", english: "ruler", category: "school", exampleGerman: "Das Lineal ist klein.", exampleEnglish: "The ruler is small." },
   { id: "schere", article: "die", noun: "Schere", plural: "Scheren", english: "scissors", category: "school", exampleGerman: "Das ist eine Schere.", exampleEnglish: "That is a pair of scissors.", acceptedEnglish: ["pair of scissors"], note: "Singular in German (eine Schere), plural in English." },
-  { id: "tafel", article: "die", noun: "Tafel", plural: "Tafeln", english: "board / blackboard", category: "school", exampleGerman: "Die Tafel ist groß.", exampleEnglish: "The board is big." },
+  { id: "tafel", article: "die", noun: "Tafel", plural: "Tafeln", english: "board / blackboard", category: "school", acceptedEnglish: ["chalkboard", "whiteboard"], exampleGerman: "Die Tafel ist groß.", exampleEnglish: "The board is big." },
   { id: "computer", article: "der", noun: "Computer", plural: "Computer", english: "computer", category: "school", exampleGerman: "Der Computer ist schnell.", exampleEnglish: "The computer is fast.", note: "Plural is unchanged." },
-  { id: "bildschirm", article: "der", noun: "Bildschirm", plural: "Bildschirme", english: "screen", category: "school", exampleGerman: "Der Bildschirm ist groß.", exampleEnglish: "The screen is big.", acceptedEnglish: ["monitor", "display"] },
+  { id: "bildschirm", article: "der", noun: "Bildschirm", plural: "Bildschirme", english: "screen", category: "school", acceptedGerman: ["der Monitor"], exampleGerman: "Der Bildschirm ist groß.", exampleEnglish: "The screen is big.", acceptedEnglish: ["monitor", "display"] },
   { id: "tastatur", article: "die", noun: "Tastatur", plural: "Tastaturen", english: "keyboard", category: "school", exampleGerman: "Die Tastatur ist neu.", exampleEnglish: "The keyboard is new." },
 
   // Rooms and home
   { id: "zimmer", article: "das", noun: "Zimmer", plural: "Zimmer", english: "room", category: "rooms", exampleGerman: "Das Zimmer ist klein.", exampleEnglish: "The room is small.", note: "Plural is unchanged." },
-  { id: "wohnzimmer", article: "das", noun: "Wohnzimmer", plural: "Wohnzimmer", english: "living room", category: "rooms", exampleGerman: "Das Wohnzimmer ist groß.", exampleEnglish: "The living room is big.", note: "Plural is unchanged." },
+  { id: "wohnzimmer", article: "das", noun: "Wohnzimmer", plural: "Wohnzimmer", english: "living room", category: "rooms", acceptedEnglish: ["lounge", "sitting room"], exampleGerman: "Das Wohnzimmer ist groß.", exampleEnglish: "The living room is big.", note: "Plural is unchanged." },
   { id: "schlafzimmer", article: "das", noun: "Schlafzimmer", plural: "Schlafzimmer", english: "bedroom", category: "rooms", exampleGerman: "Das Schlafzimmer ist schön.", exampleEnglish: "The bedroom is nice.", note: "Plural is unchanged." },
   { id: "kueche", article: "die", noun: "Küche", plural: "Küchen", english: "kitchen", category: "rooms", exampleGerman: "Die Küche ist neu.", exampleEnglish: "The kitchen is new." },
   { id: "badezimmer", article: "das", noun: "Badezimmer", plural: "Badezimmer", english: "bathroom", category: "rooms", exampleGerman: "Das Badezimmer ist klein.", exampleEnglish: "The bathroom is small.", note: "Plural is unchanged." },
@@ -57,17 +59,17 @@ const rows: NounRow[] = [
   { id: "fenster", article: "das", noun: "Fenster", plural: "Fenster", english: "window", category: "rooms", exampleGerman: "Das Fenster ist groß.", exampleEnglish: "The window is big.", note: "Plural is unchanged." },
   { id: "wand", article: "die", noun: "Wand", plural: "Wände", english: "wall", category: "rooms", exampleGerman: "Die Wand ist neu.", exampleEnglish: "The wall is new.", note: "The plural has an umlaut." },
   { id: "boden", article: "der", noun: "Boden", plural: "Böden", english: "floor", category: "rooms", exampleGerman: "Der Boden ist alt.", exampleEnglish: "The floor is old.", acceptedEnglish: ["ground"], note: "The plural has an umlaut." },
-  { id: "treppe", article: "die", noun: "Treppe", plural: "Treppen", english: "stairs / staircase", category: "rooms", exampleGerman: "Die Treppe ist schön.", exampleEnglish: "The stairs are nice.", note: "Singular in German (die Treppe), plural in English." },
+  { id: "treppe", article: "die", noun: "Treppe", plural: "Treppen", english: "stairs / staircase", category: "rooms", acceptedEnglish: ["steps"], exampleGerman: "Die Treppe ist schön.", exampleEnglish: "The stairs are nice.", note: "Singular in German (die Treppe), plural in English." },
   { id: "garten", article: "der", noun: "Garten", plural: "Gärten", english: "garden", category: "rooms", exampleGerman: "Der Garten ist schön.", exampleEnglish: "The garden is nice.", note: "The plural has an umlaut." },
 
   // Furniture
   { id: "tisch", article: "der", noun: "Tisch", plural: "Tische", english: "table", category: "furniture", exampleGerman: "Der Tisch ist groß.", exampleEnglish: "The table is big." },
   { id: "stuhl", article: "der", noun: "Stuhl", plural: "Stühle", english: "chair", category: "furniture", exampleGerman: "Der Stuhl ist alt.", exampleEnglish: "The chair is old.", note: "The plural has an umlaut." },
   { id: "bett", article: "das", noun: "Bett", plural: "Betten", english: "bed", category: "furniture", exampleGerman: "Das Bett ist groß.", exampleEnglish: "The bed is big." },
-  { id: "sofa", article: "das", noun: "Sofa", plural: "Sofas", english: "sofa", category: "furniture", exampleGerman: "Das Sofa ist neu.", exampleEnglish: "The sofa is new.", acceptedEnglish: ["couch"] },
-  { id: "schrank", article: "der", noun: "Schrank", plural: "Schränke", english: "cupboard / wardrobe", category: "furniture", exampleGerman: "Der Schrank ist groß.", exampleEnglish: "The cupboard is big.", note: "The plural has an umlaut." },
-  { id: "regal", article: "das", noun: "Regal", plural: "Regale", english: "shelf", category: "furniture", exampleGerman: "Das Regal ist klein.", exampleEnglish: "The shelf is small." },
-  { id: "lampe", article: "die", noun: "Lampe", plural: "Lampen", english: "lamp", category: "furniture", exampleGerman: "Die Lampe ist neu.", exampleEnglish: "The lamp is new." },
+  { id: "sofa", article: "das", noun: "Sofa", plural: "Sofas", english: "sofa", category: "furniture", acceptedGerman: ["die Couch"], exampleGerman: "Das Sofa ist neu.", exampleEnglish: "The sofa is new.", acceptedEnglish: ["couch"] },
+  { id: "schrank", article: "der", noun: "Schrank", plural: "Schränke", english: "cupboard / wardrobe", category: "furniture", acceptedEnglish: ["closet", "cabinet"], exampleGerman: "Der Schrank ist groß.", exampleEnglish: "The cupboard is big.", note: "The plural has an umlaut." },
+  { id: "regal", article: "das", noun: "Regal", plural: "Regale", english: "shelf", category: "furniture", acceptedEnglish: ["bookshelf", "shelves"], exampleGerman: "Das Regal ist klein.", exampleEnglish: "The shelf is small." },
+  { id: "lampe", article: "die", noun: "Lampe", plural: "Lampen", english: "lamp", category: "furniture", acceptedEnglish: ["light"], exampleGerman: "Die Lampe ist neu.", exampleEnglish: "The lamp is new." },
   { id: "spiegel", article: "der", noun: "Spiegel", plural: "Spiegel", english: "mirror", category: "furniture", exampleGerman: "Der Spiegel ist schön.", exampleEnglish: "The mirror is nice.", note: "Plural is unchanged." },
 
   // Food and drink
@@ -81,17 +83,17 @@ const rows: NounRow[] = [
   { id: "kartoffel", article: "die", noun: "Kartoffel", plural: "Kartoffeln", english: "potato", category: "food", exampleGerman: "Die Kartoffel ist klein.", exampleEnglish: "The potato is small." },
   { id: "saft", article: "der", noun: "Saft", plural: "Säfte", english: "juice", category: "food", exampleGerman: "Der Saft ist gut.", exampleEnglish: "The juice is good.", note: "Die Säfte means kinds of juice." },
   { id: "suppe", article: "die", noun: "Suppe", plural: "Suppen", english: "soup", category: "food", exampleGerman: "Die Suppe ist gut.", exampleEnglish: "The soup is good." },
-  { id: "gemuese", article: "das", noun: "Gemüse", plural: null, english: "vegetables", category: "food", exampleGerman: "Das Gemüse ist gut.", exampleEnglish: "The vegetables are good.", acceptedEnglish: ["vegetable"], note: "Singular in German (das Gemüse), plural in English. No ordinary plural." },
+  { id: "gemuese", article: "das", noun: "Gemüse", plural: null, english: "vegetables", category: "food", exampleGerman: "Das Gemüse ist gut.", exampleEnglish: "The vegetables are good.", acceptedEnglish: ["vegetable", "veggies", "veg"], note: "Singular in German (das Gemüse), plural in English. No ordinary plural." },
   { id: "wasser", article: "das", noun: "Wasser", plural: null, english: "water", category: "food", exampleGerman: "Das Wasser ist gut.", exampleEnglish: "The water is good.", note: NO_PLURAL_NOTE },
   { id: "kaffee", article: "der", noun: "Kaffee", plural: null, english: "coffee", category: "food", exampleGerman: "Der Kaffee ist gut.", exampleEnglish: "The coffee is good.", note: NO_PLURAL_NOTE },
 
   // Everyday objects
-  { id: "handy", article: "das", noun: "Handy", plural: "Handys", english: "mobile phone", category: "objects", exampleGerman: "Das Handy ist neu.", exampleEnglish: "The mobile phone is new.", acceptedEnglish: ["phone", "cell phone", "mobile", "smartphone"], note: "A German word for a phone that looks English but is not used in English." },
+  { id: "handy", article: "das", noun: "Handy", plural: "Handys", english: "mobile phone", category: "objects", acceptedGerman: ["das Smartphone"], exampleGerman: "Das Handy ist neu.", exampleEnglish: "The mobile phone is new.", acceptedEnglish: ["phone", "cell phone", "mobile", "smartphone"], note: "A German word for a phone that looks English but is not used in English." },
   { id: "schluessel", article: "der", noun: "Schlüssel", plural: "Schlüssel", english: "key", category: "objects", exampleGerman: "Der Schlüssel ist klein.", exampleEnglish: "The key is small.", note: "Plural is unchanged." },
   { id: "uhr", article: "die", noun: "Uhr", plural: "Uhren", english: "clock / watch", category: "objects", exampleGerman: "Die Uhr ist schön.", exampleEnglish: "The clock is nice." },
   { id: "flasche", article: "die", noun: "Flasche", plural: "Flaschen", english: "bottle", category: "objects", exampleGerman: "Die Flasche ist groß.", exampleEnglish: "The bottle is big." },
   { id: "glas", article: "das", noun: "Glas", plural: "Gläser", english: "glass", category: "objects", exampleGerman: "Das Glas ist klein.", exampleEnglish: "The glass is small.", note: "The plural has an umlaut and the ending -er." },
-  { id: "tasse", article: "die", noun: "Tasse", plural: "Tassen", english: "cup", category: "objects", exampleGerman: "Die Tasse ist neu.", exampleEnglish: "The cup is new." },
+  { id: "tasse", article: "die", noun: "Tasse", plural: "Tassen", english: "cup", category: "objects", acceptedEnglish: ["mug"], exampleGerman: "Die Tasse ist neu.", exampleEnglish: "The cup is new." },
   { id: "teller", article: "der", noun: "Teller", plural: "Teller", english: "plate", category: "objects", exampleGerman: "Der Teller ist klein.", exampleEnglish: "The plate is small.", note: "Plural is unchanged." },
   { id: "gabel", article: "die", noun: "Gabel", plural: "Gabeln", english: "fork", category: "objects", exampleGerman: "Die Gabel ist neu.", exampleEnglish: "The fork is new." },
   { id: "messer", article: "das", noun: "Messer", plural: "Messer", english: "knife", category: "objects", exampleGerman: "Das Messer ist neu.", exampleEnglish: "The knife is new.", note: "Plural is unchanged." },
@@ -122,6 +124,7 @@ export const week3Vocabulary: VocabularyItem[] = rows.map((row) => ({
     : { noPlural: true }),
   requireArticle: true,
   ...(row.acceptedEnglish ? { acceptedEnglish: row.acceptedEnglish } : {}),
+  ...(row.acceptedGerman ? { acceptedGerman: row.acceptedGerman } : {}),
   exampleGerman: row.exampleGerman,
   exampleEnglish: row.exampleEnglish,
   ...(row.note ? { note: row.note } : {}),

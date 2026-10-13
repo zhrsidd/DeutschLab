@@ -49,6 +49,11 @@ Discover exact paths from the repo before assuming a file exists.
 - Respect existing ECC, context reducer, and model-router configuration; don't install overlapping memory/router tools unless requested.
 - After finishing a milestone, provide a concise summary rather than code dumps.
 
+## Content accuracy guards
+- `src/lib/contentAudit.test.ts` holds an independent reference of every Week 2–3 noun's article and plural. When you add a noun, add it there too, or the "references every noun" test fails. Verify gender and plural against a German reference; flag uncertain claims instead of guessing.
+- Informal variants named in a note (for example "Informal: Oma.") must also be in `acceptedGerman`; that test enforces it.
+- `docs/QUALITY_AUDIT.md` records the v0.8 audit (content, performance, data safety, native status) and the ranked recommendations.
+
 ## Testing: mandatory gate
 During development, run **focused tests** for changed behavior. Add/update regression tests for any product bug found.
 

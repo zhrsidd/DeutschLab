@@ -93,8 +93,8 @@ export const week3ListeningClips: ListeningItem[] = [
   },
   {
     id: "l3-plural",
-    audio: "Die Bücher sind neu. Das Buch ist nicht neu.",
-    translation: "The books are new. The book is not new.",
+    audio: "Die Bücher sind neu. Das Heft ist nicht neu.",
+    translation: "The books are new. The exercise book is not new.",
     questions: [
       {
         id: "l3-7",
@@ -107,13 +107,13 @@ export const week3ListeningClips: ListeningItem[] = [
           "Das Buch ist alt.",
         ],
         answer: "Die Bücher sind neu.",
-        explanation: "Die Bücher sind = plural (the books are). Das Buch ist = singular.",
+        explanation: "Die Bücher sind = plural (the books are). Das Buch ist = singular (the book is).",
         concept: { sourceType: "vocabulary", sourceId: "buch#plural" },
       },
       {
         id: "l3-8",
         kind: "mc",
-        prompt: "What is said about the single book?",
+        prompt: "What is said about the exercise book?",
         options: [
           "It is not new",
           "It is new",
@@ -121,7 +121,7 @@ export const week3ListeningClips: ListeningItem[] = [
           "It is small",
         ],
         answer: "It is not new",
-        explanation: "“Das Buch ist nicht neu.” nicht negates the adjective neu.",
+        explanation: "“Das Heft ist nicht neu.” nicht negates the adjective neu.",
         concept: { sourceType: "grammar", sourceId: "neg-c-adjective" },
       },
     ],

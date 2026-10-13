@@ -60,7 +60,7 @@ export const readingPassages: ReadingPassage[] = [
   {
     id: "rd-jonas",
     title: "Jonas and Paul",
-    text: "Guten Tag! Ich heiße Jonas. Ich komme aus Österreich, und ich wohne in Zürich. Die Stadt ist schön. Heute ist Samstag. Heute schlafe ich, ich trinke Wasser und ich esse. Morgen ist Sonntag. Morgen spiele ich Fußball. Der Park ist groß. Der Freund heißt Paul. Er wohnt auch in Zürich. Paul spricht Deutsch und Französisch. Er hat Zeit. Paul liest ein Buch, und Jonas hört Musik. Der Supermarkt ist neu, und das Restaurant ist gut. Wir sprechen Deutsch.",
+    text: "Guten Tag! Ich heiße Jonas. Ich komme aus Österreich, und ich wohne in Zürich. Die Stadt ist schön. Heute ist Samstag. Heute schlafe ich. Ich trinke Wasser, und ich esse. Morgen ist Sonntag. Morgen spiele ich Fußball. Der Park ist groß. Der Freund heißt Paul. Er wohnt auch in Zürich. Paul spricht Deutsch und Französisch. Er hat Zeit. Paul liest ein Buch, und Jonas hört Musik. Der Supermarkt ist neu, und das Restaurant ist gut. Wir sprechen Deutsch.",
     questions: [
       {
         id: "rd-5",

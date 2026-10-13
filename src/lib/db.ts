@@ -113,6 +113,17 @@ export async function initialiseDatabase() {
     )
   `);
 
+  // v0.8: indexes for the Review and mistakes queries. Additive and
+  // idempotent; they only change query plans, never data.
+  await db.execute(
+    `CREATE INDEX IF NOT EXISTS idx_review_items_due ON review_items (due_at)`,
+  );
+
+  await db.execute(`
+    CREATE INDEX IF NOT EXISTS idx_mistakes_open_key
+    ON mistakes (item_key) WHERE resolved_at IS NULL
+  `);
+
   // v0.4A: structured exercise data. Older databases get the column added;
   // existing rows keep NULL and are rebuilt (or shown as legacy cards).
   const columns = await db.select<{ name: string }[]>(

@@ -183,7 +183,7 @@ export const habenCourse: GrammarCourse = {
             {
               german: "Ich habe einen Bruder.",
               english: "I have a brother.",
-              note: "A useful phrase to learn as it is for now. Articles like einen come later.",
+              note: "A useful phrase to learn as it is for now. Week 3 explains why it is einen.",
             },
           ],
         },
