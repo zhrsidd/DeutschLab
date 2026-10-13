@@ -23,7 +23,8 @@ DeutschLab is a **local-first macOS German-learning app** built with **Tauri v2,
 - `src/components/` — lesson UIs, Review, checkpoints
 - `src/components/lesson/` — shared presentation primitives
 - `src/hooks/` — German speech and timers
-- `src/lib/` — SQLite, scoring, answer grading, planner, review scheduler
+- `src/lib/` — SQLite, scoring, answer grading, planner, review scheduler, backup (`backup.ts`), resume state (`vocabResume.ts`)
+- `src/components/today/`, `CurriculumView.tsx`, `DataView.tsx` — dashboard views; `App.tsx` holds the lesson registry
 - `src-tauri/` — native Tauri integration
 - Existing Vitest/Testing Library and Playwright tests — product regression suite
 
@@ -53,6 +54,7 @@ Discover exact paths from the repo before assuming a file exists.
 - `src/lib/contentAudit.test.ts` holds an independent reference of every Week 2–4 noun's article and plural. When you add a noun, add it there too, or the "references every noun" test fails. Verify gender and plural against a German reference; flag uncertain claims instead of guessing.
 - Informal variants named in a note (for example "Informal: Oma.") must also be in `acceptedGerman`; that test enforces it.
 - `docs/QUALITY_AUDIT.md` records the v0.8 audit (content, performance, data safety, native status) and the ranked recommendations.
+- `docs/V1_RELEASE_REPORT.md` records the v1.0 state (verification levels, limitations, manual native checklist); `docs/CHANGELOG.md` lists milestones.
 
 ## Testing: mandatory gate
 During development, run **focused tests** for changed behavior. Add/update regression tests for any product bug found.
