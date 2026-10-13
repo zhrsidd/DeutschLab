@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("../lib/db", () => ({
   getReviewStats: vi.fn(),
   getMistakes: vi.fn(),
+  MISTAKE_LIST_LIMIT: 100,
   getDueReviewItems: vi.fn(),
   applyReviewResult: vi.fn(),
 }));

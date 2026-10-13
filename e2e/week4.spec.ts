@@ -121,7 +121,7 @@ test.describe("Week 4 (browser, mocked Tauri SQL)", () => {
     seedCompleted(db, [...WEEK_3_MASTERED, ...WEEK_4_INSTRUCTIONAL]);
     await page.goto("/");
 
-    await expect(page.getByText(/7 of 8 Week 4 activities complete/)).toBeVisible();
+    await expect(page.getByRole("region", { name: "Week 4 progress" })).toContainText("7 of 8 activities complete");
     await planSection(page).getByRole("button", { name: /October Foundations Checkpoint/ }).click();
     await expect(page.getByText("Week 4 · Checkpoint")).toBeVisible();
     await expect(page.getByText(/unfinished Week 4 lessons/)).toHaveCount(0);
@@ -135,7 +135,7 @@ test.describe("Week 4 (browser, mocked Tauri SQL)", () => {
     seedDueReview(db);
     await page.goto("/");
 
-    await expect(page.getByText("Week 4 progress · Mastered")).toBeVisible();
+    await expect(page.getByRole("region", { name: "Week 4 progress" })).toContainText("Mastered");
     await expect(page.getByText(/October Foundations complete/).first()).toBeVisible();
 
     const review = planSection(page).getByRole("button", { name: /1 review due/ });

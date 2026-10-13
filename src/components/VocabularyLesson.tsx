@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { ArrowRight, RotateCcw, Volume2 } from "lucide-react";
 
@@ -14,6 +14,11 @@ import {
 import { useGermanSpeech } from "../hooks/useGermanSpeech";
 
 import { trackAnswer } from "../lib/db";
+import {
+  loadResumeBatch,
+  readLocalResume,
+  saveResumeBatch,
+} from "../lib/vocabResume";
 
 import {
   buildBatchCheck,
@@ -48,36 +53,6 @@ interface VocabularyLessonProps {
   onSaveAttempt: (score: number, total: number) => Promise<void>;
 }
 
-const RESUME_KEY_PREFIX = "deutschlab:vocab-resume:";
-
-/** Saved batch position for resumable sets (browser storage may be unavailable). */
-function readResumeBatch(set: VocabularySet): number {
-  if (!set.resumable) return 0;
-
-  try {
-    const stored = Number(
-      window.localStorage.getItem(`${RESUME_KEY_PREFIX}${set.taskId}`),
-    );
-    return Number.isInteger(stored) && stored > 0 && stored < set.batches.length
-      ? stored
-      : 0;
-  } catch {
-    return 0;
-  }
-}
-
-function writeResumeBatch(set: VocabularySet, batchIndex: number | null) {
-  if (!set.resumable) return;
-
-  try {
-    const key = `${RESUME_KEY_PREFIX}${set.taskId}`;
-    if (batchIndex === null) window.localStorage.removeItem(key);
-    else window.localStorage.setItem(key, String(batchIndex));
-  } catch {
-    // Resuming is a convenience; ignore storage problems.
-  }
-}
-
 function itemsForBatch(set: VocabularySet, batchIndex: number): VocabularyItem[] {
   return set.batches[batchIndex].itemIds
     .map((id) => set.items.find((item) => item.id === id))
@@ -101,7 +76,21 @@ export default function VocabularyLesson({
   const [savingAttempt, setSavingAttempt] = useState(false);
   const [finishing, setFinishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [resumeBatch] = useState(() => readResumeBatch(set));
+  // localStorage gives an instant first value; SQLite (the durable store)
+  // replaces it once loaded.
+  const [resumeBatch, setResumeBatch] = useState(() => readLocalResume(set));
+
+  useEffect(() => {
+    let active = true;
+
+    void loadResumeBatch(set).then((index) => {
+      if (active) setResumeBatch(index);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [set]);
 
   const speech = useGermanSpeech();
 
@@ -125,7 +114,7 @@ export default function VocabularyLesson({
 
   const goToBatch = (index: number) => {
     speech.stop();
-    writeResumeBatch(set, index);
+    void saveResumeBatch(set, index);
     setBatchIndex(index);
     setLearnIndex(0);
     setCheckIndex(0);
@@ -227,7 +216,7 @@ export default function VocabularyLesson({
       setError(null);
       setFinishing(true);
       await onFinish();
-      writeResumeBatch(set, null);
+      void saveResumeBatch(set, null);
     } catch (finishError) {
       console.error("Failed to finish lesson:", finishError);
       setError(

@@ -523,7 +523,13 @@ interface MistakeDbRow {
   resolved_at: string | null;
 }
 
-export async function getMistakes(): Promise<MistakeRow[]> {
+/** How many mistakes the Review screen lists (the counts are exact). */
+export const MISTAKE_LIST_LIMIT = 100;
+
+/** Unresolved first, then the most-missed; capped so Review stays fast. */
+export async function getMistakes(
+  limit = MISTAKE_LIST_LIMIT,
+): Promise<MistakeRow[]> {
   const db = await getDatabase();
 
   const rows = await db.select<MistakeDbRow[]>(
@@ -532,7 +538,9 @@ export async function getMistakes(): Promise<MistakeRow[]> {
              times_missed, resolved_at
       FROM mistakes
       ORDER BY (resolved_at IS NOT NULL) ASC, times_missed DESC, id DESC
+      LIMIT ?
     `,
+    [limit],
   );
 
   return rows.map((row) => ({
@@ -559,18 +567,22 @@ export interface PlannerData {
   nextDueAt: string | null;
 }
 
+/**
+ * How many weak-area candidates Today considers. The planner shows at most
+ * one; the rest only matter if the top ones are dismissed this session or
+ * belong to an unfinished lesson.
+ */
+export const PLANNER_MISTAKE_LIMIT = 200;
+
 export async function getPlannerData(): Promise<PlannerData> {
   const db = await getDatabase();
 
   const stats = await getReviewStats();
 
-  const dueRows = await db.select<
-    { source_type: string; source_id: string }[]
-  >(
-    `SELECT source_type, source_id FROM review_items WHERE due_at <= ?`,
-    [endOfToday()],
-  );
-
+  // Weak-area candidates only: unresolved mistakes whose concept has no
+  // review due today (a due review already covers it), strongest first and
+  // capped. Earlier versions returned every due key and every mistake, which
+  // grew linearly with the database (v0.8 audit, risk 4); the plan is the same.
   const mistakeRows = await db.select<
     {
       id: number;
@@ -581,10 +593,19 @@ export async function getPlannerData(): Promise<PlannerData> {
     }[]
   >(
     `
-      SELECT id, lesson_id, item_key, prompt, times_missed
-      FROM mistakes
-      WHERE resolved_at IS NULL
+      SELECT m.id, m.lesson_id, m.item_key, m.prompt, m.times_missed
+      FROM mistakes m
+      WHERE m.resolved_at IS NULL
+        AND NOT EXISTS (
+          SELECT 1 FROM review_items r
+          WHERE r.source_type = substr(m.item_key, 1, instr(m.item_key, ':') - 1)
+            AND r.source_id = substr(m.item_key, instr(m.item_key, ':') + 1)
+            AND r.due_at <= ?
+        )
+      ORDER BY m.times_missed DESC, m.id DESC
+      LIMIT ?
     `,
+    [endOfToday(), PLANNER_MISTAKE_LIMIT],
   );
 
   const attempted = await db.select<{ checkpoint_id: string }[]>(
@@ -594,9 +615,8 @@ export async function getPlannerData(): Promise<PlannerData> {
   return {
     attemptedCheckpointIds: attempted.map((row) => row.checkpoint_id),
     dueReviewCount: stats.dueToday,
-    dueReviewKeys: dueRows.map(
-      (row) => `${row.source_type}:${row.source_id}`,
-    ),
+    // Mistakes with a due review are already excluded above.
+    dueReviewKeys: [],
     unresolvedMistakes: mistakeRows.map((row) => ({
       id: row.id,
       lessonId: row.lesson_id,
@@ -751,4 +771,89 @@ export async function clearWritingDraft(taskId: string) {
   const db = await getDatabase();
 
   await db.execute(`DELETE FROM app_state WHERE key = ?`, [draftKey(taskId)]);
+}
+
+/*
+ * Vocabulary batch position for resumable lessons (v1.0). Stored in
+ * app_state so it lives in the database file with the rest of the learner's
+ * progress; see src/lib/vocabResume.ts for the localStorage migration.
+ */
+
+const vocabResumeKey = (taskId: string) => `vocab_resume:${taskId}`;
+
+/** The saved batch index, or null when nothing (or nothing valid) is stored. */
+export async function getVocabResume(taskId: string): Promise<number | null> {
+  const db = await getDatabase();
+
+  const rows = await db.select<{ value: string }[]>(
+    `SELECT value FROM app_state WHERE key = ?`,
+    [vocabResumeKey(taskId)],
+  );
+
+  const parsed = rows.length > 0 ? Number(rows[0].value) : NaN;
+
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : null;
+}
+
+export async function saveVocabResume(taskId: string, batchIndex: number) {
+  const db = await getDatabase();
+
+  await db.execute(
+    `
+      INSERT INTO app_state (key, value)
+      VALUES (?, ?)
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value
+    `,
+    [vocabResumeKey(taskId), String(batchIndex)],
+  );
+}
+
+/** Forgets the position once the lesson has been finished. */
+export async function clearVocabResume(taskId: string) {
+  const db = await getDatabase();
+
+  await db.execute(`DELETE FROM app_state WHERE key = ?`, [vocabResumeKey(taskId)]);
+}
+
+/*
+ * Backup (v1.0). Read-only: exporting never changes the database.
+ */
+
+/** Every learner table, in a stable order, for the JSON export. */
+export const LEARNER_TABLES = [
+  "task_progress",
+  "lesson_attempts",
+  "checkpoint_attempts",
+  "review_items",
+  "mistakes",
+  "app_state",
+] as const;
+
+export type LearnerTable = (typeof LEARNER_TABLES)[number];
+
+/** All rows of every learner table, oldest first. */
+export async function exportLearnerTables(): Promise<
+  Record<LearnerTable, Record<string, unknown>[]>
+> {
+  const db = await getDatabase();
+  const out = {} as Record<LearnerTable, Record<string, unknown>[]>;
+
+  // Table names come from the constant list above, never from input.
+  for (const table of LEARNER_TABLES) {
+    out[table] = await db.select<Record<string, unknown>[]>(
+      `SELECT * FROM ${table} ORDER BY rowid`,
+    );
+  }
+
+  return out;
+}
+
+/**
+ * Writes a consistent copy of the whole database (including anything still
+ * in the WAL file) to `path`. SQLite refuses if the file already exists.
+ */
+export async function snapshotDatabase(path: string) {
+  const db = await getDatabase();
+
+  await db.execute(`VACUUM INTO ?`, [path]);
 }

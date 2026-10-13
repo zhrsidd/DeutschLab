@@ -441,26 +441,29 @@ export function validateExercise(raw: unknown): ReviewExercise | null {
 }
 
 /**
- * Stored JSON first (if valid), then a rebuild from the lesson data for
- * older rows. Null means "use the legacy reveal + Correct/Again card".
+ * A fresh rebuild from the current lesson data first, so a later content
+ * correction (an accepted answer, an explanation) reaches items already in
+ * Review. The stored JSON is the fallback for a concept whose lesson item no
+ * longer exists. Null means "use the legacy reveal + Correct/Again card".
  */
 export function resolveExercise(
   exerciseJson: string | null,
   sourceType: ReviewSourceType,
   sourceId: string,
 ): ReviewExercise | null {
-  if (exerciseJson) {
-    try {
-      const stored = validateExercise(JSON.parse(exerciseJson));
-      if (stored) return stored;
-    } catch {
-      // Malformed JSON: fall through to the rebuild.
-    }
+  try {
+    const rebuilt = validateExercise(buildReviewExercise(sourceType, sourceId));
+    if (rebuilt) return rebuilt;
+  } catch {
+    // Fall through to the stored copy.
   }
 
+  if (!exerciseJson) return null;
+
   try {
-    return validateExercise(buildReviewExercise(sourceType, sourceId));
+    return validateExercise(JSON.parse(exerciseJson));
   } catch {
+    // Malformed JSON and nothing to rebuild from.
     return null;
   }
 }

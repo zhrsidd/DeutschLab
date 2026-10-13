@@ -43,3 +43,50 @@ textarea,
 select {
   font: inherit;
 }
+/*
+ * v1.0 design tokens (Editorial Motion + Neo-Swiss): a neutral grid with one
+ * restrained accent, used only for progress and "you are here" markers.
+ */
+@theme {
+  --color-accent: #b4232a;
+  --color-accent-soft: #fbeceb;
+  --color-paper: #f7f7f5;
+}
+
+/* Visible keyboard focus everywhere; mouse clicks stay clean. */
+:focus-visible {
+  outline: 2px solid #171717;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* A short, purposeful entrance for views and cards. */
+@keyframes dl-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.dl-enter {
+  animation: dl-enter 220ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}

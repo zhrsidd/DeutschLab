@@ -11,7 +11,7 @@ test.describe("Week 2 (browser, mocked Tauri SQL)", () => {
     seedCompleted(db, [...WEEK_1_IDS, "checkpoint-001"]);
     await page.goto("/");
 
-    await expect(page.getByText(/Mastered/)).toBeVisible();
+    await expect(page.getByRole("region", { name: "Week 1 progress" })).toContainText("Mastered");
 
     const plan = planSection(page);
     await expect(plan.getByRole("button", { name: /Week 2 vocabulary/ })).toBeVisible();
@@ -80,7 +80,7 @@ test.describe("Week 2 (browser, mocked Tauri SQL)", () => {
     seedCompleted(db, WEEK_1_IDS);
     await page.goto("/");
 
-    await expect(page.getByText(/7\s*of\s*8\s*Week 1 activities complete/)).toBeVisible();
+    await expect(page.getByRole("region", { name: "Week 1 progress" })).toContainText("7 of 8 activities complete");
 
     // All seven Week 1 lessons are done, so Today plans the checkpoint (not Week 2).
     const plan = planSection(page);

@@ -174,9 +174,9 @@ test.describe("Finishing Week 2 (browser, mocked Tauri SQL)", () => {
     seedCompleted(db, [...WEEK_1_MASTERED, ...WEEK_2_INSTRUCTIONAL, "checkpoint-002"]);
     await page.goto("/");
 
-    await expect(page.getByText("Week 1 progress · Mastered")).toBeVisible();
-    await expect(page.getByText("Week 2 progress · Mastered")).toBeVisible();
-    await expect(page.getByText(/7 of 7 Week 2 activities complete/)).toBeVisible();
+    await expect(page.getByRole("region", { name: "Week 1 progress" })).toContainText("Mastered");
+    await expect(page.getByRole("region", { name: "Week 2 progress" })).toContainText("Mastered");
+    await expect(page.getByRole("region", { name: "Week 2 progress" })).toContainText("7 of 7 activities complete");
     // Week 3 content is offered next once Week 2 is mastered.
     await expect(
       planSection(page).getByRole("button", { name: /School, home and everyday objects/ }),
@@ -187,7 +187,7 @@ test.describe("Finishing Week 2 (browser, mocked Tauri SQL)", () => {
     seedCompleted(db, [...WEEK_1_MASTERED, ...WEEK_2_INSTRUCTIONAL]);
     await page.goto("/");
 
-    await expect(page.getByText("Week 2 progress")).toBeVisible();
-    await expect(page.getByText("Week 2 progress · Mastered")).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "Week 2 progress" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Week 2 progress" })).not.toContainText("Mastered");
   });
 });

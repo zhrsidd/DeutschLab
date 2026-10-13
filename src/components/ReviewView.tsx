@@ -14,6 +14,7 @@ import {
   applyReviewResult,
   getDueReviewItems,
   getMistakes,
+  MISTAKE_LIST_LIMIT,
   getReviewStats,
 } from "../lib/db";
 
@@ -196,6 +197,13 @@ export default function ReviewView({
               ))}
             </div>
           )}
+
+          {mistakes.length >= MISTAKE_LIST_LIMIT ? (
+            <p className="mt-3 text-sm text-neutral-400">
+              Showing the {MISTAKE_LIST_LIMIT} most important: unresolved and
+              most-missed first.
+            </p>
+          ) : null}
 
           {unresolved.length > 0 ? (
             <p className="mt-3 text-sm text-neutral-400">

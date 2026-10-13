@@ -236,3 +236,35 @@ describe("describeReviewConcept for grammar concepts (regression)", () => {
     expect(question?.concept).toEqual({ sourceType: "grammar", sourceId: "neg-f-tasche" });
   });
 });
+
+describe("resolveExercise prefers current lesson content (v0.8 audit #3)", () => {
+  it("lets a content correction reach an item already stored in Review", () => {
+    // A stale copy saved before an accepted answer was corrected.
+    const stale = JSON.stringify({
+      kind: "typed",
+      instruction: "Type the missing word.",
+      prompt: "Ich brauche den Stift. → Ich brauche ___.",
+      accepted: ["er"],
+      preferred: "er",
+      explanation: "old",
+    });
+
+    const resolved = resolveExercise(stale, "grammar", "pr-f-ihn-stift");
+    expect(resolved).toMatchObject({ accepted: ["ihn"], preferred: "ihn", concept: "pronoun" });
+  });
+
+  it("keeps using the stored copy when the lesson item no longer exists", () => {
+    const stored = {
+      kind: "typed",
+      instruction: "Type it.",
+      prompt: "old prompt",
+      accepted: ["alt"],
+      preferred: "alt",
+      explanation: "kept",
+    };
+
+    expect(resolveExercise(JSON.stringify(stored), "grammar", "removed-question")).toEqual(stored);
+    expect(resolveExercise("{broken", "grammar", "removed-question")).toBeNull();
+    expect(resolveExercise(null, "grammar", "removed-question")).toBeNull();
+  });
+});
