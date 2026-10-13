@@ -32,3 +32,9 @@ lto = true
 opt-level = 3
 panic = "abort"
 strip = true
+
+# Test-only: exercise snapshots through the same driver and bundled SQLite
+# that tauri-plugin-sql uses. Not part of the app build.
+[dev-dependencies]
+sqlx = { version = "0.8", default-features = false, features = ["sqlite", "runtime-tokio"] }
+tokio = { version = "1", features = ["rt"] }

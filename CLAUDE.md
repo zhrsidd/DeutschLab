@@ -54,6 +54,7 @@ Discover exact paths from the repo before assuming a file exists.
 - `src/lib/contentAudit.test.ts` holds an independent reference of every Week 2–4 noun's article and plural. When you add a noun, add it there too, or the "references every noun" test fails. Verify gender and plural against a German reference; flag uncertain claims instead of guessing.
 - Informal variants named in a note (for example "Informal: Oma.") must also be in `acceptedGerman`; that test enforces it.
 - `docs/QUALITY_AUDIT.md` records the v0.8 audit (content, performance, data safety, native status) and the ranked recommendations.
+- `bash scripts/native-selftest.sh` runs the opt-in native self-test of the bundled app in a temporary HOME (never the live database).
 - `docs/V1_RELEASE_REPORT.md` records the v1.0 state (verification levels, limitations, manual native checklist); `docs/CHANGELOG.md` lists milestones.
 
 ## Testing: mandatory gate

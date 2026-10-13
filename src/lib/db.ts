@@ -29,15 +29,31 @@ import type {
 } from "../data/reviewTypes";
 
 const DATABASE_URL = "sqlite:deutschlab.db";
+/** Used only by the opt-in native self-test, so it never touches learner data. */
+export const SELFTEST_DATABASE_URL = "sqlite:deutschlab-selftest.db";
+
+let databaseUrl = DATABASE_URL;
 
 let databasePromise: Promise<Database> | null = null;
 
 async function getDatabase() {
   if (!databasePromise) {
-    databasePromise = Database.load(DATABASE_URL);
+    databasePromise = Database.load(databaseUrl);
   }
 
   return databasePromise;
+}
+
+/**
+ * Points this session at the self-test database. Only allowed before the
+ * database has been opened, so learner data can never be mixed in.
+ */
+export function useSelfTestDatabase() {
+  if (databasePromise && databaseUrl !== SELFTEST_DATABASE_URL) {
+    throw new Error("The learner database is already open.");
+  }
+
+  databaseUrl = SELFTEST_DATABASE_URL;
 }
 
 export async function initialiseDatabase() {

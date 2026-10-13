@@ -149,6 +149,27 @@ describe("JSON export", () => {
   });
 });
 
+describe("JSON export completeness", () => {
+  it("covers every table in the schema, every row and every column", async () => {
+    await seedLearner();
+    const sql = getTestDatabase();
+    const schemaTables = (
+      sql.prepare(`SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name`).all() as {
+        name: string;
+      }[]
+    ).map((row) => row.name);
+
+    // A new table must be added to LEARNER_TABLES (and so to backups).
+    expect([...db.LEARNER_TABLES].sort()).toEqual(schemaTables);
+
+    const exported = await backup.buildBackup(NOW);
+    for (const table of schemaTables) {
+      const raw = sql.prepare(`SELECT * FROM ${table} ORDER BY rowid`).all();
+      expect(exported.tables[table as keyof typeof exported.tables], table).toEqual(raw.map((row) => ({ ...row })));
+    }
+  });
+});
+
 describe("backup validation rejects bad input", () => {
   const valid = async () => JSON.parse(backup.serializeBackup(await backup.buildBackup(NOW)));
 
@@ -212,7 +233,11 @@ describe("database snapshot", () => {
     tauri.invoke.mockResolvedValue(path);
 
     expect(await backup.createSnapshot(NOW)).toBe(path);
-    expect(tauri.invoke).toHaveBeenCalledWith("backup_path", { fileName: "deutschlab-2026-10-13-183005.db" });
+    expect(tauri.invoke.mock.calls).toEqual([
+      ["backup_path", { fileName: "deutschlab-2026-10-13-183005.db" }],
+      // Verified and fsynced only after VACUUM INTO has written it.
+      ["seal_backup_file", { fileName: "deutschlab-2026-10-13-183005.db" }],
+    ]);
   });
 
   it("is not offered in a plain browser", async () => {

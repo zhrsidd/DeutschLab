@@ -19,6 +19,13 @@ export function resetTestDatabase(): DatabaseSync {
   return holder.__sqliteTestDb;
 }
 
+/** Uses an on-disk database instead (for WAL and backup tests). */
+export function useTestDatabaseFile(path: string): DatabaseSync {
+  holder.__sqliteTestDb?.close();
+  holder.__sqliteTestDb = new DatabaseSync(path);
+  return holder.__sqliteTestDb;
+}
+
 export function getTestDatabase(): DatabaseSync {
   return holder.__sqliteTestDb ?? resetTestDatabase();
 }

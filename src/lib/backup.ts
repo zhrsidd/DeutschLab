@@ -193,7 +193,12 @@ export const canSnapshot = () => isTauri();
 export async function createSnapshot(now = new Date()): Promise<string> {
   if (!isTauri()) throw new Error("Database snapshots need the DeutschLab app.");
 
-  const path = await invoke<string>("backup_path", { fileName: snapshotFileName(now) });
+  const fileName = snapshotFileName(now);
+  const path = await invoke<string>("backup_path", { fileName });
+  // VACUUM INTO reads one consistent transaction, so commits still in the
+  // WAL file are included; a plain copy of deutschlab.db would miss them.
   await snapshotDatabase(path);
+  // SQLite does not fsync that file: verify it and force it to disk.
+  await invoke<number>("seal_backup_file", { fileName });
   return path;
 }
