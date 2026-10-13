@@ -401,6 +401,53 @@ Learner should be able to:
 - recognise article patterns
 - use approximately **300+ active words/expressions**
 
+### Current DeutschLab implementation
+
+| ID | Lesson | Status |
+|---|---|---|
+| `vocab-004` | Everyday German in context | Implemented |
+| `grammar-009` | Accusative pronouns | Implemented |
+| `grammar-010` | Irregular verbs and the accusative | Implemented |
+| `reading-003` | Everyday descriptions | Implemented |
+| `listening-004` | Everyday conversations | Implemented |
+| `writing-003` | Describing everyday life | Implemented |
+| `speaking-002` | Introducing myself and my daily life | Implemented |
+| `checkpoint-004` | October Foundations Checkpoint | Implemented |
+
+Week 4 order in the app: `vocab-004` → `grammar-009` → `grammar-010` → `reading-003` → `listening-004` → `writing-003` → `speaking-002` → `checkpoint-004`. New Week 4 content is offered on Today once Week 3 is mastered (`checkpoint-003` passed); `checkpoint-004` is offered once every Week 4 lesson is complete (opening it earlier shows a warning, not a lock).
+
+Week 4 is mastered when:
+
+`checkpoint-004` is passed.
+
+Passing `checkpoint-004` also marks the **October Foundations** curriculum as mastered within DeutschLab (`isWeek4Mastered`). It is the app's own milestone, **not** a CEFR A1 certificate. After it, Today shows a completion state and keeps offering due reviews; no Week 5 tasks exist yet.
+
+Implementation notes:
+
+- `vocab-004` adds **84** items in 9 resumable batches (8–12 items): 16 everyday verbs (including sehen, nehmen, treffen, tragen, fahren, kaufen, suchen, brauchen), 37 article-aware nouns (meals, home, clothes, school and study), 13 adjectives and 18 expressions and small words. Cumulative introduced vocabulary for October: **296** items (introduced, not mastered). Its 20-question final quiz passes at 16/20; nouns get article and plural questions, while verbs, adjectives and expressions only get meaning and typed questions.
+- Scope decisions recorded with `vocab-004`: `machen` (already drilled as a regular verb in Week 1) enters the vocabulary list; `gern` is taught as an adverb (*Ich lese gern*) so learners can say what they like without `mögen` (Week 6); `zu Hause` is a fixed phrase like the earlier `nach Hause` chunk; *Ich habe Hunger / Durst* are taught as haben chunks. Adjectives are only used after `sein`; adjective endings are not taught.
+- `grammar-009` teaches nominative vs accusative personal pronouns (mich, dich, ihn, sie, es, uns, euch, sie, Sie) and pronouns for things by grammatical gender. 16 questions, pass 13/16. Dative pronouns are out of scope.
+- `grammar-010` adds five stem-changing verbs (sehen, nehmen, treffen with e → i/ie; fahren, tragen with a → ä) without repeating the Week 2 tables, then consolidates der → den, ein → einen, accusative pronouns and V2 word order. 16 questions, pass 13/16.
+- `reading-003` (2 texts of about 100 words, 8 questions, pass 7/8) and `listening-004` (4 clips, two of them short conversations, 8 questions, pass 7/8) create Review items only for questions that map to a reusable word or grammar item.
+- `writing-003` (60–80 words) is self-assessed (6 points, pass 5/6) and keeps the learner's draft; `speaking-002` is a 2–3 minute guided talk with prompts, model audio and cues, self-assessed (5 points, pass 4/5). Neither records audio, grades language automatically, or creates mistakes.
+- Review keeps the new grammar targets separate: accusative pronoun (`pr-…`, concept `pronoun`), irregular verb form (`iv-…`, `verb_form`), word order (`word_order`), alongside the existing accusative, negation, article and plural concepts. The SRS intervals are unchanged.
+
+### October Foundations checkpoint (`checkpoint-004`)
+
+One checkpoint serves as both the Week 4 mastery check and the October assessment. It is cumulative (Weeks 1–4) with most weight on Week 4, uses fresh questions, and is harder than the earlier checkpoints while staying within taught material.
+
+| Section | Marks | Minimum |
+|---|---|---|
+| Vocabulary | 8 | 6 |
+| Grammar | 12 | 9 |
+| Reading | 4 | – |
+| Listening | 4 | 2 |
+| Writing self-check | 6 | 4 |
+| Speaking self-check | 5 | 3 |
+| **Total** | **39** | **pass at 80% = 32/39** |
+
+Grammar covers noun gender, plurals, the accusative (articles and direct objects), accusative pronouns, irregular present-tense verbs, nicht vs kein and V2 / question word order. Writing is a fresh 60–80 word task and speaking a 2–3 minute guided introduction, both honestly self-assessed. Every attempt is saved in `checkpoint_attempts` (a retry inserts a new row); the task is completed only after a pass and **Finish checkpoint**. The results show the total and percentage, the section breakdown, pass/fail, the weakest sections and links to the relevant lessons or Review.
+
 ---
 
 # NOVEMBER 2026 — MODALS, ROUTINE, TIME

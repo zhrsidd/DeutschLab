@@ -15,6 +15,9 @@ import { week3AccusativeQuiz } from "../data/lessons/week3Accusative";
 import { week3ArticlesQuiz } from "../data/lessons/week3Articles";
 import { week3GrammarSlots } from "../data/lessons/week3Checkpoint";
 import { week3NegationQuiz } from "../data/lessons/week3Negation";
+import { week4GrammarSlots } from "../data/lessons/week4Checkpoint";
+import { week4IrregularVerbsQuiz } from "../data/lessons/week4IrregularVerbs";
+import { week4PronounsQuiz } from "../data/lessons/week4Pronouns";
 import { week1SeinQuiz } from "../data/lessons/week1Sein";
 import { week1PronunciationQuiz } from "../data/lessons/week1Pronunciation";
 import { week1ListeningQuiz } from "../data/lessons/week1Listening";
@@ -107,7 +110,17 @@ export function lessonIdFor(
   if (sourceId.startsWith("c3-art-")) return "grammar-006";
   if (sourceId.startsWith("c3-acc-")) return "grammar-007";
   if (sourceId.startsWith("c3-neg-")) return "grammar-008";
+  // Week 4 checkpoint questions trace back to the skill they test.
+  if (sourceId.startsWith("c4-art-")) return "grammar-006";
+  if (sourceId.startsWith("c4-acc-")) return "grammar-007";
+  if (sourceId.startsWith("c4-neg-")) return "grammar-008";
+  if (sourceId.startsWith("c4-pr-")) return "grammar-009";
+  if (sourceId.startsWith("c4-iv-")) return "grammar-010";
+  if (sourceId.startsWith("c4-v2-")) return "grammar-002";
+  if (sourceId.startsWith("c4-q-")) return "grammar-003";
   if (sourceId.startsWith("neg-")) return "grammar-008";
+  if (sourceId.startsWith("pr-")) return "grammar-009";
+  if (sourceId.startsWith("iv-")) return "grammar-010";
   if (sourceId.startsWith("hb-")) return "grammar-004";
   if (sourceId.startsWith("cv-")) return "grammar-005";
   // Week 2 checkpoint questions trace back to the skill they test.
@@ -129,11 +142,17 @@ const courseQuestions: CourseQuestion[] = [
   ...week3AccusativeQuiz,
   ...week3NegationQuiz,
   ...week3GrammarSlots.flat(),
+  ...week4PronounsQuiz,
+  ...week4IrregularVerbsQuiz,
+  ...week4GrammarSlots.flat(),
 ];
 
 const CONCEPT_LABEL = {
   accusative: "Grammar · Accusative",
   negation: "Grammar · Negation",
+  pronoun: "Grammar · Accusative pronouns",
+  verb_form: "Grammar · Irregular verbs",
+  word_order: "Grammar · Word order",
 } as const;
 
 /** Turns a data-driven grammar question into a structured review exercise. */
@@ -589,12 +608,18 @@ export function describeReviewConcept(
     };
   }
 
-  if (exercise.kind === "typed" && exercise.concept) {
+  // Only the noun concepts get a rewritten prompt; grammar concepts
+  // (accusative, negation, ...) fall through to their own instruction.
+  if (exercise.kind === "typed" && exercise.concept === "noun_article") {
     return {
-      prompt:
-        exercise.concept === "noun_article"
-          ? `What is the article of "${exercise.prompt.replace("___ ", "")}"?`
-          : `What is the plural of "${exercise.prompt}"?`,
+      prompt: `What is the article of "${exercise.prompt.replace("___ ", "")}"?`,
+      expected: exercise.preferred,
+    };
+  }
+
+  if (exercise.kind === "typed" && exercise.concept === "noun_plural") {
+    return {
+      prompt: `What is the plural of "${exercise.prompt}"?`,
       expected: exercise.preferred,
     };
   }

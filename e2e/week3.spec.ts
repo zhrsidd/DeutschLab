@@ -279,14 +279,16 @@ test.describe("Week 3 (browser, mocked Tauri SQL)", () => {
     await expect(page.getByText("Week 3 · Checkpoint")).toBeVisible();
   });
 
-  test("shows Week 3 Mastered and nothing more to plan after checkpoint-003", async ({ page, db }) => {
+  test("shows Week 3 Mastered and moves on to Week 4 after checkpoint-003", async ({ page, db }) => {
     seedCompleted(db, [...WEEK_2_MASTERED, ...WEEK_3_INSTRUCTIONAL, "checkpoint-003"]);
     await page.goto("/");
 
     await expect(page.getByText("Week 3 progress · Mastered")).toBeVisible();
     await expect(page.getByText(/8 of 8 Week 3 activities complete/)).toBeVisible();
     await expect(page.getByText("Week 2 progress · Mastered")).toBeVisible();
-    await expect(planSection(page).getByText("You're done for today.")).toBeVisible();
+    await expect(
+      planSection(page).getByRole("button", { name: /Everyday German in context/ }),
+    ).toContainText("Next lesson");
   });
 
   test("Week 3 stays unmastered before checkpoint-003", async ({ page, db }) => {

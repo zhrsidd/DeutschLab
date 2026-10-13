@@ -11,15 +11,8 @@ import {
 } from "lucide-react";
 
 import {
-  DRILL_SECONDS,
-  FINAL_SECONDS,
-  SPEAKING_PASS_SCORE,
-  finalCues,
-  sampleIntroduction,
-  sampleIntroductionEnglish,
-  selfAssessment,
-  sentenceFrames,
-  speakingPrompts,
+  week1SpeakingConfig,
+  type SpeakingLessonConfig,
 } from "../data/lessons/week1Speaking";
 
 import { formatTime, useCountdown } from "../hooks/useCountdown";
@@ -35,6 +28,8 @@ import {
 type Stage = "intro" | "prep" | "drills" | "final" | "assess" | "results";
 
 interface SpeakingLessonProps {
+  /** Lesson content; defaults to the Week 1 self-introduction. */
+  config?: SpeakingLessonConfig;
   onBack: () => void;
   onFinish: () => Promise<void>;
   onSaveAttempt: (score: number, total: number) => Promise<void>;
@@ -51,10 +46,16 @@ const STAGE_PROGRESS: Record<Stage, number> = {
 };
 
 export default function SpeakingLesson({
+  config = week1SpeakingConfig,
   onBack,
   onFinish,
   onSaveAttempt,
 }: SpeakingLessonProps) {
+  const {
+    selfAssessment,
+    prompts: speakingPrompts,
+    passScore: SPEAKING_PASS_SCORE,
+  } = config;
   const total = selfAssessment.length;
 
   const [stage, setStage] = useState<Stage>("intro");
@@ -136,22 +137,20 @@ export default function SpeakingLesson({
       <LessonShell onBack={onBack}>
         <div className="mx-auto max-w-2xl px-8 py-12">
           <p className="text-sm font-medium text-neutral-400">
-            Week 1 · Speaking
+            {config.kicker}
           </p>
 
           <h1 className="mt-3 text-4xl font-semibold tracking-tight">
-            Introduce yourself
+            {config.title}
           </h1>
 
           <p className="mt-4 max-w-xl text-lg leading-8 text-neutral-500">
-            Time to speak. Using only what you've learned this week, you'll
-            practise short sentences out loud, then give a 60-second
-            self-introduction without a script.
+            {config.intro}
           </p>
 
           <div className="mt-10 grid grid-cols-3 gap-3">
             <Stat label="Prompts" value={String(speakingPrompts.length)} />
-            <Stat label="Final" value="60 sec" />
+            <Stat label="Final" value={config.finalLabel} />
             <Stat label="Check" value="Self-rated" />
           </div>
 
@@ -200,7 +199,7 @@ export default function SpeakingLesson({
           </p>
 
           <div className="mt-6 space-y-3">
-            {sentenceFrames.map((item) => (
+            {config.frames.map((item) => (
               <div
                 key={item.frame}
                 className="flex items-center justify-between gap-4 rounded-xl border border-black/5 bg-white px-5 py-4"
@@ -221,18 +220,18 @@ export default function SpeakingLesson({
 
           <div className="mt-6 rounded-xl bg-neutral-50 px-5 py-4">
             <div className="flex items-center justify-between gap-4">
-              <p className="text-sm font-medium">Example introduction</p>
+              <p className="text-sm font-medium">{config.sampleLabel}</p>
 
               <PlayButton
                 disabled={!speech.available}
-                label="Play example introduction"
-                onClick={() => speech.speak(sampleIntroduction, NORMAL_RATE)}
+                label={`Play ${config.sampleLabel.toLowerCase()}`}
+                onClick={() => speech.speak(config.sample, NORMAL_RATE)}
               />
             </div>
 
-            <p className="mt-2 leading-7">{sampleIntroduction}</p>
+            <p className="mt-2 leading-7">{config.sample}</p>
             <p className="mt-1 text-sm leading-6 text-neutral-400">
-              {sampleIntroductionEnglish}
+              {config.sampleEnglish}
             </p>
           </div>
 
@@ -275,6 +274,7 @@ export default function SpeakingLesson({
             english={prompt.english}
             german={prompt.german}
             speech={speech}
+            seconds={config.drillSeconds}
             isLast={drillIndex === speakingPrompts.length - 1}
             onNext={nextDrill}
           />
@@ -299,7 +299,10 @@ export default function SpeakingLesson({
             Final challenge
           </p>
 
-          <FinalChallenge onContinue={() => goTo("assess")} />
+          <FinalChallenge
+            config={config}
+            onContinue={() => goTo("assess")}
+          />
         </div>
       </LessonShell>
     );
@@ -417,8 +420,8 @@ export default function SpeakingLesson({
 
         <p className="mx-auto mt-3 max-w-md leading-7 text-neutral-500">
           {passed
-            ? "You gave your first German self-introduction. Repeat it out loud often, because speaking gets easier with repetition."
-            : `You need at least ${SPEAKING_PASS_SCORE}/${total} before this lesson is marked complete. Review the sentence frames and try the introduction again.`}
+            ? config.passMessage
+            : `You need at least ${SPEAKING_PASS_SCORE}/${total} before this lesson is marked complete. ${config.failMessage}`}
         </p>
 
         {error ? <ErrorMessage>{error}</ErrorMessage> : null}
@@ -475,16 +478,18 @@ function DrillCard({
   english,
   german,
   speech,
+  seconds,
   isLast,
   onNext,
 }: {
   english: string;
   german: string;
   speech: Speech;
+  seconds: number;
   isLast: boolean;
   onNext: () => void;
 }) {
-  const timer = useCountdown(DRILL_SECONDS);
+  const timer = useCountdown(seconds);
   const [attempted, setAttempted] = useState(false);
   const [revealed, setRevealed] = useState(false);
 
@@ -571,7 +576,14 @@ function DrillCard({
   );
 }
 
-function FinalChallenge({ onContinue }: { onContinue: () => void }) {
+function FinalChallenge({
+  config,
+  onContinue,
+}: {
+  config: SpeakingLessonConfig;
+  onContinue: () => void;
+}) {
+  const FINAL_SECONDS = config.finalSeconds;
   const timer = useCountdown(FINAL_SECONDS);
   const [started, setStarted] = useState(false);
 
@@ -591,13 +603,17 @@ function FinalChallenge({ onContinue }: { onContinue: () => void }) {
   return (
     <>
       <h2 className="mt-4 text-3xl font-semibold tracking-tight">
-        Introduce yourself in German for 60 seconds.
+        {config.finalHeading}
       </h2>
+
+      {config.finalHint ? (
+        <p className="mt-3 text-neutral-500">{config.finalHint}</p>
+      ) : null}
 
       <div className="mt-6 rounded-xl bg-neutral-50 px-5 py-4 text-sm leading-6 text-neutral-500">
         <p className="font-medium text-neutral-900">Cues (optional)</p>
         <ul className="mt-1 list-disc space-y-0.5 pl-5">
-          {finalCues.map((cue) => (
+          {config.finalCues.map((cue) => (
             <li key={cue}>{cue}</li>
           ))}
         </ul>
@@ -619,7 +635,7 @@ function FinalChallenge({ onContinue }: { onContinue: () => void }) {
 
         {finishedNaturally ? (
           <p className="mt-4 text-sm text-neutral-500">
-            Time's up. Well done for speaking the whole minute.
+            {config.finishedText}
           </p>
         ) : null}
 

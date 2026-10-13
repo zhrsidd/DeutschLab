@@ -2,7 +2,10 @@ export type ReviewConcept =
   | "noun_article"
   | "noun_plural"
   | "accusative"
-  | "negation";
+  | "negation"
+  | "pronoun"
+  | "verb_form"
+  | "word_order";
 
 export type ReviewSourceType =
   | "vocabulary"

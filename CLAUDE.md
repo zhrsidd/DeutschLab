@@ -5,7 +5,7 @@ DeutschLab is a **local-first macOS German-learning app** built with **Tauri v2,
 
 **Learner goal:** A0 → strong A1 by January 2027; eventual C1 and academic German for Physics at ETH Zürich by March 2028. Keep workload realistic alongside school.
 
-**Current implementation:** Weeks **1, 2 and 3** of Unit 1 are implemented, including lessons, checkpoints, mistakes, active-recall spaced review, and the daily planner. Week 3 ends with `checkpoint-003`; Week 4 has not been started. An implemented feature is **not** automatically verified in the native macOS window.
+**Current implementation:** Weeks **1–4** of Unit 1 (October Foundations, the v1.0 scope) are implemented, including lessons, checkpoints, mistakes, active-recall spaced review, and the daily planner. Week 4 ends with `checkpoint-004` (the October Foundations Checkpoint); Weeks 5–16 are planned only. An implemented feature is **not** automatically verified in the native macOS window.
 
 ## Curriculum: source of truth
 - **`CURRICULUM.md` is authoritative** for scope, sequence, prerequisites, vocabulary targets, mastery, and longer-term progression.
@@ -50,7 +50,7 @@ Discover exact paths from the repo before assuming a file exists.
 - After finishing a milestone, provide a concise summary rather than code dumps.
 
 ## Content accuracy guards
-- `src/lib/contentAudit.test.ts` holds an independent reference of every Week 2–3 noun's article and plural. When you add a noun, add it there too, or the "references every noun" test fails. Verify gender and plural against a German reference; flag uncertain claims instead of guessing.
+- `src/lib/contentAudit.test.ts` holds an independent reference of every Week 2–4 noun's article and plural. When you add a noun, add it there too, or the "references every noun" test fails. Verify gender and plural against a German reference; flag uncertain claims instead of guessing.
 - Informal variants named in a note (for example "Informal: Oma.") must also be in `acceptedGerman`; that test enforces it.
 - `docs/QUALITY_AUDIT.md` records the v0.8 audit (content, performance, data safety, native status) and the ranked recommendations.
 
@@ -81,4 +81,4 @@ If the `test:agent` npm alias is configured, `npm run test:agent` is equivalent.
 - Final report: concise changed-file/behavior summary, exact test counts, commit/push status (if applicable), and any native-runtime caveat.
 
 ## Next curriculum work
-Weeks **1, 2 and 3 are implementation-complete**. Before implementing Week 4 (accusative consolidation and irregular verbs), consult its section of `CURRICULUM.md`. Do not jump ahead or silently alter earlier mastery rules. Do not jump ahead or silently alter earlier mastery rules.
+Weeks **1–4 (October Foundations) are implementation-complete** for v1.0. Before implementing Week 5 (modal verbs), consult its section of `CURRICULUM.md`. Do not jump ahead or silently alter earlier mastery rules.

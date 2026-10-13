@@ -11,6 +11,8 @@ import {
 
 import {
   evaluateCheckpoint,
+  lowestSections,
+  overallRequiredMarks,
   type CheckpointResult,
   type SectionKey,
   type SectionScores,
@@ -199,8 +201,10 @@ export default function WeekCheckpoint({
             </div>
 
             <p className="mt-4 text-sm leading-6 text-neutral-500">
-              Pass with {passPercent}% overall and the minimum in every
-              section, so one strong area can't hide a weak one.{" "}
+              Pass with {passPercent}% overall (
+              {overallRequiredMarks(definition.config)}/{possible}) and the
+              minimum in every section, so one strong area can't hide a weak
+              one.{" "}
               {definition.scoringNote}
             </p>
           </div>
@@ -224,6 +228,13 @@ export default function WeekCheckpoint({
 
   if (stage === "results" && result) {
     const recommendations = definition.recommend(result, missedGrammar);
+    // After a pass, point at the weakest section(s) to keep practising.
+    const weakest = result.passed ? lowestSections(result) : [];
+    const keepPractising = weakest.length
+      ? definition
+          .recommend({ ...result, weakSections: weakest }, missedGrammar)
+          .filter((item) => item.target.type === "lesson")
+      : [];
 
     return (
       <LessonShell onBack={onBack}>
@@ -245,6 +256,12 @@ export default function WeekCheckpoint({
               ? `${definition.weekLabel} mastered`
               : "Review recommended"}
           </h1>
+
+          {result.passed && definition.passNote ? (
+            <p className="mx-auto mt-3 max-w-md text-center text-sm leading-6 text-neutral-500">
+              {definition.passNote}
+            </p>
+          ) : null}
 
           <div className="mt-8 overflow-hidden rounded-2xl border border-black/5 bg-white">
             {result.sections.map((section, index) => (
@@ -294,6 +311,34 @@ export default function WeekCheckpoint({
 
               <div className="space-y-2">
                 {recommendations.map((item) => (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={() => onOpenTarget(item.target)}
+                    className="flex w-full items-center justify-between rounded-xl border border-black/5 bg-white px-5 py-3.5 text-left text-sm font-medium transition hover:bg-neutral-50"
+                  >
+                    {item.label}
+                    <ArrowRight size={16} className="text-neutral-300" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {result.passed && keepPractising.length > 0 ? (
+            <div className="mt-6">
+              <p className="mb-1 text-sm font-medium">Keep it strong</p>
+              <p className="mb-3 text-sm text-neutral-500">
+                Your weakest {weakest.length === 1 ? "section was" : "sections were"}{" "}
+                {result.sections
+                  .filter((section) => weakest.includes(section.key))
+                  .map((section) => `${section.label} (${section.score}/${section.max})`)
+                  .join(", ")}
+                .
+              </p>
+
+              <div className="space-y-2">
+                {keepPractising.map((item) => (
                   <button
                     key={item.label}
                     type="button"
@@ -442,6 +487,7 @@ export default function WeekCheckpoint({
         {stage === "speaking" ? (
           <SpeakingSection
             key={`s-${attempt}`}
+            content={definition.speaking}
             onComplete={(score) => completeSection("speaking", score)}
           />
         ) : null}

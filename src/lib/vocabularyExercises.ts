@@ -258,6 +258,13 @@ function articleAwareFinalKind(
 ): VocabQuestionKind {
   const slot = index % 5;
 
+  // Verbs, adjectives and expressions in a mixed set (Week 4) have no
+  // article or plural to ask about.
+  if (!item.requireArticle) {
+    if (slot === 4 && typedAllowed) return "typed";
+    return slot % 2 === 0 ? "de-en" : "en-de";
+  }
+
   if (slot === 0) return "de-en";
   if (slot === 1) return "en-de";
   if (slot === 2) return "article";

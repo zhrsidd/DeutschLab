@@ -70,9 +70,27 @@ const REFERENCE: Record<string, string> = {
   lehrer: "der | Lehrer", lehrerin: "die | Lehrerinnen", schueler: "der | Schüler",
   schuelerin: "die | Schülerinnen", mann: "der | Männer", frau: "die | Frauen",
   maedchen: "das | Mädchen", junge: "der | Jungen",
+  // Week 4 (checked against de.wiktionary.org, 2026-10-13). Mass nouns
+  // follow the "no ordinary plural" policy: Butter, Tee, Fleisch, Obst,
+  // Schokolade, Geld (Gelder = funds), Kleidung (Kleidungen is rare).
+  fruehstueck: "das | Frühstücke", mittagessen: "das | Mittagessen",
+  abendessen: "das | Abendessen", broetchen: "das | Brötchen",
+  butter: "die | -", tee: "der | -", fleisch: "das | -", fisch: "der | Fische",
+  kuchen: "der | Kuchen", schokolade: "die | -", obst: "das | -",
+  tomate: "die | Tomaten", salat: "der | Salate",
+  wohnung: "die | Wohnungen", kuehlschrank: "der | Kühlschränke",
+  fernseher: "der | Fernseher", bild: "das | Bilder", hund: "der | Hunde",
+  katze: "die | Katzen", geld: "das | -", zeit: "die | Zeiten",
+  kleidung: "die | -", jacke: "die | Jacken", hose: "die | Hosen",
+  "t-shirt": "das | T-Shirts", schuh: "der | Schuhe", brille: "die | Brillen",
+  hausaufgabe: "die | Hausaufgaben", klasse: "die | Klassen",
+  pruefung: "die | Prüfungen", test: "der | Tests", frage: "die | Fragen",
+  antwort: "die | Antworten", wort: "das | Wörter", satz: "der | Sätze",
+  fach: "das | Fächer", stunde: "die | Stunden", pause: "die | Pausen",
+  woerterbuch: "das | Wörterbücher",
 };
 
-describe("noun gender and plural reference (Weeks 2–3)", () => {
+describe("noun gender and plural reference (Weeks 2–4)", () => {
   it("matches the reference for every noun", () => {
     for (const [id, expected] of Object.entries(REFERENCE)) {
       const item = findVocabularyItem(id);
@@ -84,7 +102,7 @@ describe("noun gender and plural reference (Weeks 2–3)", () => {
     }
   });
 
-  it("references every Week 2 and Week 3 noun, so none can drift unnoticed", () => {
+  it("references every Week 2–4 noun, so none can drift unnoticed", () => {
     const nouns = allVocabularyItems().filter(
       (item) => item.partOfSpeech === "noun" && item.article && !["subjects", "countries", "days", "months"].includes(item.category),
     );

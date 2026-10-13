@@ -61,3 +61,53 @@ export const selfAssessment = [
 export const DRILL_SECONDS = 20;
 export const FINAL_SECONDS = 60;
 export const SPEAKING_PASS_SCORE = 4;
+
+/** Everything a guided speaking lesson needs (speaking-001, speaking-002). */
+export interface SpeakingLessonConfig {
+  kicker: string;
+  title: string;
+  intro: string;
+  /** Stat shown on the intro card, e.g. "60 sec". */
+  finalLabel: string;
+  frames: SentenceFrame[];
+  sampleLabel: string;
+  sample: string;
+  sampleEnglish: string;
+  prompts: SpeakingPrompt[];
+  finalHeading: string;
+  /** Optional line under the final heading. */
+  finalHint?: string;
+  finalCues: string[];
+  /** Shown when the final timer runs out. */
+  finishedText: string;
+  selfAssessment: string[];
+  drillSeconds: number;
+  finalSeconds: number;
+  passScore: number;
+  passMessage: string;
+  failMessage: string;
+}
+
+export const week1SpeakingConfig: SpeakingLessonConfig = {
+  kicker: "Week 1 · Speaking",
+  title: "Introduce yourself",
+  intro:
+    "Time to speak. Using only what you've learned this week, you'll practise short sentences out loud, then give a 60-second self-introduction without a script.",
+  finalLabel: "60 sec",
+  frames: sentenceFrames,
+  sampleLabel: "Example introduction",
+  sample: sampleIntroduction,
+  sampleEnglish: sampleIntroductionEnglish,
+  prompts: speakingPrompts,
+  finalHeading: "Introduce yourself in German for 60 seconds.",
+  finalCues,
+  finishedText: "Time's up. Well done for speaking the whole minute.",
+  selfAssessment,
+  drillSeconds: DRILL_SECONDS,
+  finalSeconds: FINAL_SECONDS,
+  passScore: SPEAKING_PASS_SCORE,
+  passMessage:
+    "You gave your first German self-introduction. Repeat it out loud often, because speaking gets easier with repetition.",
+  failMessage:
+    "Review the sentence frames and try the introduction again.",
+};

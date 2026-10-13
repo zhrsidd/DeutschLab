@@ -83,7 +83,9 @@ describe("curriculum", () => {
   it("lists Week 3 in order right after checkpoint-002", () => {
     const ids = starterTasks.map((task) => task.id);
 
-    expect(ids.slice(ids.indexOf("checkpoint-002") + 1)).toEqual([
+    expect(
+      ids.slice(ids.indexOf("checkpoint-002") + 1, ids.indexOf("checkpoint-003") + 1),
+    ).toEqual([
       "vocab-003",
       "grammar-006",
       "grammar-007",
@@ -94,7 +96,8 @@ describe("curriculum", () => {
       "checkpoint-003",
     ]);
     expect(starterTasks.filter((task) => task.week === 3)).toHaveLength(8);
-    expect(Math.max(...starterTasks.map((task) => task.week ?? 1))).toBe(3);
+    // Week 4 is the last implemented week (v1.0 scope: October only).
+    expect(Math.max(...starterTasks.map((task) => task.week ?? 1))).toBe(4);
     expect(new Set(ids).size).toBe(ids.length);
     expect(starterTasks.find((t) => t.id === "vocab-003")?.minutes).toBe(25);
     expect(starterTasks.find((t) => t.id === "grammar-006")?.minutes).toBe(15);

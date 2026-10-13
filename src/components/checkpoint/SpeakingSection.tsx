@@ -12,12 +12,32 @@ import { formatTime, useCountdown } from "../../hooks/useCountdown";
 
 import SelfCheck from "./SelfCheck";
 
+/** What a checkpoint's speaking section asks for. */
+export interface CheckpointSpeakingContent {
+  heading: string;
+  instructions: string;
+  seconds: number;
+  cues: string[];
+  checklist: string[];
+}
+
+export const week1CheckpointSpeaking: CheckpointSpeakingContent = {
+  heading: "Introduce yourself in German.",
+  instructions: "Speak out loud for 60–90 seconds. Use the timer, and no script.",
+  seconds: SPEAKING_SECONDS,
+  cues: writingCues,
+  checklist: speakingChecklist,
+};
+
 export default function SpeakingSection({
+  content = week1CheckpointSpeaking,
   onComplete,
 }: {
+  content?: CheckpointSpeakingContent;
   onComplete: (score: number) => void;
 }) {
-  const timer = useCountdown(SPEAKING_SECONDS);
+  const SECONDS = content.seconds;
+  const timer = useCountdown(SECONDS);
   const [started, setStarted] = useState(false);
   const [assessing, setAssessing] = useState(false);
 
@@ -26,7 +46,7 @@ export default function SpeakingSection({
       <SelfCheck
         title="How did it go?"
         intro="Nothing is recorded or analysed, so tick only what is honestly true."
-        statements={speakingChecklist}
+        statements={content.checklist}
         continueLabel="See results"
         onSubmit={onComplete}
       />
@@ -39,17 +59,15 @@ export default function SpeakingSection({
   return (
     <>
       <h2 className="mt-4 text-3xl font-semibold tracking-tight">
-        Introduce yourself in German.
+        {content.heading}
       </h2>
 
-      <p className="mt-3 text-neutral-500">
-        Speak out loud for 60–90 seconds. Use the timer, and no script.
-      </p>
+      <p className="mt-3 text-neutral-500">{content.instructions}</p>
 
       <div className="mt-4 rounded-xl bg-neutral-50 px-5 py-4 text-sm leading-6 text-neutral-500">
         <p className="font-medium text-neutral-900">Cues (optional)</p>
         <ul className="mt-1 list-disc space-y-0.5 pl-5">
-          {writingCues.map((cue) => (
+          {content.cues.map((cue) => (
             <li key={cue}>{cue}</li>
           ))}
         </ul>
@@ -66,7 +84,7 @@ export default function SpeakingSection({
 
         {stoppedEarly ? (
           <p className="mt-4 text-sm text-neutral-500">
-            Stopped at {formatTime(SPEAKING_SECONDS - timer.remaining)}.
+            Stopped at {formatTime(SECONDS - timer.remaining)}.
           </p>
         ) : null}
 

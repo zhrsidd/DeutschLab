@@ -1,5 +1,5 @@
 /*
- * Checkpoint scoring (Week 1 and Week 2). Pure: every threshold lives here.
+ * Checkpoint scoring (Weeks 1–4). Pure: every threshold lives here.
  */
 
 export const CHECKPOINT_ID = "checkpoint-001";
@@ -89,7 +89,36 @@ export const WEEK3_CHECKPOINT: CheckpointConfig = {
   overallPassFraction: OVERALL_PASS_FRACTION,
 };
 
+export const WEEK4_CHECKPOINT_ID = "checkpoint-004";
+
+/**
+ * Week 4 / October Foundations: all six sections, 39 marks. Pass with 80%
+ * overall (32/39) and these section minimums; reading has none.
+ */
+export const WEEK4_SECTION_RULES: SectionRule[] = [
+  { key: "vocabulary", label: "Vocabulary", max: 8, minFraction: 6 / 8 },
+  { key: "grammar", label: "Grammar", max: 12, minFraction: 9 / 12 },
+  { key: "reading", label: "Reading", max: 4, minFraction: 0 },
+  { key: "listening", label: "Listening", max: 4, minFraction: 2 / 4 },
+  { key: "writing", label: "Writing self-check", max: 6, minFraction: 4 / 6 },
+  { key: "speaking", label: "Speaking self-check", max: 5, minFraction: 3 / 5 },
+];
+
+export const WEEK4_CHECKPOINT_TOTAL = totalOf(WEEK4_SECTION_RULES);
+
+export const WEEK4_CHECKPOINT: CheckpointConfig = {
+  id: WEEK4_CHECKPOINT_ID,
+  rules: WEEK4_SECTION_RULES,
+  overallPassFraction: OVERALL_PASS_FRACTION,
+};
+
+/** Whole marks needed overall (e.g. 32 of 39 at 80%). */
+export function overallRequiredMarks(config: CheckpointConfig): number {
+  return Math.ceil(totalOf(config.rules) * config.overallPassFraction - 1e-9);
+}
+
 export function checkpointConfigFor(id: string): CheckpointConfig {
+  if (id === WEEK4_CHECKPOINT_ID) return WEEK4_CHECKPOINT;
   if (id === WEEK3_CHECKPOINT_ID) return WEEK3_CHECKPOINT;
   return id === WEEK2_CHECKPOINT_ID ? WEEK2_CHECKPOINT : WEEK1_CHECKPOINT;
 }
@@ -218,4 +247,27 @@ export function isWeek2Mastered(completedTaskIds: string[]): boolean {
 /** Week 3 is mastered once checkpoint-003 has been completed (passed). */
 export function isWeek3Mastered(completedTaskIds: string[]): boolean {
   return completedTaskIds.includes(WEEK3_CHECKPOINT_ID);
+}
+
+/**
+ * Week 4 (and with it the October Foundations curriculum) is mastered once
+ * checkpoint-004 has been completed (passed). This is DeutschLab's own
+ * milestone, not a CEFR certificate.
+ */
+export function isWeek4Mastered(completedTaskIds: string[]): boolean {
+  return completedTaskIds.includes(WEEK4_CHECKPOINT_ID);
+}
+
+/**
+ * The lowest-scoring sections relative to their maximum (ties included),
+ * ignoring full marks. Used to suggest what to keep practising after a pass.
+ */
+export function lowestSections(result: CheckpointResult): SectionKey[] {
+  const below = result.sections.filter((section) => section.score < section.max);
+  if (below.length === 0) return [];
+
+  const lowest = Math.min(...below.map((section) => section.score / section.max));
+  return below
+    .filter((section) => section.score / section.max <= lowest + 1e-9)
+    .map((section) => section.key);
 }

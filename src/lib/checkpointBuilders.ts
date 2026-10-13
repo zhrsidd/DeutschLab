@@ -16,6 +16,10 @@ import {
   week3GrammarSlots,
   week3VocabularySlots,
 } from "../data/lessons/week3Checkpoint";
+import {
+  week4GrammarSlots,
+  week4VocabularySlots,
+} from "../data/lessons/week4Checkpoint";
 import { findVocabularyItem } from "../data/lessons/vocabularySets";
 import type { CourseQuestion } from "../data/lessons/grammarCourseTypes";
 import { week1QuestionsQuiz } from "../data/lessons/week1Questions";
@@ -71,6 +75,16 @@ export function buildWeek3CheckpointVocabulary(attempt: number): VocabQuestion[]
 /** Ten Week 3 grammar questions, one per skill, varied by attempt. */
 export function buildWeek3CheckpointGrammar(attempt: number): CourseQuestion[] {
   return week3GrammarSlots.map((options) => options[attempt % options.length]);
+}
+
+/** Eight cumulative vocabulary questions, mostly Week 4, varied by attempt. */
+export function buildWeek4CheckpointVocabulary(attempt: number): VocabQuestion[] {
+  return buildCheckpointVocabulary(attempt, week4VocabularySlots, "cp4");
+}
+
+/** Twelve cumulative grammar questions, one per skill, varied by attempt. */
+export function buildWeek4CheckpointGrammar(attempt: number): CourseQuestion[] {
+  return week4GrammarSlots.map((options) => options[attempt % options.length]);
 }
 
 /** Adapts a grammar-001 question to the data-driven shape. */

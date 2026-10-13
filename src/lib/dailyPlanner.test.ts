@@ -487,14 +487,15 @@ describe("Week 3 progression", () => {
     expect(next([...week2Done, ...week3Instructional], 30)).toEqual(["checkpoint-003"]);
   });
 
-  it("has nothing left to plan once checkpoint-003 is done (no Week 4 yet)", () => {
+  it("moves on to Week 4 once checkpoint-003 is done", () => {
     const plan = generateDailyPlan({
       ...base,
       completedTaskIds: [...week2Done, ...week3Order],
     });
 
-    expect(plan.done).toBe(true);
-    expect(starterTasks.every((task) => (task.week ?? 1) <= 3)).toBe(true);
+    expect(plan.done).toBe(false);
+    expect(plan.items[0].sourceId).toBe("vocab-004");
+    expect(plan.items.every((item) => item.kind === "lesson")).toBe(true);
   });
 
   it("defers a failed checkpoint-003 behind reviews", () => {
@@ -538,12 +539,87 @@ describe("Week 3 progression", () => {
       ],
     });
 
-    expect(plan.items.map((item) => item.kind)).toEqual(["review", "mistake"]);
+    // Reviews and the weak area come first; new (Week 4) lessons only after.
+    const kinds = plan.items.map((item) => item.kind);
+    expect(kinds.slice(0, 2)).toEqual(["review", "mistake"]);
+    expect(kinds.slice(2).every((kind) => kind === "lesson")).toBe(true);
     expect(plan.items[1].title).toBe("Revisit Week 3 nouns and articles");
   });
 
   it("leaves the Week 1 and Week 2 order unchanged", () => {
     expect(next(week1All, 15)[0]).toBe("vocab-002");
     expect(next([...week1All, "vocab-002"], 15)[0]).toBe("grammar-004");
+  });
+});
+
+describe("Week 4 progression", () => {
+  const week3Done = starterTasks
+    .filter((task) => (task.week ?? 1) <= 3)
+    .map((task) => task.id);
+  const week4Order = [
+    "vocab-004", "grammar-009", "grammar-010", "reading-003",
+    "listening-004", "writing-003", "speaking-002", "checkpoint-004",
+  ];
+  const week4Instructional = week4Order.slice(0, 7);
+
+  const next = (completed: string[], budgetMinutes = 30, extra: Partial<PlannerInput> = {}) =>
+    generateDailyPlan({ ...base, budgetMinutes, completedTaskIds: completed, ...extra }).items;
+
+  it("lists Week 4 in curriculum order after checkpoint-003", () => {
+    const ids = starterTasks.map((task) => task.id);
+    expect(ids.slice(ids.indexOf("checkpoint-003") + 1)).toEqual(week4Order);
+  });
+
+  it("withholds Week 4 until checkpoint-003 is passed", () => {
+    const beforeCheckpoint = week3Done.filter((id) => id !== "checkpoint-003");
+    const planned = next(beforeCheckpoint, 60).map((item) => item.sourceId);
+
+    expect(planned[0]).toBe("checkpoint-003");
+    for (const id of week4Order) expect(planned).not.toContain(id);
+  });
+
+  it("walks Week 4 in order, one lesson at a time on a short day", () => {
+    for (const [index, id] of week4Instructional.entries()) {
+      const planned = next([...week3Done, ...week4Instructional.slice(0, index)], 15);
+      expect(planned[0].sourceId, id).toBe(id);
+    }
+  });
+
+  it("offers checkpoint-004 only once every Week 4 lesson is complete", () => {
+    const almost = [...week3Done, ...week4Instructional.slice(0, 6)];
+    expect(next(almost, 60).map((item) => item.sourceId)).not.toContain("checkpoint-004");
+    expect(next([...week3Done, ...week4Instructional], 60)[0].sourceId).toBe("checkpoint-004");
+  });
+
+  it("keeps due reviews and weak areas ahead of new Week 4 lessons", () => {
+    const items = next([...week3Done, "vocab-004"], 60, {
+      dueReviewCount: 5,
+      dueReviewKeys: ["grammar:pr-c-mich"],
+      unresolvedMistakes: [
+        { id: 3, lessonId: "vocab-004", itemKey: "vocabulary:jacke#article", prompt: "p", timesMissed: 2 },
+      ],
+    });
+
+    expect(items.map((item) => item.kind).slice(0, 2)).toEqual(["review", "mistake"]);
+    expect(items[1].title).toBe("Revisit Week 4 vocabulary");
+    expect(items[2].sourceId).toBe("grammar-009");
+  });
+
+  it("defers a failed checkpoint-004 behind reviews", () => {
+    const items = next([...week3Done, ...week4Instructional], 30, {
+      attemptedCheckpointIds: ["checkpoint-004"],
+      dueReviewCount: 3,
+    });
+    expect(items.map((item) => item.kind)).toEqual(["review"]);
+  });
+
+  it("has no new lessons after checkpoint-004 but still offers due reviews", () => {
+    const all = starterTasks.map((task) => task.id);
+
+    expect(generateDailyPlan({ ...base, completedTaskIds: all }).done).toBe(true);
+
+    const withReviews = next(all, 30, { dueReviewCount: 4 });
+    expect(withReviews.map((item) => item.kind)).toEqual(["review"]);
+    expect(starterTasks.every((task) => (task.week ?? 1) <= 4)).toBe(true);
   });
 });

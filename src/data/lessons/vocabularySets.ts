@@ -13,6 +13,10 @@ import {
   week3Vocabulary,
   week3VocabularyBatches,
 } from "./week3Vocabulary";
+import {
+  week4Vocabulary,
+  week4VocabularyBatches,
+} from "./week4Vocabulary";
 
 /*
  * A vocabulary set is one batch-based vocabulary lesson (vocab-001,
@@ -112,10 +116,47 @@ export const week3VocabularySet: VocabularySet = {
   resumable: true,
 };
 
+/**
+ * Week 4 mixes nouns (article-aware, as in Week 3) with verbs, adjectives
+ * and expressions. Only the nouns get article and plural questions.
+ */
+export const week4VocabularySet: VocabularySet = {
+  taskId: "vocab-004",
+  kicker: "Week 4 · Vocabulary",
+  title: "Everyday German in context",
+  intro:
+    "Learn {count} words and phrases for daily life: everyday actions, meals, home, clothes, school and study, descriptions and useful expressions. Nouns come with their article and plural, as in Week 3. Each batch ends with a short check, and a mixed quiz closes the lesson. You can leave between batches and resume where you stopped.",
+  items: week4Vocabulary,
+  batches: week4VocabularyBatches,
+  finalQuota: [
+    ["actions", 4],
+    ["meals", 4],
+    ["home", 2],
+    ["clothes", 2],
+    ["study", 3],
+    ["descriptions", 3],
+    ["expressions", 2],
+  ],
+  typedCategories: [
+    "actions",
+    "meals",
+    "home",
+    "clothes",
+    "study",
+    "descriptions",
+    "expressions",
+  ],
+  seedPrefix: "final-w4",
+  articleAware: true,
+  reminder: ARTICLE_REMINDER,
+  resumable: true,
+};
+
 export const vocabularySets: VocabularySet[] = [
   week1VocabularySet,
   week2VocabularySet,
   week3VocabularySet,
+  week4VocabularySet,
 ];
 
 /** Every vocabulary item across all sets (ids are unique across sets). */

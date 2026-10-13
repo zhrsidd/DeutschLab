@@ -74,12 +74,12 @@ export const unit1Curriculum: CurriculumMonth[] = [
       },
       {
         week: 4,
-        title: "Accusative",
+        title: "Accusative & irregular verbs",
         topics: [
-          "der → den",
-          "ein → einen",
+          "Everyday vocabulary",
+          "Accusative pronouns",
+          "sehen, nehmen, fahren, treffen, tragen",
           "Direct objects",
-          "Basic pronouns",
           "October consolidation",
         ],
       },
@@ -392,5 +392,76 @@ export const starterTasks: LessonTask[] = [
     type: "review",
     minutes: 25,
     week: 3,
+  },
+  {
+    id: "vocab-004",
+    title: "Everyday German in context",
+    description:
+      "Learn everyday actions, meals, home, clothes, school words, descriptions and useful phrases.",
+    type: "vocabulary",
+    minutes: 25,
+    week: 4,
+  },
+  {
+    id: "grammar-009",
+    title: "Accusative pronouns",
+    description:
+      "Replace a direct object with mich, dich, ihn, sie, es, uns or euch.",
+    type: "grammar",
+    minutes: 14,
+    week: 4,
+  },
+  {
+    id: "grammar-010",
+    title: "Irregular verbs and the accusative",
+    description:
+      "Learn sehen, nehmen, treffen, fahren and tragen, then combine verbs, articles, pronouns and word order.",
+    type: "grammar",
+    minutes: 16,
+    week: 4,
+  },
+  {
+    id: "reading-003",
+    title: "Everyday descriptions",
+    description: "Read two short texts about a school day and a home.",
+    type: "reading",
+    minutes: 12,
+    week: 4,
+  },
+  {
+    id: "listening-004",
+    title: "Everyday conversations",
+    description:
+      "Listen to short clips and conversations about school, people, plans and shopping.",
+    type: "listening",
+    minutes: 12,
+    week: 4,
+  },
+  {
+    id: "writing-003",
+    title: "Describing everyday life",
+    description:
+      "Write 60–80 words about yourself, your school, your activities, your home and your belongings.",
+    type: "writing",
+    minutes: 16,
+    week: 4,
+  },
+  {
+    id: "speaking-002",
+    title: "Introducing myself and my daily life",
+    description:
+      "Prepare, practise and give a 2–3 minute spoken introduction about yourself and your daily life.",
+    type: "speaking",
+    minutes: 15,
+    week: 4,
+  },
+  {
+    id: "checkpoint-004",
+    title: "October Foundations Checkpoint",
+    description:
+      "The Week 4 mastery check and October assessment: vocabulary, grammar, reading, listening, writing and speaking from Weeks 1–4.",
+    type: "review",
+    minutes: 40,
+    week: 4,
   },
 ];

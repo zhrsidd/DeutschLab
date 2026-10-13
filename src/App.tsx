@@ -32,6 +32,7 @@ import WeekCheckpoint from "./components/WeekCheckpoint";
 import {
   week2VocabularySet,
   week3VocabularySet,
+  week4VocabularySet,
 } from "./data/lessons/vocabularySets";
 import CommonVerbsLesson from "./components/CommonVerbsLesson";
 import WritingLesson from "./components/WritingLesson";
@@ -39,14 +40,21 @@ import Week2ListeningLesson from "./components/Week2ListeningLesson";
 import Week2ReadingLesson from "./components/Week2ReadingLesson";
 import Week3ListeningLesson from "./components/Week3ListeningLesson";
 import Week3ReadingLesson from "./components/Week3ReadingLesson";
+import Week4ListeningLesson from "./components/Week4ListeningLesson";
+import Week4ReadingLesson from "./components/Week4ReadingLesson";
 import { roomWriting } from "./data/lessons/week3Writing";
+import { everydayWriting } from "./data/lessons/week4Writing";
+import { week4SpeakingConfig } from "./data/lessons/week4Speaking";
 import {
   week2CheckpointDefinition,
   week3CheckpointDefinition,
+  week4CheckpointDefinition,
 } from "./lib/checkpointDefinitions";
 import AccusativeLesson from "./components/AccusativeLesson";
 import ArticlesLesson from "./components/ArticlesLesson";
 import HabenLesson from "./components/HabenLesson";
+import IrregularVerbsLesson from "./components/IrregularVerbsLesson";
+import PronounsLesson from "./components/PronounsLesson";
 import NegationLesson from "./components/NegationLesson";
 import QuestionsLesson from "./components/QuestionsLesson";
 import RegularVerbsLesson from "./components/RegularVerbsLesson";
@@ -78,9 +86,11 @@ import {
   CHECKPOINT_ID,
   WEEK2_CHECKPOINT_ID,
   WEEK3_CHECKPOINT_ID,
+  WEEK4_CHECKPOINT_ID,
   isWeek1Mastered,
   isWeek2Mastered,
   isWeek3Mastered,
+  isWeek4Mastered,
 } from "./lib/checkpointScoring";
 
 import {
@@ -511,6 +521,123 @@ function App() {
     );
   }
 
+  if (activeLessonId === "vocab-004") {
+    return (
+      <VocabularyLesson
+        set={week4VocabularySet}
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("vocab-004", score, total)
+        }
+        onFinish={() => finishLesson("vocab-004")}
+      />
+    );
+  }
+
+  if (activeLessonId === "grammar-009") {
+    return (
+      <PronounsLesson
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("grammar-009", score, total)
+        }
+        onFinish={() => finishLesson("grammar-009")}
+      />
+    );
+  }
+
+  if (activeLessonId === "grammar-010") {
+    return (
+      <IrregularVerbsLesson
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("grammar-010", score, total)
+        }
+        onFinish={() => finishLesson("grammar-010")}
+      />
+    );
+  }
+
+  if (activeLessonId === "reading-003") {
+    return (
+      <Week4ReadingLesson
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("reading-003", score, total)
+        }
+        onFinish={() => finishLesson("reading-003")}
+      />
+    );
+  }
+
+  if (activeLessonId === "listening-004") {
+    return (
+      <Week4ListeningLesson
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("listening-004", score, total)
+        }
+        onFinish={() => finishLesson("listening-004")}
+      />
+    );
+  }
+
+  if (activeLessonId === "writing-003") {
+    return (
+      <WritingLesson
+        config={everydayWriting}
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("writing-003", score, total)
+        }
+        onFinish={() => finishLesson("writing-003")}
+      />
+    );
+  }
+
+  if (activeLessonId === "speaking-002") {
+    return (
+      <SpeakingLesson
+        config={week4SpeakingConfig}
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(score, total) =>
+          saveLessonAttempt("speaking-002", score, total)
+        }
+        onFinish={() => finishLesson("speaking-002")}
+      />
+    );
+  }
+
+  if (activeLessonId === WEEK4_CHECKPOINT_ID) {
+    return (
+      <WeekCheckpoint
+        definition={week4CheckpointDefinition}
+        unfinishedLessons={
+          starterTasks.filter(
+            (task) =>
+              taskWeek(task) === 4 &&
+              task.id !== WEEK4_CHECKPOINT_ID &&
+              !completedTasks.includes(task.id),
+          ).length
+        }
+        onBack={() => setActiveLessonId(null)}
+        onSaveAttempt={(result) =>
+          saveCheckpointAttempt(WEEK4_CHECKPOINT_ID, result)
+        }
+        onFinish={() => finishLesson(WEEK4_CHECKPOINT_ID)}
+        onOpenTarget={(target) => {
+          if (target.type === "review") {
+            setReviewLimit(null);
+            setActiveLessonId(null);
+            setView("review");
+          } else {
+            setActiveLessonId(target.taskId);
+          }
+        }}
+      />
+    );
+  }
+
   if (activeLessonId === WEEK3_CHECKPOINT_ID) {
     return (
       <WeekCheckpoint
@@ -761,6 +888,7 @@ function App() {
               week1Mastered={isWeek1Mastered(completedTasks)}
               week2Mastered={isWeek2Mastered(completedTasks)}
               week3Mastered={isWeek3Mastered(completedTasks)}
+              week4Mastered={isWeek4Mastered(completedTasks)}
               nextReviewAt={planData.nextDueAt}
               studyMinutes={studyMinutes}
               setStudyMinutes={(minutes) =>
@@ -807,6 +935,7 @@ interface TodayViewProps {
   week1Mastered: boolean;
   week2Mastered: boolean;
   week3Mastered: boolean;
+  week4Mastered: boolean;
   nextReviewAt: string | null;
   studyMinutes: number;
   setStudyMinutes: (minutes: number) => void;
@@ -824,6 +953,7 @@ function TodayView({
   week1Mastered,
   week2Mastered,
   week3Mastered,
+  week4Mastered,
   nextReviewAt,
   studyMinutes,
   setStudyMinutes,
@@ -875,6 +1005,20 @@ function TodayView({
           </div>
         </header>
 
+        {week4Mastered ? (
+          <section
+            aria-label="October Foundations"
+            className="mb-4 rounded-2xl border border-black/5 bg-white p-6"
+          >
+            <p className="text-sm font-medium">October Foundations complete</p>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-neutral-500">
+              You have mastered Weeks 1–4 in DeutschLab. This is the app's own
+              milestone, not a CEFR certificate. November (Weeks 5–16) is not
+              built yet, so keep your due reviews going.
+            </p>
+          </section>
+        ) : null}
+
         <WeekProgressCard
           label="Week 1"
           tasks={starterTasks.filter((task) => taskWeek(task) === 1)}
@@ -894,6 +1038,13 @@ function TodayView({
           tasks={starterTasks.filter((task) => taskWeek(task) === 3)}
           completedTasks={completedTasks}
           mastered={week3Mastered}
+        />
+
+        <WeekProgressCard
+          label="Week 4"
+          tasks={starterTasks.filter((task) => taskWeek(task) === 4)}
+          completedTasks={completedTasks}
+          mastered={week4Mastered}
         />
 
         <section className="mb-8">

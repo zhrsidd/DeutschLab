@@ -44,3 +44,27 @@ export const planSection = (page: Page) =>
   page.locator("section", {
     has: page.getByRole("heading", { name: "Today's plan" }),
   });
+
+export const WEEK_2_MASTERED = [...WEEK_1_MASTERED, ...WEEK_2_INSTRUCTIONAL, "checkpoint-002"];
+
+export const WEEK_3_MASTERED = [
+  ...WEEK_2_MASTERED,
+  "vocab-003",
+  "grammar-006",
+  "grammar-007",
+  "grammar-008",
+  "reading-002",
+  "listening-003",
+  "writing-002",
+  "checkpoint-003",
+];
+
+export const WEEK_4_INSTRUCTIONAL = [
+  "vocab-004",
+  "grammar-009",
+  "grammar-010",
+  "reading-003",
+  "listening-004",
+  "writing-003",
+  "speaking-002",
+];

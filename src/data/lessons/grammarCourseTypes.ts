@@ -19,7 +19,12 @@ export interface TeachingPage {
 }
 
 /** Distinct learning target a question trains (shown on Review cards). */
-export type CourseConcept = "accusative" | "negation";
+export type CourseConcept =
+  | "accusative"
+  | "negation"
+  | "pronoun"
+  | "verb_form"
+  | "word_order";
 
 interface QuestionBase {
   id: string;

@@ -18,7 +18,14 @@ export type VocabularyCategory =
   | "furniture"
   | "food"
   | "objects"
-  | "people";
+  | "people"
+  | "actions"
+  | "meals"
+  | "home"
+  | "clothes"
+  | "study"
+  | "descriptions"
+  | "expressions";
 
 export interface VocabularyItem {
   id: string;
@@ -74,6 +81,13 @@ export const categoryLabels: Record<VocabularyCategory, string> = {
   food: "Food and drink",
   objects: "Everyday objects",
   people: "People",
+  actions: "Everyday actions",
+  meals: "Food and meals",
+  home: "Home and daily life",
+  clothes: "Clothes and belongings",
+  study: "School and study",
+  descriptions: "Descriptions",
+  expressions: "Useful expressions",
 };
 
 export const week1Vocabulary: VocabularyItem[] = [

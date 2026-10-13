@@ -24,6 +24,14 @@ import {
   checkpoint3ReadingText,
 } from "../data/lessons/week3Checkpoint";
 import { checkpoint3Writing } from "../data/lessons/week3Writing";
+import {
+  checkpoint4ListeningItems,
+  checkpoint4ReadingQuestions,
+  checkpoint4ReadingText,
+  checkpoint4Speaking,
+} from "../data/lessons/week4Checkpoint";
+import { checkpoint4Writing } from "../data/lessons/week4Writing";
+import type { CheckpointSpeakingContent } from "../components/checkpoint/SpeakingSection";
 
 import {
   buildCheckpointGrammar,
@@ -32,11 +40,14 @@ import {
   buildWeek2CheckpointVocabulary,
   buildWeek3CheckpointGrammar,
   buildWeek3CheckpointVocabulary,
+  buildWeek4CheckpointGrammar,
+  buildWeek4CheckpointVocabulary,
 } from "./checkpointBuilders";
 import {
   WEEK1_CHECKPOINT,
   WEEK2_CHECKPOINT,
   WEEK3_CHECKPOINT,
+  WEEK4_CHECKPOINT,
   type CheckpointConfig,
   type CheckpointResult,
   type SectionKey,
@@ -63,6 +74,10 @@ export interface CheckpointDefinition {
   readingQuestions: ComprehensionQuestion[];
   listeningQuestions: ComprehensionQuestion[];
   writing: WritingContent;
+  /** Speaking section content; defaults to the Week 1 introduction. */
+  speaking?: CheckpointSpeakingContent;
+  /** Extra line shown under the heading after a pass. */
+  passNote?: string;
   buildVocabulary: (attempt: number) => VocabQuestion[];
   buildGrammar: (attempt: number) => CourseQuestion[];
   recommend: (
@@ -104,6 +119,8 @@ const grammarLabels: Record<string, string> = {
   "grammar-006": "Review nouns, articles and plurals",
   "grammar-007": "Review the accusative case",
   "grammar-008": "Review nicht and kein",
+  "grammar-009": "Review accusative pronouns",
+  "grammar-010": "Review irregular verbs and the accusative",
 };
 
 export const week1CheckpointDefinition: CheckpointDefinition = {
@@ -255,6 +272,65 @@ export const week3CheckpointDefinition: CheckpointDefinition = {
         add("Practise listening", { type: "lesson", taskId: "listening-003" });
       } else if (key === "writing") {
         add("Review your writing", { type: "lesson", taskId: "writing-002" });
+      }
+    }
+
+    if (!result.passed) add("Open Review", { type: "review" });
+
+    return out;
+  },
+};
+
+export const week4CheckpointDefinition: CheckpointDefinition = {
+  config: WEEK4_CHECKPOINT,
+  weekLabel: "Week 4",
+  title: "October Foundations Checkpoint",
+  summary:
+    "The Week 4 mastery check and the October Foundations assessment in one. It covers everything from Weeks 1–4, with most weight on Week 4: vocabulary, grammar, reading, listening, a paragraph about your day and a 2–3 minute spoken introduction.",
+  time: "35–40 min",
+  sections: ["vocabulary", "grammar", "reading", "listening", "writing", "speaking"],
+  scoringNote:
+    "Writing and speaking are self-assessed: nothing is recorded or graded automatically. You'll need a German voice for the listening section.",
+  readingText: checkpoint4ReadingText,
+  readingQuestions: checkpoint4ReadingQuestions,
+  listeningQuestions: flattenListening(checkpoint4ListeningItems),
+  writing: {
+    prompt: checkpoint4Writing.prompt,
+    targetWords: checkpoint4Writing.targetWords,
+    cues: checkpoint4Writing.cues,
+    checklist: checkpoint4Writing.checklist,
+    sample: checkpoint4Writing.sample,
+  },
+  speaking: checkpoint4Speaking,
+  passNote:
+    "October Foundations complete within DeutschLab. This is the app's own milestone, not a CEFR A1 certificate.",
+  buildVocabulary: buildWeek4CheckpointVocabulary,
+  buildGrammar: buildWeek4CheckpointGrammar,
+  recommend: (result, missedGrammarLessons) => {
+    const { out, add } = collect();
+
+    for (const key of result.weakSections) {
+      if (key === "vocabulary") {
+        add("Review Week 4 vocabulary", { type: "lesson", taskId: "vocab-004" });
+      } else if (key === "grammar") {
+        const lessons = missedGrammarLessons.length
+          ? missedGrammarLessons
+          : ["grammar-010"];
+
+        for (const lessonId of lessons) {
+          add(grammarLabels[lessonId] ?? "Review grammar", {
+            type: "lesson",
+            taskId: lessonId,
+          });
+        }
+      } else if (key === "reading") {
+        add("Practise reading", { type: "lesson", taskId: "reading-003" });
+      } else if (key === "listening") {
+        add("Practise listening", { type: "lesson", taskId: "listening-004" });
+      } else if (key === "writing") {
+        add("Review your writing", { type: "lesson", taskId: "writing-003" });
+      } else if (key === "speaking") {
+        add("Practise your spoken introduction", { type: "lesson", taskId: "speaking-002" });
       }
     }
 
