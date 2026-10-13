@@ -288,7 +288,7 @@ export default function WeekCheckpoint({
                     "rounded-full px-3 py-1 text-sm font-medium",
                     section.passed
                       ? "bg-neutral-100 text-neutral-700"
-                      : "bg-red-50 text-red-900",
+                      : "dl-feedback bg-red-50 text-red-900",
                   ].join(" ")}
                 >
                   {section.score}/{section.max}

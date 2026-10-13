@@ -58,7 +58,7 @@ export default function WritingSection({
         </div>
 
         <div className="mt-4 rounded-xl bg-neutral-50 px-5 py-4 text-sm leading-6 text-neutral-500">
-          <p className="font-medium text-neutral-900">
+          <p className="font-medium text-fg">
             Compare your paragraph with this example
           </p>
           <p className="mt-1">{content.sample}</p>
@@ -90,7 +90,7 @@ export default function WritingSection({
       </p>
 
       <div className="mt-4 rounded-xl bg-neutral-50 px-5 py-4 text-sm leading-6 text-neutral-500">
-        <p className="font-medium text-neutral-900">Cues (optional)</p>
+        <p className="font-medium text-fg">Cues (optional)</p>
         <ul className="mt-1 list-disc space-y-0.5 pl-5">
           {content.cues.map((cue) => (
             <li key={cue}>{cue}</li>

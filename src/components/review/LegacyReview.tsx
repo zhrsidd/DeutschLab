@@ -78,7 +78,7 @@ export default function LegacyReview({
             onClick={() => void rate(true)}
             className="flex items-center justify-center gap-2 rounded-xl bg-neutral-900 px-5 py-3.5 text-sm font-medium text-white transition enabled:hover:bg-neutral-800 disabled:opacity-40"
           >
-            <Check size={16} />
+            <Check size={16} className="dl-check" aria-hidden="true" />
             Correct
           </button>
         </div>

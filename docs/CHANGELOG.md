@@ -3,6 +3,37 @@
 Newest first. Versions before 1.0 were internal milestones; dates are commit dates.
 Details of each audit live in `docs/QUALITY_AUDIT.md` (v0.8) and `docs/V1_RELEASE_REPORT.md` (v1.0).
 
+## Unreleased — Nocturne redesign (2026-10-13)
+
+Interface and interaction redesign only: no new curriculum, no change to grading, checkpoint scoring,
+SRS intervals or mistake resolution. Details, verification and limitations: `docs/UI_REDESIGN_REPORT.md`;
+the system itself: `DESIGN.md`.
+
+- **Nocturne identity:** obsidian surfaces, electric violet accent, Bricolage Grotesque / DM Sans /
+  Instrument Serif (bundled). Legacy lesson utilities are remapped in `src/index.css`, so every lesson
+  is dark without rewriting its markup. No white flash: `index.html` and the native window paint
+  `#09080D` first.
+- **Six-section shell** (Home, Course, Practice, Review, Progress, Settings) with a springing violet
+  marker; side rail from 960 px, top bar below.
+- **Opening sequence:** violet light, the Umlaut mark and a kinetic wordmark that split open the moment
+  the database is ready; no minimum duration, honest slow and error states, once per launch.
+- **Home:** atmospheric light that leans toward the pointer, a kinetic German greeting, the week as a
+  numeral, one luminous next-activity block, lighter activity charts.
+- **Learning feedback:** spring and drawn check on correct answers, a gentle nudge plus the answer and
+  explanation on wrong ones, animated lesson progress; articles in violet and a singular → plural shift on
+  vocabulary cards.
+- **Completion moments:** lesson ("Geschafft!"), week mastered ("Woche N geschafft.") and October
+  Foundations ("Oktober geschafft."), shown only after a saved, first-time completion.
+- **Educational motion:** replayable V2 word order (grammar-010) and der → den (grammar-007)
+  demonstrations, with written captions.
+- **Course:** current week emphasised, planned units compact. **Review** restyled. **Progress/Settings**
+  spacing and colour fixes.
+- Fixed: horizontal overflow caused by visually hidden chart tables and `1fr` grid columns; the obsolete
+  template `src/App.css` removed.
+- Tests: E2E selectors updated for the six-section shell; new unit, component and E2E tests for the
+  opening, celebrations, kinetic sentences, dark first paint, navigation, reduced motion and
+  completion-after-persistence. The native self-test covers the new shell.
+
 ## 1.0.0 — October Foundations (2026-10-13)
 
 The first complete October Foundations learning app: Weeks 1–4 of Unit 1. Not a complete A1

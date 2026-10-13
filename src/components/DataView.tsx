@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
-import { Database, Download, FolderOpen } from "lucide-react";
+import { FolderOpen } from "lucide-react";
 
 import { APP_VERSION } from "../lib/appInfo";
 import {
@@ -16,7 +16,7 @@ import { ErrorMessage } from "./lesson/LessonParts";
 type Busy = "export" | "snapshot" | null;
 
 /*
- * "Your data": local backups. Exporting only reads the database. There is no
+ * "Your data" (shown inside Settings): local backups. Exporting only reads the database. There is no
  * in-app restore in v1.0; the steps for restoring a snapshot by hand are
  * shown instead (see docs/V1_RELEASE_REPORT.md).
  */
@@ -53,136 +53,109 @@ export default function DataView() {
   };
 
   return (
-    <div className="dl-enter px-5 py-6 md:px-10 md:py-9">
-      <div className="mx-auto max-w-3xl">
-        <header className="mb-8">
-          <p className="mb-2 text-sm font-medium text-neutral-400">Local backup</p>
-          <h1 className="text-3xl font-semibold tracking-[-0.03em]">Your data</h1>
-          <p className="mt-2 max-w-xl text-neutral-500">
-            Your progress, reviews, mistakes, checkpoint attempts, writing drafts
-            and settings stay on this Mac. Make a backup before big changes, or
-            from time to time.
-          </p>
-        </header>
+    <div>
+      <p className="max-w-reading text-sm leading-6 text-fg-2">
+        Your progress, reviews, mistakes, checkpoint attempts, writing drafts and settings stay on this
+        Mac. Make a backup before big changes, or from time to time.
+      </p>
 
-        {error ? <ErrorMessage>{error}</ErrorMessage> : null}
+      {error ? <ErrorMessage>{error}</ErrorMessage> : null}
 
-        <div className="grid gap-4">
-          <section aria-label="Export" className="rounded-2xl border border-black/5 bg-white p-6">
-            <div className="flex items-start gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-600">
-                <Download size={19} strokeWidth={1.8} />
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <h2 className="font-semibold tracking-tight">Export learning data</h2>
-                <p className="mt-1 text-sm leading-6 text-neutral-500">
-                  A readable, versioned JSON file with everything DeutschLab has
-                  stored for you. Exporting never changes your data.
-                </p>
-
-                <button
-                  type="button"
-                  disabled={busy !== null}
-                  onClick={() => void run("export")}
-                  className="mt-4 rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white transition-colors enabled:hover:bg-neutral-800 disabled:opacity-40"
-                >
-                  {busy === "export" ? "Exporting…" : "Export backup"}
-                </button>
-
-                {exported ? (
-                  <div role="status" className="mt-4 rounded-xl bg-neutral-50 px-4 py-3 text-sm text-neutral-600">
-                    {exported.kind === "file" ? (
-                      <>
-                        <p>Saved to</p>
-                        <p className="mt-1 break-all font-mono text-xs">{exported.path}</p>
-                        <button
-                          type="button"
-                          onClick={() => reveal(exported.path)}
-                          className="mt-3 flex items-center gap-2 rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50"
-                        >
-                          <FolderOpen size={15} />
-                          Show in Finder
-                        </button>
-                      </>
-                    ) : (
-                      <p>Downloaded {exported.fileName}.</p>
-                    )}
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          </section>
-
-          <section aria-label="Snapshot" className="rounded-2xl border border-black/5 bg-white p-6">
-            <div className="flex items-start gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-600">
-                <Database size={19} strokeWidth={1.8} />
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <h2 className="font-semibold tracking-tight">Database snapshot</h2>
-                <p className="mt-1 text-sm leading-6 text-neutral-500">
-                  An exact copy of your database file, the safest thing to keep
-                  for a full restore. Snapshots are never overwritten.
-                </p>
-
-                <button
-                  type="button"
-                  disabled={busy !== null || !native}
-                  onClick={() => void run("snapshot")}
-                  className="mt-4 rounded-xl border border-black/10 bg-white px-4 py-2.5 text-sm font-medium text-neutral-800 transition-colors enabled:hover:bg-neutral-50 disabled:opacity-40"
-                >
-                  {busy === "snapshot" ? "Saving…" : "Save snapshot"}
-                </button>
-
-                {!native ? (
-                  <p className="mt-2 text-xs text-neutral-400">
-                    Available in the DeutschLab app, not in a browser preview.
-                  </p>
-                ) : null}
-
-                {snapshot ? (
-                  <div role="status" className="mt-4 rounded-xl bg-neutral-50 px-4 py-3 text-sm text-neutral-600">
-                    <p>Saved to</p>
-                    <p className="mt-1 break-all font-mono text-xs">{snapshot}</p>
-                    <button
-                      type="button"
-                      onClick={() => reveal(snapshot)}
-                      className="mt-3 flex items-center gap-2 rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50"
-                    >
-                      <FolderOpen size={15} />
-                      Show in Finder
-                    </button>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          </section>
-
-          <section aria-label="Restoring" className="rounded-2xl border border-black/5 bg-neutral-50 p-6">
-            <h2 className="font-semibold tracking-tight">Restoring</h2>
-            <p className="mt-1 text-sm leading-6 text-neutral-500">
-              DeutschLab {APP_VERSION} cannot restore inside the app yet, so
-              nothing can be overwritten by accident. To restore a snapshot by
-              hand:
+      <div className="mt-6 divide-y divide-line border-y border-line">
+        <section aria-label="Export" className="grid gap-4 py-5 md:grid-cols-[1fr_auto] md:items-start">
+          <div>
+            <h3 className="font-medium">Export learning data</h3>
+            <p className="mt-1 max-w-reading text-sm leading-6 text-fg-2">
+              A readable, versioned JSON file with everything DeutschLab has stored for you. Exporting never
+              changes your data.
             </p>
-            <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm leading-6 text-neutral-600">
-              <li>Quit DeutschLab.</li>
-              <li>
-                In the app's data folder, move <code>deutschlab.db</code>,{" "}
-                <code>deutschlab.db-wal</code> and <code>deutschlab.db-shm</code>{" "}
-                somewhere safe.
-              </li>
-              <li>
-                Copy the snapshot from <code>backups</code> into the folder and
-                rename it <code>deutschlab.db</code>.
-              </li>
-              <li>Open DeutschLab again.</li>
-            </ol>
-          </section>
-        </div>
+          </div>
+
+          <button
+            type="button"
+            disabled={busy !== null}
+            onClick={() => void run("export")}
+            className="dl-press justify-self-start rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-on-accent enabled:hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {busy === "export" ? "Exporting…" : "Export backup"}
+          </button>
+
+          {exported ? (
+            <div role="status" className="rounded-md bg-surface px-4 py-3 text-sm text-fg-2 md:col-span-2">
+              {exported.kind === "file" ? (
+                <SavedPath path={exported.path} onReveal={reveal} />
+              ) : (
+                <p>Downloaded {exported.fileName}.</p>
+              )}
+            </div>
+          ) : null}
+        </section>
+
+        <section aria-label="Snapshot" className="grid gap-4 py-5 md:grid-cols-[1fr_auto] md:items-start">
+          <div>
+            <h3 className="font-medium">Database snapshot</h3>
+            <p className="mt-1 max-w-reading text-sm leading-6 text-fg-2">
+              An exact, consistent copy of your database file, the safest thing to keep for a full restore.
+              Snapshots are never overwritten.
+            </p>
+            {!native ? (
+              <p className="mt-1 text-xs text-fg-3">Available in the DeutschLab app, not in a browser preview.</p>
+            ) : null}
+          </div>
+
+          <button
+            type="button"
+            disabled={busy !== null || !native}
+            onClick={() => void run("snapshot")}
+            className="dl-press justify-self-start rounded-md border border-line bg-white px-4 py-2.5 text-sm font-medium enabled:hover:border-line-strong disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {busy === "snapshot" ? "Saving…" : "Save snapshot"}
+          </button>
+
+          {snapshot ? (
+            <div role="status" className="rounded-md bg-surface px-4 py-3 text-sm text-fg-2 md:col-span-2">
+              <SavedPath path={snapshot} onReveal={reveal} />
+            </div>
+          ) : null}
+        </section>
+
+        <section aria-label="Restoring" className="py-5">
+          <h3 className="font-medium">Restoring</h3>
+          <p className="mt-1 max-w-reading text-sm leading-6 text-fg-2">
+            DeutschLab {APP_VERSION} cannot restore inside the app, so nothing can be overwritten by
+            accident. To restore a snapshot by hand:
+          </p>
+          <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm leading-6 text-fg-2">
+            <li>Quit DeutschLab.</li>
+            <li>
+              In the app's data folder, move <code>deutschlab.db</code>, <code>deutschlab.db-wal</code> and{" "}
+              <code>deutschlab.db-shm</code> somewhere safe.
+            </li>
+            <li>
+              Copy the snapshot from <code>backups</code> into the folder and rename it{" "}
+              <code>deutschlab.db</code>.
+            </li>
+            <li>Open DeutschLab again.</li>
+          </ol>
+        </section>
       </div>
     </div>
+  );
+}
+
+function SavedPath({ path, onReveal }: { path: string; onReveal: (path: string) => void }) {
+  return (
+    <>
+      <p>Saved to</p>
+      <p className="mt-1 break-all font-mono text-xs">{path}</p>
+      <button
+        type="button"
+        onClick={() => onReveal(path)}
+        className="dl-press mt-3 flex items-center gap-2 rounded-md border border-line bg-white px-3 py-2 text-sm font-medium hover:border-line-strong"
+      >
+        <FolderOpen size={15} />
+        Show in Finder
+      </button>
+    </>
   );
 }

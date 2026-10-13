@@ -306,7 +306,7 @@ export default function WritingLesson({
                         : "border-black/20",
                     ].join(" ")}
                   >
-                    {on ? <Check size={13} /> : null}
+                    {on ? <Check size={13} className="dl-check" aria-hidden="true" /> : null}
                   </span>
                   {cue}
                 </button>

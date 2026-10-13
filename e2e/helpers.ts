@@ -68,3 +68,23 @@ export const WEEK_4_INSTRUCTIONAL = [
   "writing-003",
   "speaking-002",
 ];
+
+/** Opens one of the six main destinations from the shell navigation. */
+export const goTo = (
+  page: Page,
+  view: "Home" | "Course" | "Practice" | "Review" | "Progress" | "Settings",
+) =>
+  page
+    .getByRole("navigation", { name: "Main" })
+    .getByRole("button", { name: new RegExp(`^${view}`) })
+    .click();
+
+/** The greeting depends on the local time of day. */
+export const GREETING = /^Guten (Morgen|Tag|Abend)\.$/;
+
+/** Opens Course and expands a week (only the current week starts open). */
+export async function openWeek(page: Page, week: number) {
+  await goTo(page, "Course");
+  const toggle = page.getByRole("button", { name: new RegExp(`^Week ${week} `) }).first();
+  if ((await toggle.getAttribute("aria-expanded")) === "false") await toggle.click();
+}

@@ -65,7 +65,7 @@ export default function SpeakingSection({
       <p className="mt-3 text-neutral-500">{content.instructions}</p>
 
       <div className="mt-4 rounded-xl bg-neutral-50 px-5 py-4 text-sm leading-6 text-neutral-500">
-        <p className="font-medium text-neutral-900">Cues (optional)</p>
+        <p className="font-medium text-fg">Cues (optional)</p>
         <ul className="mt-1 list-disc space-y-0.5 pl-5">
           {content.cues.map((cue) => (
             <li key={cue}>{cue}</li>

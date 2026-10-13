@@ -10,7 +10,16 @@ export type TeachingBlock =
       type: "examples";
       items: { german: string; english: string; note?: string }[];
     }
-  | { type: "callout"; title: string; text: string };
+  | { type: "callout"; title: string; text: string }
+  /** A replayable sentence demonstration (DESIGN.md §14). */
+  | { type: "kinetic"; title: string; steps: KineticStep[] };
+
+/** One state of a kinetic sentence; parts keep their id across steps. */
+export interface KineticStep {
+  sentence: string;
+  caption: string;
+  parts: { id: string; text: string; tag?: string; emphasis?: boolean }[];
+}
 
 export interface TeachingPage {
   id: string;

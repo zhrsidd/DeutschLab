@@ -26,7 +26,8 @@ import {
 } from "./db";
 
 export const BACKUP_FORMAT = "deutschlab-backup";
-export const BACKUP_VERSION = 1;
+/** 2 adds study_events (v1.1); version 1 files are still accepted. */
+export const BACKUP_VERSION = 2;
 
 export interface LearnerBackup {
   format: typeof BACKUP_FORMAT;
@@ -53,7 +54,11 @@ const REQUIRED_COLUMNS: Record<LearnerTable, string[]> = {
   review_items: ["source_type", "source_id", "prompt", "answer", "due_at", "interval_days", "repetitions"],
   mistakes: ["lesson_id", "item_key", "prompt", "expected_answer", "times_missed"],
   app_state: ["key", "value"],
+  study_events: ["kind", "occurred_at"],
 };
+
+/** Tables a given backup version does not contain yet. */
+const ADDED_IN: Partial<Record<LearnerTable, number>> = { study_events: 2 };
 
 const BROWSER_PREFIX = "deutschlab:";
 
@@ -129,6 +134,10 @@ export function validateBackup(raw: unknown): BackupValidation {
 
   for (const table of LEARNER_TABLES) {
     const rows = raw.tables[table];
+    if (rows === undefined && (ADDED_IN[table] ?? 1) > raw.version) {
+      counts[table] = 0;
+      continue;
+    }
     if (!Array.isArray(rows)) return { ok: false, error: `Table ${table} is missing.` };
 
     for (const [index, row] of rows.entries()) {

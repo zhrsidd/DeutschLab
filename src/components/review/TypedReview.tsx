@@ -80,8 +80,8 @@ export default function TypedReview({
               "w-full rounded-xl border bg-white px-5 py-4 text-lg outline-none transition focus:border-neutral-400",
               grade
                 ? grade.correct
-                  ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-                  : "border-red-200 bg-red-50 text-red-900"
+                  ? "dl-correct border-emerald-200 bg-emerald-50 text-emerald-900"
+                  : "dl-wrong border-red-200 bg-red-50 text-red-900"
                 : "border-black/10",
             ].join(" ")}
           />

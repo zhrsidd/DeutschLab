@@ -64,7 +64,7 @@ describe("v0.8 indexes", () => {
   it("are created on a fresh database", async () => {
     await db.initialiseDatabase();
 
-    expect(indexNames()).toEqual(["idx_mistakes_open_key", "idx_review_items_due"]);
+    expect(indexNames()).toEqual(["idx_mistakes_open_key", "idx_review_items_due", "idx_study_events_time"]);
   });
 
   it("are added to an existing database without touching any row", async () => {
@@ -80,7 +80,7 @@ describe("v0.8 indexes", () => {
 
     await db.initialiseDatabase();
 
-    expect(indexNames()).toEqual(["idx_mistakes_open_key", "idx_review_items_due"]);
+    expect(indexNames()).toEqual(["idx_mistakes_open_key", "idx_review_items_due", "idx_study_events_time"]);
     expect(rows(`SELECT * FROM task_progress ORDER BY task_id`)).toEqual(before.tasks);
     expect(rows(`SELECT * FROM app_state ORDER BY key`)).toEqual(before.state);
     expect(rows(`SELECT * FROM lesson_attempts`)).toEqual(before.attempts);
@@ -99,7 +99,8 @@ describe("v0.8 indexes", () => {
     await db.initialiseDatabase();
     await db.initialiseDatabase();
 
-    expect(indexNames()).toHaveLength(2);
+    expect(indexNames()).toHaveLength(3);
+    expect(rows(`SELECT name FROM sqlite_master WHERE name = 'study_events'`)).toHaveLength(1);
     expect(rows(`SELECT * FROM review_items`)).toHaveLength(1);
     expect(rows<{ name: string }>(`PRAGMA table_info(review_items)`).filter((c) => c.name === "exercise_json")).toHaveLength(1);
   });
@@ -157,5 +158,47 @@ describe("v0.8 indexes", () => {
     getTestDatabase().prepare(`UPDATE review_items SET due_at = '2000-01-01T00:00:00.000Z'`).run();
     expect((await db.getReviewStats()).dueToday).toBe(1);
     expect(await db.getDueReviewItems()).toHaveLength(1);
+  });
+});
+
+describe("v1.1 study_events", () => {
+  it("is added to a legacy database without changing any existing row", async () => {
+    createLegacyDatabase();
+    const before = ["task_progress", "lesson_attempts", "mistakes", "review_items", "app_state"].map((table) =>
+      rows(`SELECT * FROM ${table}`),
+    );
+
+    await db.initialiseDatabase();
+
+    expect(rows(`SELECT * FROM study_events`)).toEqual([]);
+    const after = ["task_progress", "lesson_attempts", "mistakes", "review_items", "app_state"].map((table) =>
+      rows<Record<string, unknown>>(`SELECT * FROM ${table}`).map((row) => {
+        const { exercise_json: _ignored, ...rest } = row;
+        return table === "review_items" ? rest : row;
+      }),
+    );
+    expect(after).toEqual(before);
+  });
+
+  it("records one row per review answer and nothing else", async () => {
+    await db.initialiseDatabase();
+    await db.recordAnswer({
+      sourceType: "grammar", sourceId: "pr-c-mich", category: "grammar",
+      prompt: "p", expected: "mich", userAnswer: "ich", correct: false,
+    });
+    expect(rows(`SELECT * FROM study_events`)).toEqual([]);
+
+    const [item] = rows<{ id: number }>(`SELECT id FROM review_items`);
+    const review = {
+      id: item.id, sourceType: "grammar" as const, sourceId: "pr-c-mich", prompt: "p", answer: "mich",
+      audioText: null, dueAt: "", intervalDays: 1, ease: 2.5, repetitions: 0, exerciseJson: null,
+    };
+    await db.applyReviewResult(review, true);
+    await db.applyReviewResult(review, false);
+
+    expect(rows(`SELECT kind, item_key, correct FROM study_events ORDER BY id`)).toEqual([
+      { kind: "review", item_key: "grammar:pr-c-mich", correct: 1 },
+      { kind: "review", item_key: "grammar:pr-c-mich", correct: 0 },
+    ]);
   });
 });

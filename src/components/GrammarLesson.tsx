@@ -296,12 +296,12 @@ export default function GrammarLesson({
               </div>
 
               <div className="mt-6 rounded-xl bg-neutral-50 px-5 py-4 text-sm leading-6 text-neutral-500">
-                <p className="font-medium text-neutral-900">du vs Sie</p>
+                <p className="font-medium text-fg">du vs Sie</p>
                 <p className="mt-1">{duVersusSie}</p>
               </div>
 
               <div className="mt-4 rounded-xl bg-neutral-50 px-5 py-4 text-sm leading-6 text-neutral-500">
-                <p className="font-medium text-neutral-900">
+                <p className="font-medium text-fg">
                   sein = "to be"
                 </p>
                 <p className="mt-1">
@@ -425,9 +425,9 @@ export default function GrammarLesson({
                   if (submitted) {
                     if (isCorrect) {
                       appearance =
-                        "border-emerald-200 bg-emerald-50 text-emerald-900";
+                        "dl-correct border-emerald-200 bg-emerald-50 text-emerald-900";
                     } else if (isSelected) {
-                      appearance = "border-red-200 bg-red-50 text-red-900";
+                      appearance = "dl-wrong border-red-200 bg-red-50 text-red-900";
                     } else {
                       appearance = "border-black/5 bg-white text-neutral-400";
                     }
@@ -443,7 +443,7 @@ export default function GrammarLesson({
                     >
                       <span className="font-medium">{option}</span>
 
-                      {submitted && isCorrect ? <Check size={18} /> : null}
+                      {submitted && isCorrect ? <Check size={18} className="dl-check" aria-hidden="true" /> : null}
                       {submitted && isSelected && !isCorrect ? (
                         <X size={18} />
                       ) : null}
@@ -487,8 +487,8 @@ export default function GrammarLesson({
                   "mt-8 w-full rounded-xl border bg-white px-5 py-4 text-lg outline-none transition focus:border-neutral-400",
                   submitted
                     ? wasCorrect
-                      ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-                      : "border-red-200 bg-red-50 text-red-900"
+                      ? "dl-correct border-emerald-200 bg-emerald-50 text-emerald-900"
+                      : "dl-wrong border-red-200 bg-red-50 text-red-900"
                     : "border-black/10",
                 ].join(" ")}
               />
@@ -510,8 +510,8 @@ export default function GrammarLesson({
               className={[
                 "mt-6 rounded-xl px-5 py-4",
                 wasCorrect
-                  ? "bg-emerald-50 text-emerald-900"
-                  : "bg-red-50 text-red-900",
+                  ? "dl-feedback bg-emerald-50 text-emerald-900"
+                  : "dl-feedback bg-red-50 text-red-900",
               ].join(" ")}
             >
               <p className="font-medium">

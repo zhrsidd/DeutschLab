@@ -312,7 +312,7 @@ export default function PronunciationLesson({
 
           <p
             className={`text-center text-neutral-500 ${
-              question.word ? "mt-4" : "mt-10 text-2xl text-neutral-900"
+              question.word ? "mt-4" : "mt-10 text-2xl text-fg"
             }`}
           >
             {question.prompt}
@@ -329,9 +329,9 @@ export default function PronunciationLesson({
               if (answered) {
                 if (isCorrect) {
                   appearance =
-                    "border-emerald-200 bg-emerald-50 text-emerald-900";
+                    "dl-correct border-emerald-200 bg-emerald-50 text-emerald-900";
                 } else if (isSelected) {
-                  appearance = "border-red-200 bg-red-50 text-red-900";
+                  appearance = "dl-wrong border-red-200 bg-red-50 text-red-900";
                 } else {
                   appearance = "border-black/5 bg-white text-neutral-400";
                 }
@@ -347,7 +347,7 @@ export default function PronunciationLesson({
                 >
                   <span className="font-medium">{option}</span>
 
-                  {answered && isCorrect ? <Check size={18} /> : null}
+                  {answered && isCorrect ? <Check size={18} className="dl-check" aria-hidden="true" /> : null}
                   {answered && isSelected && !isCorrect ? (
                     <X size={18} />
                   ) : null}
@@ -361,8 +361,8 @@ export default function PronunciationLesson({
               className={[
                 "mt-6 rounded-xl px-5 py-4",
                 correct
-                  ? "bg-emerald-50 text-emerald-900"
-                  : "bg-red-50 text-red-900",
+                  ? "dl-feedback bg-emerald-50 text-emerald-900"
+                  : "dl-feedback bg-red-50 text-red-900",
               ].join(" ")}
             >
               <p className="font-medium">

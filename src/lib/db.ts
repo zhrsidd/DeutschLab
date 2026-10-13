@@ -149,6 +149,23 @@ export async function initialiseDatabase() {
   if (!columns.some((column) => column.name === "exercise_json")) {
     await db.execute(`ALTER TABLE review_items ADD COLUMN exercise_json TEXT`);
   }
+
+  // v1.1: an append-only log of review answers for Progress. Lesson and
+  // checkpoint attempts already keep their own timestamped rows. Additive:
+  // nothing existing is read, changed or backfilled.
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS study_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      kind TEXT NOT NULL,
+      item_key TEXT,
+      correct INTEGER,
+      occurred_at TEXT NOT NULL
+    )
+  `);
+
+  await db.execute(
+    `CREATE INDEX IF NOT EXISTS idx_study_events_time ON study_events (occurred_at)`,
+  );
 }
 
 interface TaskProgressRow {
@@ -504,6 +521,12 @@ export async function applyReviewResult(
     ],
   );
 
+  // Progress history only; scheduling above is unchanged.
+  await db.execute(
+    `INSERT INTO study_events (kind, item_key, correct, occurred_at) VALUES ('review', ?, ?, ?)`,
+    [itemKey(item.sourceType, item.sourceId), correct ? 1 : 0, now.toISOString()],
+  );
+
   if (!correct) {
     await upsertMistake(
       item.sourceType,
@@ -843,6 +866,7 @@ export const LEARNER_TABLES = [
   "review_items",
   "mistakes",
   "app_state",
+  "study_events",
 ] as const;
 
 export type LearnerTable = (typeof LEARNER_TABLES)[number];
@@ -872,4 +896,106 @@ export async function snapshotDatabase(path: string) {
   const db = await getDatabase();
 
   await db.execute(`VACUUM INTO ?`, [path]);
+}
+
+/*
+ * Progress (v1.1). Read-only; every figure comes from persisted rows.
+ */
+
+export interface ProgressData {
+  /** Timestamps of lesson attempts, checkpoint attempts and review answers in the window. */
+  activity: { kind: "lesson" | "checkpoint" | "review"; at: string }[];
+  /** Latest and best attempt per lesson. */
+  lessonScores: {
+    taskId: string;
+    latestScore: number;
+    latestTotal: number;
+    bestFraction: number;
+    attempts: number;
+  }[];
+  checkpointAttempts: CheckpointAttemptRow[];
+  /** Review answers in the window (recorded from v1.1 on). */
+  reviewAnswers: { correct: boolean; at: string }[];
+  /** Review items by how many times in a row they were recalled. */
+  reviewStages: { repetitions: number; count: number }[];
+  /** Unresolved mistakes per lesson, most first. */
+  openMistakesByLesson: { lessonId: string; count: number }[];
+  /** First recorded study_events row, to say since when reviews are counted. */
+  reviewHistoryStartedAt: string | null;
+}
+
+/** Everything Progress shows; `since` bounds the time-based series. */
+export async function getProgressData(since: Date): Promise<ProgressData> {
+  const db = await getDatabase();
+  const from = since.toISOString();
+
+  const activity = await db.select<{ kind: "lesson" | "checkpoint" | "review"; at: string }[]>(
+    `
+      SELECT 'lesson' AS kind, completed_at AS at FROM lesson_attempts WHERE completed_at >= ?
+      UNION ALL
+      SELECT 'checkpoint', completed_at FROM checkpoint_attempts WHERE completed_at >= ?
+      UNION ALL
+      SELECT 'review', occurred_at FROM study_events WHERE kind = 'review' AND occurred_at >= ?
+    `,
+    [from, from, from],
+  );
+
+  const scores = await db.select<
+    { task_id: string; score: number; total: number; best: number; attempts: number }[]
+  >(
+    `
+      SELECT a.task_id, a.score, a.total, s.best, s.attempts
+      FROM lesson_attempts a
+      JOIN (
+        SELECT task_id, MAX(id) AS last_id, COUNT(*) AS attempts,
+               MAX(CAST(score AS REAL) / NULLIF(total, 0)) AS best
+        FROM lesson_attempts GROUP BY task_id
+      ) s ON s.last_id = a.id
+      ORDER BY a.task_id
+    `,
+  );
+
+  const answers = await db.select<{ correct: number; at: string }[]>(
+    `SELECT correct, occurred_at AS at FROM study_events WHERE kind = 'review' AND occurred_at >= ? ORDER BY id`,
+    [from],
+  );
+
+  const stages = await db.select<{ repetitions: number; count: number }[]>(
+    `SELECT MIN(repetitions, 4) AS repetitions, COUNT(*) AS count FROM review_items GROUP BY MIN(repetitions, 4) ORDER BY 1`,
+  );
+
+  const open = await db.select<{ lesson_id: string; count: number }[]>(
+    `
+      SELECT lesson_id, COUNT(*) AS count FROM mistakes
+      WHERE resolved_at IS NULL GROUP BY lesson_id ORDER BY count DESC, lesson_id LIMIT 8
+    `,
+  );
+
+  const firstEvent = await db.select<{ at: string | null }[]>(
+    `SELECT MIN(occurred_at) AS at FROM study_events`,
+  );
+
+  const checkpoints = (
+    await Promise.all(
+      ["checkpoint-001", "checkpoint-002", "checkpoint-003", "checkpoint-004"].map((id) =>
+        getCheckpointAttempts(id),
+      ),
+    )
+  ).flat();
+
+  return {
+    activity,
+    lessonScores: scores.map((row) => ({
+      taskId: row.task_id,
+      latestScore: row.score,
+      latestTotal: row.total,
+      bestFraction: row.best ?? 0,
+      attempts: row.attempts,
+    })),
+    checkpointAttempts: checkpoints,
+    reviewAnswers: answers.map((row) => ({ correct: row.correct === 1, at: row.at })),
+    reviewStages: stages,
+    openMistakesByLesson: open.map((row) => ({ lessonId: row.lesson_id, count: row.count })),
+    reviewHistoryStartedAt: firstEvent[0]?.at ?? null,
+  };
 }

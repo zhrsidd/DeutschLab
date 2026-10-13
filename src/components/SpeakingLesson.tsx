@@ -363,7 +363,7 @@ export default function SpeakingLesson({
                         : "border-black/20",
                     ].join(" ")}
                   >
-                    {on ? <Check size={15} /> : null}
+                    {on ? <Check size={15} className="dl-check" aria-hidden="true" /> : null}
                   </span>
 
                   <span className="font-medium">{statement}</span>
@@ -611,7 +611,7 @@ function FinalChallenge({
       ) : null}
 
       <div className="mt-6 rounded-xl bg-neutral-50 px-5 py-4 text-sm leading-6 text-neutral-500">
-        <p className="font-medium text-neutral-900">Cues (optional)</p>
+        <p className="font-medium text-fg">Cues (optional)</p>
         <ul className="mt-1 list-disc space-y-0.5 pl-5">
           {config.finalCues.map((cue) => (
             <li key={cue}>{cue}</li>

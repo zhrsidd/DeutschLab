@@ -1,4 +1,5 @@
 import type { TeachingPage } from "../../data/lessons/grammarCourseTypes";
+import KineticSentence from "../lesson/KineticSentence";
 
 export default function TeachingPageView({ page }: { page: TeachingPage }) {
   return (
@@ -15,6 +16,10 @@ export default function TeachingPageView({ page }: { page: TeachingPage }) {
                 {block.text}
               </p>
             );
+          }
+
+          if (block.type === "kinetic") {
+            return <KineticSentence key={index} title={block.title} steps={block.steps} />;
           }
 
           if (block.type === "table") {
@@ -87,7 +92,7 @@ export default function TeachingPageView({ page }: { page: TeachingPage }) {
               key={index}
               className="rounded-xl bg-neutral-50 px-5 py-4 text-sm leading-6 text-neutral-500"
             >
-              <p className="font-medium text-neutral-900">{block.title}</p>
+              <p className="font-medium text-fg">{block.title}</p>
               <p className="mt-1">{block.text}</p>
             </div>
           );

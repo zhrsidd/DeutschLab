@@ -1,20 +1,210 @@
 @import "tailwindcss";
 
+/*
+ * DeutschLab design tokens: NOCTURNE. DESIGN.md is the authoritative
+ * description; keep the two in step. Components use these tokens through
+ * Tailwind utilities (bg-canvas, text-fg-2, font-display, duration-base, ...).
+ */
+
+/* ---------- fonts (bundled, offline; SIL OFL 1.1, see assets/fonts) ---------- */
+
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("./assets/fonts/bricolage-grotesque-normal-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("./assets/fonts/bricolage-grotesque-normal-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 100 1000;
+  font-display: swap;
+  src: url("./assets/fonts/dm-sans-normal-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 100 1000;
+  font-display: swap;
+  src: url("./assets/fonts/dm-sans-normal-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Instrument Serif";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/instrument-serif-normal-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Instrument Serif";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/instrument-serif-normal-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Instrument Serif";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/instrument-serif-italic-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Instrument Serif";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/instrument-serif-italic-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+
+/* ---------- tokens ---------- */
+
+@theme {
+  /* Type families: display (Bricolage), interface (DM Sans), editorial (Instrument Serif). */
+  --font-sans: "DM Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Bricolage Grotesque", "DM Sans", ui-sans-serif, -apple-system, sans-serif;
+  --font-serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+
+  /* Display sizes (interface sizes use Tailwind's text-xs … text-2xl). */
+  --text-display-sm: 1.75rem;
+  --text-display-sm--line-height: 1.1;
+  --text-display-md: 2.5rem;
+  --text-display-md--line-height: 1.02;
+  --text-display-lg: 3.5rem;
+  --text-display-lg--line-height: 0.98;
+  --text-display-xl: 5rem;
+  --text-display-xl--line-height: 0.92;
+  --text-stat: 2.25rem;
+  --text-stat--line-height: 1;
+
+  /*
+   * NOCTURNE palette. 70–80% of a screen is obsidian and dark neutrals,
+   * 15–20% violet-tinted surfaces and details, 5–10% strong violet/orchid.
+   * Semantic names (DESIGN.md §3 maps them to the spec's roles).
+   */
+  --color-canvas: #09080d; /* background */
+  --color-elevated: #15121d; /* background-elevated: cards, inputs, rail */
+  --color-surface: #211a2c; /* deep violet surface: tracks, quiet fills */
+  --color-surface-hover: #2a2138; /* surface-interactive: hover and pressed fills */
+  --color-line: #352b42; /* border: hairlines */
+  --color-line-strong: #54466a; /* border-strong: section rules, outlines */
+  --color-fg: #f5f2ff; /* text-primary */
+  --color-fg-2: #b4adc5; /* text-secondary */
+  --color-fg-3: #958ca8; /* text-muted (≥ 4.5:1 on canvas, elevated and surface) */
+  --color-accent: #a78bfa; /* electric violet: the primary action, "now", data marks */
+  --color-accent-hover: #bba5fc;
+  --color-accent-active: #9273f5;
+  --color-on-accent: #120d1c; /* text on accent fills (6.9:1) */
+  --color-ultraviolet: #7c3aed; /* light sources and gradients, never text */
+  --color-orchid: #d946ef; /* gradient partner; emphasis only */
+  --color-focus: #c4b5fd; /* focus ring */
+  --color-success: #6ee7b7;
+  --color-success-soft: #0f2a20;
+  --color-error: #ffa3a3;
+  --color-error-soft: #2c1418;
+  --color-warning: #f5c56b;
+  --color-warning-soft: #2a2010;
+
+  /*
+   * Compatibility layer for v1.0 lesson markup (DESIGN.md §3.3). Lessons were
+   * written with Tailwind's light utilities; remapping the scales here gives
+   * every lesson the Nocturne identity without rewriting its markup.
+   *   white   → elevated surface (cards), and dark text on primary buttons
+   *   black   → light ink, so border-black/10 becomes a faint light hairline
+   *   neutral → inverted: 50–200 dark fills/lines, 400–700 text, 800/900 violet
+   *   red / emerald / amber → dark error / success / warning tints
+   */
+  --color-white: #15121d;
+  --color-black: #f5f2ff;
+  --color-neutral-50: #1b1625;
+  --color-neutral-100: #211a2c;
+  --color-neutral-200: #352b42;
+  --color-neutral-300: #5f5373;
+  --color-neutral-400: #958ca8;
+  --color-neutral-500: #b4adc5;
+  --color-neutral-600: #c8c2d6;
+  --color-neutral-700: #ddd8ea;
+  --color-neutral-800: #bba5fc; /* primary button hover */
+  --color-neutral-900: #a78bfa; /* primary button fill */
+  --color-neutral-950: #f5f2ff;
+  --color-emerald-50: #0f2a20;
+  --color-emerald-100: #133426;
+  --color-emerald-200: #1f5a43;
+  --color-emerald-700: #6ee7b7;
+  --color-emerald-800: #8cefc8;
+  --color-emerald-900: #a7f3d0;
+  --color-red-50: #2c1418;
+  --color-red-100: #3a1a20;
+  --color-red-200: #6b2c36;
+  --color-red-700: #ff8f8f;
+  --color-red-800: #ff9e9e;
+  --color-red-900: #ffb8b8;
+  --color-amber-50: #2a2010;
+  --color-amber-200: #5c4520;
+  --color-amber-900: #fcd68a;
+
+  /* The side rail appears at 960 px; below it the shell uses a top bar. */
+  --breakpoint-rail: 60rem;
+
+  /* Layout widths. */
+  --container-reading: 42rem;
+  --container-page: 72rem;
+
+  /* Radii: small and consistent; Swiss, not bubbly. */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.625rem;
+  --radius-2xl: 0.75rem;
+  --radius-3xl: 1rem;
+
+  /* Motion (DESIGN.md §11). */
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-standard: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in-out-expo: cubic-bezier(0.87, 0, 0.13, 1);
+  /* A critically-under-damped spring (≈ 3% overshoot) as a CSS easing. */
+  --ease-spring: linear(0, 0.006, 0.025 2.8%, 0.101 6.1%, 0.539 18.9%, 0.721 25.3%, 0.849 31.5%, 0.937 38.1%, 0.968 41.8%, 0.991 45.7%, 1.006 50.1%, 1.015 55%, 1.017 63.9%, 1.001 85.9%, 1);
+  --duration-press: 140ms;
+  --duration-base: 220ms;
+  --duration-feedback: 320ms;
+  --duration-page: 300ms;
+  --duration-chart: 450ms;
+  --duration-reveal: 520ms;
+}
+
+/* ---------- base ---------- */
+
 :root {
-  font-family:
-    Inter,
-    ui-sans-serif,
-    -apple-system,
-    BlinkMacSystemFont,
-    "SF Pro Display",
-    "SF Pro Text",
-    "Helvetica Neue",
-    Arial,
-    sans-serif;
-
-  color: #171717;
-  background: #f7f7f5;
-
+  color-scheme: dark;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-optical-sizing: auto;
+  color: var(--color-fg);
+  background: var(--color-canvas);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -35,6 +225,7 @@ body,
 
 body {
   min-height: 100vh;
+  background: var(--color-canvas);
 }
 
 button,
@@ -43,28 +234,128 @@ textarea,
 select {
   font: inherit;
 }
-/*
- * v1.0 design tokens (Editorial Motion + Neo-Swiss): a neutral grid with one
- * restrained accent, used only for progress and "you are here" markers.
- */
-@theme {
-  --color-accent: #b4232a;
-  --color-accent-soft: #fbeceb;
-  --color-paper: #f7f7f5;
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-fg-3);
+}
+
+/* Page and lesson titles use the display face; everything else stays DM Sans. */
+h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* Long German compounds wrap at a hyphenation point instead of overflowing. */
+h1,
+h2,
+h3 {
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-accent) 45%, transparent);
+  color: var(--color-fg);
 }
 
 /* Visible keyboard focus everywhere; mouse clicks stay clean. */
 :focus-visible {
-  outline: 2px solid #171717;
+  outline: 2px solid var(--color-focus);
   outline-offset: 2px;
   border-radius: 6px;
 }
 
-/* A short, purposeful entrance for views and cards. */
+/* ---------- light and atmosphere (DESIGN.md §8) ---------- */
+
+/*
+ * Soft violet light in a dark room. Layers are radial gradients (no blur
+ * filter) moved only by transform; --mx / --my (−1…1) come from
+ * <Atmosphere> and drift each layer a few pixels toward the pointer.
+ */
+.nc-atmosphere {
+  --mx: 0;
+  --my: 0;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.nc-light {
+  position: absolute;
+  border-radius: 9999px;
+  /* No will-change: these layers are large, so they are promoted only while they move. */
+  transition: transform 900ms var(--ease-out-quint);
+}
+
+.nc-light--violet {
+  width: 70vmax;
+  height: 70vmax;
+  top: -38vmax;
+  right: -18vmax;
+  background: radial-gradient(closest-side, rgb(124 58 237 / 0.34), rgb(124 58 237 / 0.1) 55%, transparent);
+  transform: translate3d(calc(var(--mx) * 28px), calc(var(--my) * 22px), 0);
+}
+
+.nc-light--orchid {
+  width: 46vmax;
+  height: 46vmax;
+  top: -14vmax;
+  right: 14vmax;
+  background: radial-gradient(closest-side, rgb(217 70 239 / 0.16), transparent 70%);
+  transform: translate3d(calc(var(--mx) * -18px), calc(var(--my) * 16px), 0);
+}
+
+.nc-light--low {
+  width: 60vmax;
+  height: 40vmax;
+  bottom: -30vmax;
+  left: -20vmax;
+  background: radial-gradient(closest-side, rgb(167 139 250 / 0.1), transparent 70%);
+  transform: translate3d(calc(var(--mx) * 12px), calc(var(--my) * -10px), 0);
+}
+
+/* Fine film grain keeps large gradients from banding; static, painted once. */
+.nc-grain {
+  position: absolute;
+  inset: 0;
+  /* Plain low-opacity noise: no blend mode, so it costs one static paint. */
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* The atmosphere fades up once on mount; light "emerges" rather than snaps. */
+@keyframes nc-emerge {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.nc-atmosphere {
+  animation: nc-emerge 1200ms var(--ease-out-quint) both;
+}
+
+/* A 1 px border lit from one corner: for the single most important block. */
+.nc-luminous {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--color-elevated), var(--color-elevated)) padding-box,
+    linear-gradient(135deg, rgb(167 139 250 / 0.9), rgb(217 70 239 / 0.45) 35%, var(--color-line) 70%) border-box;
+}
+
+/* ---------- motion primitives ---------- */
+
+/* Page entrance: opacity and a small rise, never blocking input. */
 @keyframes dl-enter {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -73,7 +364,135 @@ select {
 }
 
 .dl-enter {
-  animation: dl-enter 220ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: dl-enter var(--duration-page) var(--ease-out-quint) both;
+}
+
+/* Kinetic headline: each word rises out of a mask, staggered by --i. */
+@keyframes dl-word {
+  from {
+    opacity: 0;
+    transform: translateY(0.6em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.dl-word {
+  display: inline-block;
+  animation: dl-word var(--duration-reveal) var(--ease-out-quint) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+/* Press feedback for buttons that opt in. */
+.dl-press {
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    background-color var(--duration-base) var(--ease-standard),
+    border-color var(--duration-base) var(--ease-standard),
+    color var(--duration-base) var(--ease-standard);
+}
+
+.dl-press:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Smooth expand / collapse without measuring heights. */
+.dl-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--duration-base) var(--ease-out-quint);
+}
+
+.dl-collapse[data-open="true"] {
+  grid-template-rows: 1fr;
+}
+
+.dl-collapse > * {
+  min-height: 0;
+  overflow: hidden;
+}
+
+/*
+ * Answer feedback (DESIGN.md §12). Classes are added when a grade arrives,
+ * which starts the animation once. Correct: a small spring and a violet
+ * glow. Wrong: a gentle sideways nudge, never a shake-and-flash.
+ */
+@keyframes dl-correct {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgb(167 139 250 / 0.55);
+  }
+  35% {
+    transform: scale(1.012);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgb(167 139 250 / 0);
+  }
+}
+
+.dl-correct {
+  animation: dl-correct var(--duration-feedback) var(--ease-spring) both;
+}
+
+@keyframes dl-wrong {
+  0%,
+  100% {
+    transform: none;
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  55% {
+    transform: translateX(3px);
+  }
+  80% {
+    transform: translateX(-1px);
+  }
+}
+
+.dl-wrong {
+  animation: dl-wrong 300ms var(--ease-standard) both;
+}
+
+/* Feedback panels rise in under the answer. */
+@keyframes dl-feedback {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.dl-feedback {
+  animation: dl-feedback var(--duration-base) var(--ease-out-quint) both;
+}
+
+/* Check marks draw themselves (lucide icons are stroked paths). */
+@keyframes dl-draw {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.dl-check path,
+.dl-check polyline {
+  stroke-dasharray: 24;
+  animation: dl-draw 360ms 60ms var(--ease-out-quint) both;
+}
+
+/* Lesson progress fill: grows by transform, and glints once when it moves. */
+.dl-progress-fill {
+  transform-origin: left center;
+  transition: transform 480ms var(--ease-spring);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -81,12 +500,400 @@ select {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .nc-light {
+    transform: none !important;
+  }
+
+  /* Without motion the lesson moment simply shows, then App removes it. */
+  .dl-celebrate--lesson {
+    animation: none !important;
   }
 }
 
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/* ---------- the Umlaut mark ---------- */
+
+.nc-mark {
+  fill: currentColor;
+  overflow: visible;
+}
+
+.nc-mark__dot {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* The dots fall onto the bar one after the other, landing on a spring. */
+@keyframes nc-dot-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-140%);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes nc-bar-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.nc-mark--animate .nc-mark__dot {
+  animation: nc-dot-drop 620ms 120ms var(--ease-spring) both;
+}
+
+.nc-mark--animate .nc-mark__dot--2 {
+  animation-delay: 210ms;
+}
+
+.nc-mark--animate .nc-mark__bar {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: nc-bar-draw 520ms var(--ease-out-quint) both;
+}
+
+/* ---------- opening sequence (DESIGN.md §10) ---------- */
+
+.dl-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.dl-intro[data-phase="out"] {
+  pointer-events: none;
+}
+
+.dl-intro__panel {
+  position: absolute;
+  inset-inline: 0;
+  height: 50.5%;
+  background: var(--color-canvas);
+  transition: transform var(--dl-intro-exit, 760ms) var(--ease-in-out-expo);
+}
+
+.dl-intro__panel--top {
+  top: 0;
+}
+
+.dl-intro__panel--bottom {
+  bottom: 0;
+}
+
+.dl-intro[data-phase="out"] .dl-intro__panel--top {
+  transform: translateY(-100%);
+}
+
+.dl-intro[data-phase="out"] .dl-intro__panel--bottom {
+  transform: translateY(100%);
+}
+
+.dl-intro__glow {
+  position: absolute;
+  width: 90vmin;
+  height: 90vmin;
+  border-radius: 9999px;
+  background:
+    radial-gradient(closest-side, rgb(124 58 237 / 0.42), rgb(124 58 237 / 0.12) 50%, transparent),
+    radial-gradient(closest-side at 70% 35%, rgb(217 70 239 / 0.2), transparent 60%);
+  animation: dl-intro-glow 1400ms var(--ease-out-quint) both;
+  transition: opacity 420ms var(--ease-standard);
+}
+
+@keyframes dl-intro-glow {
+  from {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.dl-intro__stage {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  transition:
+    opacity 360ms var(--ease-standard),
+    transform 760ms var(--ease-in-out-expo);
+}
+
+.dl-intro[data-phase="out"] .dl-intro__glow,
+.dl-intro[data-phase="out"] .dl-intro__stage {
+  opacity: 0;
+}
+
+.dl-intro[data-phase="out"] .dl-intro__stage {
+  transform: scale(1.04);
+}
+
+.dl-intro__mark {
+  width: 3.25rem;
+  height: auto;
+  color: var(--color-accent);
+}
+
+.dl-intro__word {
+  margin: 1.25rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 7vw, 5.5rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  color: var(--color-fg);
+  /* Letters rise from behind this edge. */
+  clip-path: inset(-0.1em -0.2em 0 -0.2em);
+}
+
+@keyframes dl-intro-letter {
+  from {
+    opacity: 0;
+    transform: translateY(0.9em);
+    letter-spacing: 0.12em;
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.dl-intro__letter {
+  display: inline-block;
+  animation: dl-intro-letter 640ms var(--ease-out-quint) both;
+  animation-delay: calc(240ms + var(--i) * 32ms);
+}
+
+/* The last three letters ("Lab") carry the violet. */
+.dl-intro__letter:nth-child(n + 8) {
+  color: var(--color-accent);
+}
+
+.dl-intro__line {
+  display: block;
+  width: min(22rem, 60vw);
+  height: 1px;
+  margin-top: 1.5rem;
+  background: linear-gradient(90deg, transparent, var(--color-accent) 30%, var(--color-orchid) 70%, transparent);
+  animation: nc-bar-draw 900ms 380ms var(--ease-out-quint) both;
+}
+
+.dl-intro__note {
+  margin: 1.25rem 0 0;
+  font-size: 0.875rem;
+  color: var(--color-fg-3);
+  opacity: 0;
+  transition: opacity 400ms var(--ease-standard);
+}
+
+.dl-intro__note[data-visible="true"] {
+  opacity: 1;
+}
+
+/* A reload in the same session skips straight to the reveal. */
+.dl-intro[data-brief="true"] .dl-intro__letter,
+.dl-intro[data-brief="true"] .nc-mark__dot,
+.dl-intro[data-brief="true"] .nc-mark__bar,
+.dl-intro[data-brief="true"] .dl-intro__line,
+.dl-intro[data-brief="true"] .dl-intro__glow {
+  animation-duration: 1ms;
+  animation-delay: 0ms;
+}
+
+/* ---------- completion moments (DESIGN.md §13) ---------- */
+
+.dl-celebrate {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: rgb(9 8 13 / 0.82);
+  animation: nc-emerge 260ms var(--ease-standard) both;
+}
+
+.dl-celebrate--lesson {
+  cursor: pointer;
+  /* Leaves on its own at LESSON_CELEBRATION_MS; fade out over the last 300 ms. */
+  animation:
+    nc-emerge 220ms var(--ease-standard) both,
+    dl-celebrate-out 300ms 1700ms var(--ease-standard) forwards;
+}
+
+.dl-celebrate--week,
+.dl-celebrate--unit {
+  background: rgb(9 8 13 / 0.94);
+}
+
+@keyframes dl-celebrate-out {
+  to {
+    opacity: 0;
+  }
+}
+
+.dl-celebrate__glow {
+  position: absolute;
+  width: 80vmin;
+  height: 80vmin;
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, rgb(124 58 237 / 0.38), rgb(124 58 237 / 0.1) 55%, transparent);
+  animation: dl-celebrate-glow 1100ms var(--ease-out-quint) both;
+}
+
+.dl-celebrate--week .dl-celebrate__glow {
+  width: 110vmin;
+  height: 110vmin;
+  animation-duration: 1600ms;
+}
+
+.dl-celebrate--unit .dl-celebrate__glow {
+  width: 140vmax;
+  height: 140vmax;
+  background:
+    radial-gradient(closest-side, rgb(124 58 237 / 0.42), rgb(124 58 237 / 0.12) 45%, transparent),
+    radial-gradient(closest-side at 62% 40%, rgb(217 70 239 / 0.22), transparent 55%);
+  animation-duration: 2000ms;
+}
+
+@keyframes dl-celebrate-glow {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.dl-celebrate__letter {
+  display: inline-block;
+  animation: dl-celebrate-letter 560ms var(--ease-spring) both;
+}
+
+@keyframes dl-celebrate-letter {
+  from {
+    opacity: 0;
+    transform: translateY(0.45em) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.dl-celebrate__fade {
+  animation: dl-enter 420ms 380ms var(--ease-out-quint) both;
+}
+
+/* The lesson's real progress: from the share done before to the share done now. */
+.dl-celebrate__progress {
+  transform: scaleX(var(--to));
+  animation: dl-celebrate-progress 700ms 450ms var(--ease-spring) both;
+}
+
+@keyframes dl-celebrate-progress {
+  from {
+    transform: scaleX(var(--from));
+  }
+  to {
+    transform: scaleX(var(--to));
+  }
+}
+
+.dl-celebrate__line {
+  background: linear-gradient(90deg, transparent, var(--color-accent) 25%, var(--color-orchid) 75%, transparent);
+  transform-origin: left center;
+  animation: nc-bar-draw 900ms 900ms var(--ease-out-quint) both;
+}
+
+.dl-celebrate__results {
+  animation: dl-enter 480ms 1300ms var(--ease-out-quint) both;
+}
+
+.dl-celebrate--unit .dl-celebrate__line {
+  animation-delay: 1250ms;
+  animation-duration: 1100ms;
+}
+
+.dl-celebrate--unit .dl-celebrate__results {
+  animation-delay: 1750ms;
+}
+
+/* ---------- vocabulary typography (DESIGN.md §14) ---------- */
+
+/* Letters of a new word rise in on a spring, 22 ms apart. */
+@keyframes dl-letter {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.dl-letter {
+  display: inline-block;
+  animation: dl-letter 420ms var(--ease-spring) both;
+  animation-delay: calc(var(--i, 0) * 22ms);
+}
+
+/* Singular → plural: the arrow slides, the plural settles, the change glows. */
+.dl-plural__arrow {
+  display: inline-block;
+  animation: dl-plural-arrow 360ms 260ms var(--ease-out-quint) both;
+}
+
+@keyframes dl-plural-arrow {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.dl-plural__to {
+  display: inline-block;
+  animation: dl-enter 420ms 420ms var(--ease-out-quint) both;
+}
+
+.dl-plural__change {
+  animation: dl-plural-change 900ms 700ms var(--ease-standard) both;
+}
+
+@keyframes dl-plural-change {
+  from {
+    background-color: rgb(167 139 250 / 0.45);
+  }
+  to {
+    background-color: rgb(167 139 250 / 0.15);
+  }
 }

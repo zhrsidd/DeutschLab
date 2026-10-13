@@ -310,6 +310,42 @@ export const irregularVerbsCourse: GrammarCourse = {
           text: "The rules from Week 1 still apply. In a statement the verb is in position 2, even when another word comes first. In a yes/no question the verb comes first.",
         },
         {
+          type: "kinetic",
+          title: "The verb holds position 2",
+          steps: [
+            {
+              sentence: "Ich lerne heute Deutsch.",
+              caption: "The subject ich is in position 1 and the verb lerne is in position 2.",
+              parts: [
+                { id: "ich", text: "Ich", tag: "1 · subject" },
+                { id: "verb", text: "lerne", tag: "2 · verb", emphasis: true },
+                { id: "time", text: "heute" },
+                { id: "deutsch", text: "Deutsch." },
+              ],
+            },
+            {
+              sentence: "Heute lerne ich Deutsch.",
+              caption: "heute moves to position 1. The verb stays in position 2, so the subject ich moves to just after it.",
+              parts: [
+                { id: "time", text: "Heute", tag: "1 · time" },
+                { id: "verb", text: "lerne", tag: "2 · verb", emphasis: true },
+                { id: "ich", text: "ich", tag: "subject" },
+                { id: "deutsch", text: "Deutsch." },
+              ],
+            },
+            {
+              sentence: "Heute Abend lerne ich Deutsch.",
+              caption: "Position 1 is one part of the sentence, not one word: heute Abend is two words, and the verb is still second.",
+              parts: [
+                { id: "time", text: "Heute Abend", tag: "1 · two words" },
+                { id: "verb", text: "lerne", tag: "2 · verb", emphasis: true },
+                { id: "ich", text: "ich", tag: "subject" },
+                { id: "deutsch", text: "Deutsch." },
+              ],
+            },
+          ],
+        },
+        {
           type: "table",
           headers: ["Position 1", "Verb", "Rest"],
           rows: [

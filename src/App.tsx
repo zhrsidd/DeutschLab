@@ -6,19 +6,18 @@ import {
   type ReactNode,
 } from "react";
 
-import {
-  BookOpen,
-  GraduationCap,
-  HardDrive,
-  RotateCcw,
-  Target,
-} from "lucide-react";
-
 import AccusativeLesson from "./components/AccusativeLesson";
 import ArticlesLesson from "./components/ArticlesLesson";
 import CommonVerbsLesson from "./components/CommonVerbsLesson";
-import CurriculumView from "./components/CurriculumView";
-import DataView from "./components/DataView";
+import Celebration, { type CelebrationData } from "./components/celebrate/Celebration";
+import CourseView from "./components/course/CourseView";
+import HomeView from "./components/home/HomeView";
+import { MotionProvider } from "./components/motion";
+import PracticeView from "./components/practice/PracticeView";
+import ProgressView from "./components/progress/ProgressView";
+import SettingsView from "./components/settings/SettingsView";
+import AppShell, { type View } from "./components/shell/AppShell";
+import Intro from "./components/shell/Intro";
 import GrammarLesson from "./components/GrammarLesson";
 import HabenLesson from "./components/HabenLesson";
 import IrregularVerbsLesson from "./components/IrregularVerbsLesson";
@@ -30,7 +29,6 @@ import QuestionsLesson from "./components/QuestionsLesson";
 import RegularVerbsLesson from "./components/RegularVerbsLesson";
 import ReviewView from "./components/ReviewView";
 import SpeakingLesson from "./components/SpeakingLesson";
-import TodayView from "./components/today/TodayView";
 import VocabularyLesson from "./components/VocabularyLesson";
 import WeekCheckpoint from "./components/WeekCheckpoint";
 import Week2ListeningLesson from "./components/Week2ListeningLesson";
@@ -70,21 +68,22 @@ import {
 import {
   getCompletedTaskIds,
   getPlannerData,
+  getProgressData,
   getStudyMinutes,
   initialiseDatabase,
   markTaskComplete,
-  markTaskIncomplete,
   saveCheckpointAttempt,
   saveLessonAttempt,
   setStudyMinutes,
   type PlannerData,
+  type ProgressData,
 } from "./lib/db";
+import { celebrationFor } from "./lib/celebration";
 import { allWeeksMastered, currentWeek, weekSummaries } from "./lib/progress";
+import { dailyActivity, windowStart } from "./lib/progressStats";
 
-type View = "today" | "curriculum" | "review" | "data";
-
-/** Tasks that open a real lesson (the rest use the manual toggle). */
-const IMPLEMENTED_LESSON_IDS = new Set(starterTasks.map((task) => task.id));
+/** Days of history loaded for Home (last 7) and Progress (last 28). */
+const HISTORY_DAYS = 28;
 
 interface LessonProps {
   onBack: () => void;
@@ -135,7 +134,7 @@ const CHECKPOINTS: Record<string, CheckpointDefinition> = {
 };
 
 function App() {
-  const [view, setView] = useState<View>("today");
+  const [view, setView] = useState<View>("home");
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
   const [databaseReady, setDatabaseReady] = useState(false);
   const [databaseError, setDatabaseError] = useState(false);
@@ -152,6 +151,9 @@ function App() {
   const [reviewLimit, setReviewLimit] = useState<number | null>(null);
   // Weak-area items practised this session; kept in memory only.
   const [dismissedMistakes, setDismissedMistakes] = useState<number[]>([]);
+  const [progressData, setProgressData] = useState<ProgressData | null>(null);
+  // A completion moment, set only after the completion has been saved.
+  const [celebration, setCelebration] = useState<CelebrationData | null>(null);
 
   const loadProgress = useCallback(async () => {
     setDatabaseError(false);
@@ -186,6 +188,12 @@ function App() {
       setPlanData(await getPlannerData());
     } catch (error) {
       console.error("Failed to load planner data:", error);
+    }
+
+    try {
+      setProgressData(await getProgressData(windowStart(HISTORY_DAYS)));
+    } catch (error) {
+      console.error("Failed to load progress data:", error);
     }
   }, []);
 
@@ -248,19 +256,6 @@ function App() {
     else setActiveLessonId(item.target.taskId);
   };
 
-  const toggleTask = async (id: string) => {
-    try {
-      if (completedTasks.includes(id)) {
-        await markTaskIncomplete(id);
-        setCompletedTasks((current) => current.filter((taskId) => taskId !== id));
-      } else {
-        await markTaskComplete(id);
-        setCompletedTasks((current) => (current.includes(id) ? current : [...current, id]));
-      }
-    } catch (error) {
-      console.error("Failed to update task progress:", error);
-    }
-  };
 
   const finishLesson = async (taskId: string) => {
     try {
@@ -271,169 +266,136 @@ function App() {
       throw error;
     }
 
+    // Saved: only now may the app present the completion as final, and only
+    // the first time (reopening a finished lesson never replays it).
+    if (!completedTasks.includes(taskId)) {
+      setCelebration(celebrationFor(taskId, completedTasks));
+    }
+
     setCompletedTasks((current) => (current.includes(taskId) ? current : [...current, taskId]));
     setActiveLessonId(null);
-    setView("today");
+    setView("home");
   };
 
-  if (databaseError) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-paper px-6">
-        <div role="alert" className="max-w-md rounded-2xl border border-black/5 bg-white p-6">
-          <p className="font-semibold">DeutschLab could not open its database.</p>
-          <p className="mt-2 text-sm leading-6 text-neutral-500">
-            Nothing was changed or deleted. Try again; if it keeps happening,
-            quit and reopen the app.
-          </p>
-          <button
-            type="button"
-            onClick={() => void loadProgress()}
-            className="mt-5 rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-neutral-800"
-          >
-            Try again
-          </button>
-        </div>
-      </div>
-    );
-  }
+  return (
+    <MotionProvider>
+      {renderContent()}
+      {celebration && activeLessonId === null ? (
+        <Celebration data={celebration} onDone={() => setCelebration(null)} />
+      ) : null}
+      <Intro ready={databaseReady} failed={databaseError} />
+    </MotionProvider>
+  );
 
-  if (!databaseReady) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-paper">
-        <div role="status" className="text-sm text-neutral-400">
-          Opening DeutschLab…
-        </div>
-      </div>
-    );
-  }
-
-  /*
-   * Lesson mode: the lesson renders by itself, without the sidebar.
-   */
-  if (activeLessonId !== null) {
-    const id = activeLessonId;
-    const back = () => setActiveLessonId(null);
-    const definition = CHECKPOINTS[id];
-    const task = starterTasks.find((entry) => entry.id === id);
-
-    if (definition && task) {
+  function renderContent() {
+    if (databaseError) {
       return (
-        <WeekCheckpoint
-          definition={definition}
-          unfinishedLessons={
-            starterTasks.filter(
-              (entry) =>
-                taskWeek(entry) === taskWeek(task) &&
-                entry.id !== id &&
-                !completedTasks.includes(entry.id),
-            ).length
-          }
-          onBack={back}
-          onSaveAttempt={(result: CheckpointResult) => saveCheckpointAttempt(id, result)}
-          onFinish={() => finishLesson(id)}
-          onOpenTarget={openTarget}
-        />
+        <div className="flex min-h-screen items-center justify-center bg-canvas px-6">
+          <div role="alert" className="max-w-md rounded-lg border border-line bg-elevated p-6">
+            <p className="font-semibold">DeutschLab could not open its database.</p>
+            <p className="mt-2 text-sm leading-6 text-neutral-500">
+              Nothing was changed or deleted. Try again; if it keeps happening,
+              quit and reopen the app.
+            </p>
+            <button
+              type="button"
+              onClick={() => void loadProgress()}
+              className="dl-press mt-5 rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-accent-hover"
+            >
+              Try again
+            </button>
+          </div>
+        </div>
       );
     }
 
-    const lesson = LESSONS[id];
-
-    if (lesson) {
-      return lesson({
-        onBack: back,
-        onSaveAttempt: (score, total) => saveLessonAttempt(id, score, total),
-        onFinish: () => finishLesson(id),
-      });
+    if (!databaseReady) {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-canvas">
+          <div role="status" className="text-sm text-fg-3">
+            Opening DeutschLab…
+          </div>
+        </div>
+      );
     }
-  }
 
-  const week = currentWeek(summaries);
-  const complete = allWeeksMastered(summaries);
-  const totalTasks = summaries.reduce((sum, summary) => sum + summary.tasks.length, 0);
-  const doneTasks = summaries.reduce((sum, summary) => sum + summary.done, 0);
-  const octoberPercent = totalTasks === 0 ? 0 : Math.round((doneTasks / totalTasks) * 100);
+    /*
+     * Lesson mode: the lesson renders by itself, without the sidebar.
+     */
+    if (activeLessonId !== null) {
+      const id = activeLessonId;
+      const back = () => setActiveLessonId(null);
+      const definition = CHECKPOINTS[id];
+      const task = starterTasks.find((entry) => entry.id === id);
 
-  return (
-    <div className="min-h-screen bg-paper text-neutral-900">
-      <div className="mx-auto flex min-h-screen max-w-375 flex-col md:flex-row">
-        <aside className="shrink-0 border-b border-black/5 bg-white px-4 py-3 md:w-60 md:border-r md:border-b-0 md:px-5 md:py-6">
-          <div className="flex items-center gap-4 md:block">
-            <div className="flex items-center gap-3 md:mb-9 md:px-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 text-white md:h-10 md:w-10">
-                <GraduationCap size={20} strokeWidth={1.8} />
-              </div>
+      if (definition && task) {
+        return (
+          <WeekCheckpoint
+            definition={definition}
+            unfinishedLessons={
+              starterTasks.filter(
+                (entry) =>
+                  taskWeek(entry) === taskWeek(task) &&
+                  entry.id !== id &&
+                  !completedTasks.includes(entry.id),
+              ).length
+            }
+            onBack={back}
+            onSaveAttempt={(result: CheckpointResult) => saveCheckpointAttempt(id, result)}
+            onFinish={() => finishLesson(id)}
+            onOpenTarget={openTarget}
+          />
+        );
+      }
 
-              <div className="hidden sm:block">
-                <div className="font-semibold tracking-tight">DeutschLab</div>
-                <div className="text-xs text-neutral-400">German for ETH</div>
-              </div>
-            </div>
+      const lesson = LESSONS[id];
 
-            <nav
-              aria-label="Main"
-              className="flex flex-1 gap-1 overflow-x-auto md:block md:space-y-1"
-            >
-              <SidebarButton active={view === "today"} onClick={() => setView("today")}>
-                <Target size={18} />
-                Today
-              </SidebarButton>
+      if (lesson) {
+        return lesson({
+          onBack: back,
+          onSaveAttempt: (score, total) => saveLessonAttempt(id, score, total),
+          onFinish: () => finishLesson(id),
+        });
+      }
+    }
 
-              <SidebarButton active={view === "curriculum"} onClick={() => setView("curriculum")}>
-                <BookOpen size={18} />
-                Unit 1
-              </SidebarButton>
+    const week = currentWeek(summaries);
+    const complete = allWeeksMastered(summaries);
+    const weekSummary = summaries.find((summary) => summary.week === week);
+    const history = dailyActivity(progressData?.activity ?? [], HISTORY_DAYS);
 
-              <SidebarButton active={view === "review"} onClick={() => openReview(null)}>
-                <RotateCcw size={18} />
-                Review
-                {planData.dueReviewCount > 0 ? (
-                  <span className="tabular ml-auto rounded-full bg-neutral-900 px-2 py-0.5 text-xs font-medium text-white">
-                    {planData.dueReviewCount}
-                  </span>
-                ) : null}
-              </SidebarButton>
-
-              <SidebarButton active={view === "data"} onClick={() => setView("data")}>
-                <HardDrive size={18} />
-                Your data
-              </SidebarButton>
-            </nav>
-          </div>
-
-          <div className="mt-10 hidden border-t border-black/5 pt-6 md:block">
-            <p className="px-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
-              October Foundations
-            </p>
-
-            <div className="mt-3 px-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium">{complete ? "Complete" : `Week ${week} of 4`}</span>
-                <span className="tabular text-neutral-400">{octoberPercent}%</span>
-              </div>
-
-              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-neutral-100">
-                <div
-                  className="h-full rounded-full bg-neutral-900 transition-[width] duration-500"
-                  style={{ width: `${Math.max(4, octoberPercent)}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        <main className="min-w-0 flex-1">
-          {view === "today" ? (
-            <TodayView
+    return (
+        <AppShell
+          view={view}
+          onNavigate={(next) => (next === "review" ? openReview(null) : setView(next))}
+          dueReviewCount={planData.dueReviewCount}
+          weekLabel={complete ? "October complete" : `Week ${week} of 4`}
+          weekDetail={weekSummary ? `${weekSummary.done} of ${weekSummary.tasks.length} activities` : ""}
+          weekShare={complete ? 1 : weekSummary ? weekSummary.done / Math.max(1, weekSummary.tasks.length) : 0}
+        >
+          {view === "home" ? (
+            <HomeView
               completedTasks={completedTasks}
               summaries={summaries}
-              implementedLessonIds={IMPLEMENTED_LESSON_IDS}
               plan={plan}
               nextReviewAt={planData.nextDueAt}
-              studyMinutes={studyMinutes}
-              setStudyMinutes={(minutes) => void changeStudyMinutes(minutes)}
+              days={history.slice(-7)}
+              activityLoaded={progressData !== null}
               startPlanItem={startPlanItem}
+              openReview={() => openReview(null)}
+              openSettings={() => setView("settings")}
+            />
+          ) : view === "course" ? (
+            <CourseView
+              summaries={summaries}
+              completedTasks={completedTasks}
               startLesson={(taskId) => setActiveLessonId(taskId)}
-              toggleTask={toggleTask}
+            />
+          ) : view === "practice" ? (
+            <PracticeView
+              progress={progressData}
+              completedTasks={completedTasks}
+              startLesson={(taskId) => setActiveLessonId(taskId)}
             />
           ) : view === "review" ? (
             <ReviewView
@@ -443,41 +405,17 @@ function App() {
                 void refreshPlanData();
               }}
             />
-          ) : view === "data" ? (
-            <DataView />
+          ) : view === "progress" ? (
+            <ProgressView progress={progressData} days={history} summaries={summaries} />
           ) : (
-            <CurriculumView summaries={summaries} />
+            <SettingsView
+              studyMinutes={studyMinutes}
+              setStudyMinutes={(minutes) => void changeStudyMinutes(minutes)}
+            />
           )}
-        </main>
-      </div>
-    </div>
-  );
-}
-
-function SidebarButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-current={active ? "page" : undefined}
-      onClick={onClick}
-      className={[
-        "flex shrink-0 items-center gap-3 whitespace-nowrap rounded-xl px-3 py-2 text-sm transition-colors md:w-full md:py-2.5",
-        active
-          ? "bg-neutral-100 font-medium text-neutral-900"
-          : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900",
-      ].join(" ")}
-    >
-      {children}
-    </button>
-  );
+        </AppShell>
+    );
+  }
 }
 
 export default App;

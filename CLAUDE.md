@@ -16,6 +16,17 @@ DeutschLab is a **local-first macOS German-learning app** built with **Tauri v2,
 - Prefer **teach → contextualise → recall → assess → review**, with meaningful typed production rather than only multiple choice.
 - Writing/speaking self-checks are honest self-assessment; **never claim automatic linguistic grading** without a real grader.
 
+## Design system: DESIGN.md
+- **`DESIGN.md` is authoritative for all UI** (the NOCTURNE system: obsidian × violet, Neo-Swiss grid,
+  tokens, motion, feedback, celebrations, charts, accessibility). Read the relevant section before UI work
+  and update it in the same change when the system changes.
+- Energy levels: **Home = cinematic, Learning = playful, Assessment = focused.** Don't bring Home's
+  atmosphere into lessons or checkpoints.
+- New markup uses semantic tokens (`bg-elevated`, `text-fg-2`, `bg-accent text-on-accent`). Legacy light
+  utilities in lessons are remapped in `src/index.css` (DESIGN.md §3.4); `text-neutral-900` is violet there.
+- Completion moments appear only after a saved, first-time completion (`src/lib/celebration.ts`).
+- `docs/UI_REDESIGN_REPORT.md` records the Nocturne redesign, its verification and limitations.
+
 ## Key code locations
 - `src/App.tsx` — navigation, lesson routing, dashboard/Today
 - `src/data/unit1.ts` — curriculum tasks and stable IDs
@@ -24,7 +35,10 @@ DeutschLab is a **local-first macOS German-learning app** built with **Tauri v2,
 - `src/components/lesson/` — shared presentation primitives
 - `src/hooks/` — German speech and timers
 - `src/lib/` — SQLite, scoring, answer grading, planner, review scheduler, backup (`backup.ts`), resume state (`vocabResume.ts`)
-- `src/components/today/`, `CurriculumView.tsx`, `DataView.tsx` — dashboard views; `App.tsx` holds the lesson registry
+- `src/components/shell/` (AppShell, Intro, Atmosphere, Brand), `home/`, `course/`, `practice/`, `progress/`,
+  `settings/` (+ `DataView.tsx`), `ReviewView.tsx` — the six sections; `App.tsx` holds the lesson registry
+- `src/components/celebrate/`, `charts/`, `lesson/KineticSentence.tsx`, `vocabulary/GermanWord.tsx` — Nocturne
+  moments, charts and educational motion
 - `src-tauri/` — native Tauri integration
 - Existing Vitest/Testing Library and Playwright tests — product regression suite
 

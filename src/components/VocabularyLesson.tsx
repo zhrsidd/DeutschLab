@@ -36,6 +36,7 @@ import {
 } from "./lesson/LessonParts";
 
 import RecallQuestion from "./vocabulary/RecallQuestion";
+import { GermanWord, PluralShift } from "./vocabulary/GermanWord";
 
 type Stage =
   | "intro"
@@ -372,8 +373,8 @@ export default function VocabularyLesson({
             </p>
 
             <div className="mt-4 flex items-center justify-between gap-4">
-              <h2 className="text-5xl font-semibold tracking-tight">
-                {learnItem.german}
+              <h2 className="font-display text-5xl font-semibold tracking-tight">
+                <GermanWord key={learnItem.german} word={learnItem.german} />
               </h2>
 
               <button
@@ -393,9 +394,13 @@ export default function VocabularyLesson({
             <p className="mt-5 text-xl text-neutral-500">{learnItem.english}</p>
 
             {learnItem.plural ? (
-              <p className="mt-2 text-sm text-neutral-400">
-                Plural: {learnItem.plural}
-              </p>
+              <div className="mt-4">
+                <p className="sr-only">Plural: {learnItem.plural}</p>
+                <p aria-hidden="true" className="text-[11px] font-medium uppercase tracking-[0.12em] text-neutral-400">
+                  Plural
+                </p>
+                <PluralShift key={learnItem.german} singular={learnItem.german} plural={learnItem.plural} />
+              </div>
             ) : null}
 
             {learnItem.noPlural ? (

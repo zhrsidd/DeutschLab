@@ -1,5 +1,10 @@
 import { expect, test } from "./fixtures";
-import { WEEK_1_IDS, seedCompleted } from "./helpers";
+import {
+  WEEK_1_IDS,
+  goTo,
+  openWeek,
+  seedCompleted,
+} from "./helpers";
 
 const planSection = (page: import("@playwright/test").Page) =>
   page.locator("section", {
@@ -10,8 +15,10 @@ test.describe("Week 2 (browser, mocked Tauri SQL)", () => {
   test("Today offers Week 2 vocabulary once Week 1 is mastered", async ({ page, db }) => {
     seedCompleted(db, [...WEEK_1_IDS, "checkpoint-001"]);
     await page.goto("/");
+    await goTo(page, "Course");
 
     await expect(page.getByRole("region", { name: "Week 1 progress" })).toContainText("Mastered");
+    await goTo(page, "Home");
 
     const plan = planSection(page);
     await expect(plan.getByRole("button", { name: /Week 2 vocabulary/ })).toBeVisible();
@@ -65,6 +72,7 @@ test.describe("Week 2 (browser, mocked Tauri SQL)", () => {
 
   test("Week 2 is still listed in the curriculum and can be opened early", async ({ page }) => {
     await page.goto("/");
+    await openWeek(page, 2);
 
     await expect(page.getByText("Week 2", { exact: true })).toBeVisible();
 
@@ -79,8 +87,10 @@ test.describe("Week 2 (browser, mocked Tauri SQL)", () => {
   test("Week 1 progress and the checkpoint warning ignore Week 2", async ({ page, db }) => {
     seedCompleted(db, WEEK_1_IDS);
     await page.goto("/");
+    await goTo(page, "Course");
 
     await expect(page.getByRole("region", { name: "Week 1 progress" })).toContainText("7 of 8 activities complete");
+    await goTo(page, "Home");
 
     // All seven Week 1 lessons are done, so Today plans the checkpoint (not Week 2).
     const plan = planSection(page);

@@ -112,8 +112,8 @@ export default function RecallQuestion({
               "w-full rounded-xl border bg-white px-5 py-4 text-lg outline-none transition focus:border-neutral-400",
               grade
                 ? grade.correct
-                  ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-                  : "border-red-200 bg-red-50 text-red-900"
+                  ? "dl-correct border-emerald-200 bg-emerald-50 text-emerald-900"
+                  : "dl-wrong border-red-200 bg-red-50 text-red-900"
                 : "border-black/10",
             ].join(" ")}
           />
@@ -138,9 +138,9 @@ export default function RecallQuestion({
 
             if (grade) {
               if (isCorrect) {
-                appearance = "border-emerald-200 bg-emerald-50 text-emerald-900";
+                appearance = "dl-correct border-emerald-200 bg-emerald-50 text-emerald-900";
               } else if (isSelected) {
-                appearance = "border-red-200 bg-red-50 text-red-900";
+                appearance = "dl-wrong border-red-200 bg-red-50 text-red-900";
               } else {
                 appearance = "border-black/5 bg-white text-neutral-400";
               }
@@ -159,7 +159,7 @@ export default function RecallQuestion({
               >
                 <span className="font-medium">{option}</span>
 
-                {grade && isCorrect ? <Check size={18} /> : null}
+                {grade && isCorrect ? <Check size={18} className="dl-check" aria-hidden="true" /> : null}
                 {grade && isSelected && !isCorrect ? <X size={18} /> : null}
               </button>
             );

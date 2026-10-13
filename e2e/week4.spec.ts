@@ -4,6 +4,8 @@ import { expect, test } from "./fixtures";
 import {
   WEEK_3_MASTERED,
   WEEK_4_INSTRUCTIONAL,
+  goTo,
+  openWeek,
   planSection,
   seedCompleted,
 } from "./helpers";
@@ -110,6 +112,7 @@ test.describe("Week 4 (browser, mocked Tauri SQL)", () => {
       planSection(page).getByRole("button", { name: /October Foundations Checkpoint/ }),
     ).toHaveCount(0);
 
+    await openWeek(page, 4);
     await page.getByRole("button", { name: /The Week 4 mastery check and October assessment/ }).click();
     await page.getByRole("button", { name: "Start lesson" }).click();
     await expect(page.getByRole("heading", { name: "October Foundations Checkpoint" })).toBeVisible();
@@ -120,8 +123,10 @@ test.describe("Week 4 (browser, mocked Tauri SQL)", () => {
   test("Today prioritises checkpoint-004 once all Week 4 lessons are done", async ({ page, db }) => {
     seedCompleted(db, [...WEEK_3_MASTERED, ...WEEK_4_INSTRUCTIONAL]);
     await page.goto("/");
+    await goTo(page, "Course");
 
     await expect(page.getByRole("region", { name: "Week 4 progress" })).toContainText("7 of 8 activities complete");
+    await goTo(page, "Home");
     await planSection(page).getByRole("button", { name: /October Foundations Checkpoint/ }).click();
     await expect(page.getByText("Week 4 · Checkpoint")).toBeVisible();
     await expect(page.getByText(/unfinished Week 4 lessons/)).toHaveCount(0);
@@ -134,8 +139,10 @@ test.describe("Week 4 (browser, mocked Tauri SQL)", () => {
     seedCompleted(db, [...WEEK_3_MASTERED, ...WEEK_4_INSTRUCTIONAL, "checkpoint-004"]);
     seedDueReview(db);
     await page.goto("/");
+    await goTo(page, "Course");
 
     await expect(page.getByRole("region", { name: "Week 4 progress" })).toContainText("Mastered");
+    await goTo(page, "Home");
     await expect(page.getByText(/October Foundations complete/).first()).toBeVisible();
 
     const review = planSection(page).getByRole("button", { name: /1 review due/ });

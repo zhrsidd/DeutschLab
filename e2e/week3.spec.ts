@@ -1,5 +1,12 @@
 import { expect, test } from "./fixtures";
-import { WEEK_1_MASTERED, WEEK_2_INSTRUCTIONAL, planSection, seedCompleted } from "./helpers";
+import {
+  WEEK_1_MASTERED,
+  WEEK_2_INSTRUCTIONAL,
+  goTo,
+  openWeek,
+  planSection,
+  seedCompleted,
+} from "./helpers";
 
 const WEEK_2_MASTERED = [...WEEK_1_MASTERED, ...WEEK_2_INSTRUCTIONAL, "checkpoint-002"];
 const WEEK_3_THROUGH_GRAMMAR = ["vocab-003", "grammar-006", "grammar-007", "grammar-008"];
@@ -129,6 +136,7 @@ test.describe("Week 3 (browser, mocked Tauri SQL)", () => {
 
   test("Week 3 is listed in the curriculum and can be opened early", async ({ page }) => {
     await page.goto("/");
+    await openWeek(page, 3);
 
     await expect(page.getByText("Week 3", { exact: true })).toBeVisible();
 
@@ -260,6 +268,7 @@ test.describe("Week 3 (browser, mocked Tauri SQL)", () => {
     ).toHaveCount(0);
 
     // Opening it early from the curriculum is allowed, with a warning.
+    await openWeek(page, 3);
     await page.getByRole("button", { name: /Test your Week 3 vocabulary/ }).click();
     await page.getByRole("button", { name: "Start lesson" }).click();
     await expect(page.getByRole("heading", { name: "Week 3 Checkpoint" })).toBeVisible();
@@ -270,8 +279,10 @@ test.describe("Week 3 (browser, mocked Tauri SQL)", () => {
   test("Today prioritises checkpoint-003 once all Week 3 lessons are done", async ({ page, db }) => {
     seedCompleted(db, [...WEEK_2_MASTERED, ...WEEK_3_INSTRUCTIONAL]);
     await page.goto("/");
+    await goTo(page, "Course");
 
     await expect(page.getByRole("region", { name: "Week 3 progress" })).toContainText("7 of 8 activities complete");
+    await goTo(page, "Home");
     await planSection(page).getByRole("button", { name: /Week 3 Checkpoint/ }).click();
 
     await expect(page.getByRole("heading", { name: "Week 3 Checkpoint" })).toBeVisible();
@@ -282,10 +293,12 @@ test.describe("Week 3 (browser, mocked Tauri SQL)", () => {
   test("shows Week 3 Mastered and moves on to Week 4 after checkpoint-003", async ({ page, db }) => {
     seedCompleted(db, [...WEEK_2_MASTERED, ...WEEK_3_INSTRUCTIONAL, "checkpoint-003"]);
     await page.goto("/");
+    await goTo(page, "Course");
 
     await expect(page.getByRole("region", { name: "Week 3 progress" })).toContainText("Mastered");
     await expect(page.getByRole("region", { name: "Week 3 progress" })).toContainText("8 of 8 activities complete");
     await expect(page.getByRole("region", { name: "Week 2 progress" })).toContainText("Mastered");
+    await goTo(page, "Home");
     await expect(
       planSection(page).getByRole("button", { name: /Everyday German in context/ }),
     ).toContainText("Next lesson");
@@ -294,6 +307,7 @@ test.describe("Week 3 (browser, mocked Tauri SQL)", () => {
   test("Week 3 stays unmastered before checkpoint-003", async ({ page, db }) => {
     seedCompleted(db, [...WEEK_2_MASTERED, ...WEEK_3_INSTRUCTIONAL]);
     await page.goto("/");
+    await goTo(page, "Course");
 
     await expect(page.getByRole("region", { name: "Week 3 progress" })).toBeVisible();
     await expect(page.getByRole("region", { name: "Week 3 progress" })).not.toContainText("Mastered");

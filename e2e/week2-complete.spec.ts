@@ -2,6 +2,8 @@ import { expect, test } from "./fixtures";
 import {
   WEEK_1_MASTERED,
   WEEK_2_INSTRUCTIONAL,
+  goTo,
+  openWeek,
   planSection,
   seedCompleted,
 } from "./helpers";
@@ -145,6 +147,7 @@ test.describe("Finishing Week 2 (browser, mocked Tauri SQL)", () => {
     await expect(planSection(page).getByRole("button", { name: /Week 2 Checkpoint/ })).toHaveCount(0);
 
     // ...but listed in the curriculum, and openable.
+    await openWeek(page, 2);
     await page.getByRole("button", { name: /Test your Week 2 vocabulary, grammar/ }).click();
     await page.getByRole("button", { name: "Start lesson" }).click();
 
@@ -173,11 +176,13 @@ test.describe("Finishing Week 2 (browser, mocked Tauri SQL)", () => {
   test("shows the Week 2 Mastered state after checkpoint-002 is complete", async ({ page, db }) => {
     seedCompleted(db, [...WEEK_1_MASTERED, ...WEEK_2_INSTRUCTIONAL, "checkpoint-002"]);
     await page.goto("/");
+    await goTo(page, "Course");
 
     await expect(page.getByRole("region", { name: "Week 1 progress" })).toContainText("Mastered");
     await expect(page.getByRole("region", { name: "Week 2 progress" })).toContainText("Mastered");
     await expect(page.getByRole("region", { name: "Week 2 progress" })).toContainText("7 of 7 activities complete");
     // Week 3 content is offered next once Week 2 is mastered.
+    await goTo(page, "Home");
     await expect(
       planSection(page).getByRole("button", { name: /School, home and everyday objects/ }),
     ).toBeVisible();
@@ -186,6 +191,7 @@ test.describe("Finishing Week 2 (browser, mocked Tauri SQL)", () => {
   test("Week 2 is not marked mastered before checkpoint-002", async ({ page, db }) => {
     seedCompleted(db, [...WEEK_1_MASTERED, ...WEEK_2_INSTRUCTIONAL]);
     await page.goto("/");
+    await goTo(page, "Course");
 
     await expect(page.getByRole("region", { name: "Week 2 progress" })).toBeVisible();
     await expect(page.getByRole("region", { name: "Week 2 progress" })).not.toContainText("Mastered");

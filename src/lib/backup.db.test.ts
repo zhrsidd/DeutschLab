@@ -81,7 +81,7 @@ describe("JSON export", () => {
 
     expect(exported).toMatchObject({
       format: "deutschlab-backup",
-      version: 1,
+      version: 2,
       exportedAt: NOW.toISOString(),
       app: { name: "DeutschLab", version: "1.0.0" },
     });
@@ -107,7 +107,7 @@ describe("JSON export", () => {
     if (result.ok) {
       expect(result.counts).toEqual({
         task_progress: 2, lesson_attempts: 1, checkpoint_attempts: 1,
-        review_items: 1, mistakes: 1, app_state: 3,
+        review_items: 1, mistakes: 1, app_state: 3, study_events: 0,
       });
     }
   });
@@ -170,13 +170,30 @@ describe("JSON export completeness", () => {
   });
 });
 
+describe("backup versions", () => {
+  it("still accepts a version 1 file, which has no study_events table", async () => {
+    const current = JSON.parse(backup.serializeBackup(await backup.buildBackup(NOW)));
+    const { study_events: _dropped, ...v1Tables } = current.tables;
+    const result = backup.validateBackup({ ...current, version: 1, tables: v1Tables });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.counts.study_events).toBe(0);
+  });
+
+  it("requires study_events from version 2 on", async () => {
+    const current = JSON.parse(backup.serializeBackup(await backup.buildBackup(NOW)));
+    const { study_events: _dropped, ...tables } = current.tables;
+    expect(backup.validateBackup({ ...current, tables }).ok).toBe(false);
+  });
+});
+
 describe("backup validation rejects bad input", () => {
   const valid = async () => JSON.parse(backup.serializeBackup(await backup.buildBackup(NOW)));
 
   it.each([
     ["not an object", () => "hello", /Not a DeutschLab backup/],
     ["wrong format", (b: Record<string, unknown>) => ({ ...b, format: "other" }), /Not a DeutschLab backup/],
-    ["a newer version", (b: Record<string, unknown>) => ({ ...b, version: 2 }), /newer than this app/],
+    ["a newer version", (b: Record<string, unknown>) => ({ ...b, version: 3 }), /newer than this app/],
     ["a bad date", (b: Record<string, unknown>) => ({ ...b, exportedAt: "yesterday" }), /export date/],
     [
       "a missing table",

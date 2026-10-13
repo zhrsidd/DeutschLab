@@ -236,11 +236,25 @@ export async function runNativeSelfTest(reportPath: string, renderApp: () => voi
 
   renderApp();
 
-  await check("Today renders with Week 4 as the current week", async () => {
+  // Shell navigation buttons read "01Home", "02Course", ... (number + label).
+  const nav = (label: string) => new RegExp(`^(\\d\\d)?${label}(\\d+ due)?$`);
+
+  await check("Nocturne dark background in WKWebView", async () => {
+    const background = getComputedStyle(document.body).backgroundColor;
+    if (background !== "rgb(9, 8, 13)") throw new Error(background);
+    return background;
+  });
+
+  await check("Home renders with Week 4 as the current week", async () => {
     await waitFor("Today's plan", () => headingByText("Today's plan"));
     const header = document.querySelector("main header p")?.textContent ?? "";
     if (!header.includes("Week 4")) throw new Error(header);
     return header;
+  });
+
+  await check("opening sequence leaves once the database is ready", async () => {
+    await waitFor("intro gone", () => !document.querySelector('[data-testid="intro"]'), 3000);
+    return "ok";
   });
 
   await check("no horizontal overflow at the window size", async () => ({
@@ -258,8 +272,22 @@ export async function runNativeSelfTest(reportPath: string, renderApp: () => voi
     return "ok";
   });
 
-  await check("Your data → Save snapshot through the UI", async () => {
-    await click("Your data");
+  await check("every main section opens without horizontal overflow", async () => {
+    const results: Record<string, number> = {};
+    for (const label of ["Course", "Practice", "Review", "Progress", "Settings", "Home"]) {
+      await click(nav(label));
+      await waitFor(`${label} active`, () =>
+        document.querySelector(`nav [aria-current="page"]`)?.textContent?.includes(label),
+      );
+      await sleep(350);
+      results[label] = document.documentElement.scrollWidth - document.documentElement.clientWidth;
+    }
+    if (Object.values(results).some((overflow) => overflow > 0)) throw new Error(JSON.stringify(results));
+    return results;
+  });
+
+  await check("Settings → Your data → Save snapshot through the UI", async () => {
+    await click(nav("Settings"));
     await waitFor("Your data", () => headingByText("Your data"));
     await sleep(1100); // a new second, so the file name differs from the earlier snapshot
     await click("Save snapshot");
@@ -269,8 +297,8 @@ export async function runNativeSelfTest(reportPath: string, renderApp: () => voi
     return status.textContent?.replace("Saved to", "").replace("Show in Finder", "").trim();
   });
 
-  await check("Unit 1 shows Weeks 5–16 as planned", async () => {
-    await click("Unit 1");
+  await check("Course shows Weeks 5–16 as planned", async () => {
+    await click(nav("Course"));
     const november = await waitFor("November", () => document.querySelector('[aria-label="November"]'));
     if (!november.textContent?.includes("Planned")) throw new Error("no Planned status");
     return "ok";

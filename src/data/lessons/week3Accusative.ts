@@ -204,6 +204,32 @@ export const accusativeCourse: GrammarCourse = {
           ],
         },
         {
+          type: "kinetic",
+          title: "Watch der become den",
+          steps: [
+            {
+              sentence: "Der Tisch ist groß.",
+              caption: "der Tisch is the subject, so it is in the nominative: der.",
+              parts: [
+                { id: "article", text: "Der", tag: "subject · nom.", emphasis: true },
+                { id: "tisch", text: "Tisch" },
+                { id: "ist", text: "ist" },
+                { id: "gross", text: "groß." },
+              ],
+            },
+            {
+              sentence: "Ich sehe den Tisch.",
+              caption: "Now der Tisch is the direct object, so the masculine article changes: der → den. The noun and its gender stay the same.",
+              parts: [
+                { id: "ich", text: "Ich", tag: "subject" },
+                { id: "sehe", text: "sehe" },
+                { id: "article", text: "den", tag: "direct object · acc.", emphasis: true },
+                { id: "tisch", text: "Tisch." },
+              ],
+            },
+          ],
+        },
+        {
           type: "callout",
           title: "Only masculine changes",
           text: "Feminine, neuter and plural articles look exactly the same in the accusative. Only der becomes den.",

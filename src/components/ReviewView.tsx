@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { ArrowRight } from "lucide-react";
+
 import type {
   MistakeRow,
   ReviewItem,
@@ -9,6 +11,8 @@ import type {
 import { resolveReviewLimit } from "../lib/dailyPlanner";
 
 import { useGermanSpeech } from "../hooks/useGermanSpeech";
+
+import { Page, PageHeader, Section } from "./shell/AppShell";
 
 import {
   applyReviewResult,
@@ -97,121 +101,88 @@ export default function ReviewView({
   const unresolved = mistakes.filter((mistake) => !mistake.resolved);
 
   return (
-    <div className="px-10 py-9">
-      <div className="mx-auto max-w-3xl">
-        <header className="mb-8">
-          <p className="mb-2 text-sm font-medium text-neutral-400">
-            Spaced review
+    <Page narrow>
+      <PageHeader kicker="Spaced review" title="Review">
+        Items you miss come back here at growing intervals until you recall them reliably.
+      </PageHeader>
+
+      {error ? <ErrorMessage>{error}</ErrorMessage> : null}
+
+      <section aria-label="Due now" className="mt-8">
+        <dl className="grid grid-cols-2 gap-6">
+          <ReviewStat label="Due today" value={stats?.dueToday ?? "–"} highlight={Boolean(stats && stats.dueToday > 0)} />
+          <ReviewStat label="Unresolved mistakes" value={stats?.unresolvedMistakes ?? "–"} />
+        </dl>
+
+        {stats && stats.dueToday > 0 ? (
+          <button
+            type="button"
+            onClick={() => void startSession()}
+            className="dl-press mt-7 flex w-full items-center justify-center gap-2 rounded-md bg-accent px-4 py-3.5 text-sm font-semibold text-on-accent hover:bg-accent-hover sm:w-auto sm:px-6"
+          >
+            Start Review
+            <ArrowRight size={16} aria-hidden="true" />
+          </button>
+        ) : stats ? (
+          <p className="mt-6 text-sm text-fg-2">
+            {stats.nextDueAt
+              ? `Nothing due. Next review: ${formatReviewDate(stats.nextDueAt)}.`
+              : "Nothing to review yet. Items appear here after you complete lessons."}
           </p>
+        ) : null}
+      </section>
 
-          <h1 className="text-3xl font-semibold tracking-[-0.03em]">
-            Review
-          </h1>
+      <Section title="Mistakes" aside={unresolved.length > 0 ? <span className="tabular text-sm text-fg-2">{unresolved.length} open</span> : undefined}>
+        {mistakes.length === 0 ? (
+          <p className="text-sm text-fg-2">No mistakes recorded yet.</p>
+        ) : (
+          <ul>
+            {mistakes.map((mistake) => (
+              <li key={mistake.id} className="flex items-start justify-between gap-4 border-b border-line py-4 last:border-b-0">
+                <div className="min-w-0">
+                  <p className="font-medium">{mistake.prompt}</p>
+                  <p lang="de" className="mt-1 text-sm text-fg-2">
+                    {mistake.expected}
+                  </p>
+                  <p className="mt-1 text-xs text-fg-3">
+                    {mistake.category} · missed {mistake.timesMissed}×
+                  </p>
+                </div>
 
-          <p className="mt-2 max-w-xl text-neutral-500">
-            Items you miss come back here at growing intervals until you
-            recall them reliably.
-          </p>
-        </header>
-
-        {error ? <ErrorMessage>{error}</ErrorMessage> : null}
-
-        <section className="rounded-2xl border border-black/5 bg-white p-6">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl bg-neutral-50 p-4">
-              <p className="text-xs font-medium uppercase tracking-wider text-neutral-400">
-                Due today
-              </p>
-              <p className="mt-2 text-3xl font-semibold">
-                {stats?.dueToday ?? "–"}
-              </p>
-            </div>
-
-            <div className="rounded-xl bg-neutral-50 p-4">
-              <p className="text-xs font-medium uppercase tracking-wider text-neutral-400">
-                Unresolved mistakes
-              </p>
-              <p className="mt-2 text-3xl font-semibold">
-                {stats?.unresolvedMistakes ?? "–"}
-              </p>
-            </div>
-          </div>
-
-          {stats && stats.dueToday > 0 ? (
-            <button
-              type="button"
-              onClick={() => void startSession()}
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-neutral-800"
-            >
-              Start Review
-            </button>
-          ) : stats ? (
-            <p className="mt-6 text-sm text-neutral-500">
-              {stats.nextDueAt
-                ? `Nothing due. Next review: ${formatReviewDate(stats.nextDueAt)}.`
-                : "Nothing to review yet. Items appear here after you complete lessons."}
-            </p>
-          ) : null}
-        </section>
-
-        <section className="mt-8">
-          <h2 className="mb-3 font-semibold tracking-tight">Mistakes</h2>
-
-          {mistakes.length === 0 ? (
-            <p className="rounded-2xl border border-black/5 bg-white p-6 text-sm text-neutral-500">
-              No mistakes recorded yet.
-            </p>
-          ) : (
-            <div className="overflow-hidden rounded-2xl border border-black/5 bg-white">
-              {mistakes.map((mistake, index) => (
-                <div
-                  key={mistake.id}
+                <span
                   className={[
-                    "flex items-start justify-between gap-4 px-5 py-4",
-                    index !== mistakes.length - 1
-                      ? "border-b border-black/5"
-                      : "",
+                    "shrink-0 rounded-full px-2.5 py-1 text-xs font-medium",
+                    mistake.resolved ? "bg-success-soft text-success" : "text-accent ring-1 ring-accent/60",
                   ].join(" ")}
                 >
-                  <div className="min-w-0">
-                    <p className="font-medium">{mistake.prompt}</p>
-                    <p className="mt-1 text-sm text-neutral-500">
-                      {mistake.expected}
-                    </p>
-                    <p className="mt-1 text-xs text-neutral-400">
-                      {mistake.category} · missed {mistake.timesMissed}×
-                    </p>
-                  </div>
+                  {mistake.resolved ? "Resolved" : "Unresolved"}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
 
-                  <span
-                    className={[
-                      "shrink-0 rounded-full px-2.5 py-1 text-xs font-medium",
-                      mistake.resolved
-                        ? "bg-neutral-100 text-neutral-500"
-                        : "bg-neutral-900 text-white",
-                    ].join(" ")}
-                  >
-                    {mistake.resolved ? "Resolved" : "Unresolved"}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
+        {mistakes.length >= MISTAKE_LIST_LIMIT ? (
+          <p className="mt-3 text-sm text-fg-3">
+            Showing the {MISTAKE_LIST_LIMIT} most important: unresolved and most-missed first.
+          </p>
+        ) : null}
 
-          {mistakes.length >= MISTAKE_LIST_LIMIT ? (
-            <p className="mt-3 text-sm text-neutral-400">
-              Showing the {MISTAKE_LIST_LIMIT} most important: unresolved and
-              most-missed first.
-            </p>
-          ) : null}
+        {unresolved.length > 0 ? (
+          <p className="mt-3 text-sm text-fg-3">A mistake is resolved after two correct reviews in a row.</p>
+        ) : null}
+      </Section>
+    </Page>
+  );
+}
 
-          {unresolved.length > 0 ? (
-            <p className="mt-3 text-sm text-neutral-400">
-              A mistake is resolved after two correct reviews in a row.
-            </p>
-          ) : null}
-        </section>
-      </div>
+function ReviewStat({ label, value, highlight = false }: { label: string; value: number | string; highlight?: boolean }) {
+  return (
+    <div className={["border-t pt-3", highlight ? "border-accent" : "border-line-strong"].join(" ")}>
+      <dt className="text-[11px] font-medium uppercase tracking-[0.12em] text-fg-3">{label}</dt>
+      <dd className={["tabular m-0 mt-2 font-display text-stat font-semibold", highlight ? "text-accent" : ""].join(" ")}>
+        {value}
+      </dd>
     </div>
   );
 }
@@ -254,24 +225,22 @@ function ReviewSession({
 
   if (done) {
     return (
-      <div className="px-10 py-9">
-        <div className="mx-auto max-w-xl py-12 text-center">
-          <p className="text-sm font-medium text-neutral-400">
-            Review complete
-          </p>
+      <div className="px-5 py-9 md:px-10">
+        <div className="dl-enter mx-auto max-w-xl py-12 text-center">
+          <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-fg-3">Review complete</p>
 
-          <div className="mt-6 text-6xl font-semibold tracking-tighter">
+          <div className="tabular mt-6 font-display text-[5rem] leading-none font-extralight tracking-tight text-accent">
             {correctCount}/{items.length}
           </div>
 
-          <p className="mt-4 text-neutral-500">
+          <p className="mt-5 text-fg-2">
             Items you got right come back later; the rest return tomorrow.
           </p>
 
           <button
             type="button"
             onClick={onEnd}
-            className="mx-auto mt-8 rounded-xl bg-neutral-900 px-6 py-3 text-sm font-medium text-white transition hover:bg-neutral-800"
+            className="dl-press mx-auto mt-8 rounded-md bg-accent px-6 py-3 text-sm font-semibold text-on-accent hover:bg-accent-hover"
           >
             Done
           </button>
@@ -280,24 +249,25 @@ function ReviewSession({
     );
   }
 
+  // Assessment energy: focused, no atmosphere, only the question.
   return (
-    <div className="px-10 py-9">
+    <div className="px-5 py-9 md:px-10">
       <div className="mx-auto max-w-xl">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-5 flex items-center justify-between">
           <button
             type="button"
             onClick={onEnd}
-            className="text-sm text-neutral-500 transition hover:text-neutral-900"
+            className="dl-press rounded-md text-sm text-fg-2 hover:text-fg"
           >
             End review
           </button>
 
-          <p className="text-sm text-neutral-400">
+          <p className="tabular text-sm text-fg-3" aria-live="polite">
             {index + 1} of {items.length}
           </p>
         </div>
 
-        <div className="mb-6 overflow-hidden rounded-full">
+        <div className="mb-8 overflow-hidden rounded-full">
           <ProgressBar value={(index / items.length) * 100} />
         </div>
 

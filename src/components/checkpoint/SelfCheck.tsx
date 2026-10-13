@@ -59,7 +59,7 @@ export default function SelfCheck({
                     : "border-black/20",
                 ].join(" ")}
               >
-                {on ? <Check size={15} /> : null}
+                {on ? <Check size={15} className="dl-check" aria-hidden="true" /> : null}
               </span>
 
               <span className="font-medium">{statement}</span>

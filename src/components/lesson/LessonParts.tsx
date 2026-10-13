@@ -2,60 +2,63 @@ import { type ReactNode } from "react";
 
 import { ArrowLeft } from "lucide-react";
 
-export function ProgressBar({
-  value,
-}: {
-  value: number;
-}) {
-  const safeValue = Math.min(
-    100,
-    Math.max(0, value),
-  );
+import { Wordmark } from "../shell/Brand";
+
+/**
+ * Thin lesson progress rule (DESIGN.md §12): a violet fill that springs
+ * forward by transform as real work is completed. It shows progress through
+ * the questions, never proficiency.
+ */
+export function ProgressBar({ value }: { value: number }) {
+  const safeValue = Math.min(100, Math.max(0, value));
 
   return (
-    <div className="h-1 bg-neutral-100">
+    <div
+      className="h-[3px] overflow-hidden rounded-full bg-surface"
+      role="progressbar"
+      aria-label="Lesson progress"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(safeValue)}
+    >
       <div
-        className="h-full bg-neutral-900 transition-all duration-300"
-        style={{
-          width: `${safeValue}%`,
-        }}
+        className="dl-progress-fill h-full rounded-full bg-accent shadow-[0_0_10px_rgb(167_139_250/0.6)]"
+        style={{ transform: `scaleX(${safeValue / 100})` }}
       />
     </div>
   );
 }
 
-export function Stat({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+/** A labelled figure under a hairline rule (Swiss key–value, not a card). */
+export function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-black/5 bg-white p-4">
-      <p className="text-xs font-medium uppercase tracking-wider text-neutral-400">
+    <div className="border-t border-line-strong pt-3">
+      <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-fg-3">
         {label}
       </p>
 
-      <p className="mt-2 font-semibold">
+      <p className="tabular mt-1.5 font-display text-xl font-semibold tracking-tight">
         {value}
       </p>
     </div>
   );
 }
 
-export function ErrorMessage({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function ErrorMessage({ children }: { children: ReactNode }) {
   return (
-    <div className="mt-6 rounded-xl border border-red-100 bg-red-50 px-5 py-4 text-left text-sm leading-6 text-red-900">
+    <div
+      role="alert"
+      className="mt-6 rounded-md border border-error/20 bg-error-soft px-5 py-4 text-left text-sm leading-6 text-error"
+    >
       {children}
     </div>
   );
 }
 
+/*
+ * Frame for every lesson: a quiet top bar with the way back, then the task.
+ * Lessons are deliberately calmer than Home: no editorial decoration here.
+ */
 export function LessonShell({
   children,
   onBack,
@@ -64,20 +67,23 @@ export function LessonShell({
   onBack: () => void;
 }) {
   return (
-    <div className="min-h-screen bg-[#f7f7f5] text-neutral-900">
-      <div className="border-b border-black/5 bg-white px-8 py-4">
+    <div className="min-h-screen bg-canvas text-fg">
+      <header className="sticky top-0 z-20 flex items-center justify-between border-b border-line bg-canvas/90 px-5 py-3.5 backdrop-blur-md md:px-8">
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-2 text-sm text-neutral-500 transition hover:text-neutral-900"
+          className="dl-press -ml-2 flex items-center gap-2 rounded-md px-2 py-1 text-sm text-fg-2 hover:text-fg"
         >
-          <ArrowLeft size={17} />
-
+          <ArrowLeft size={16} />
           Back to today
         </button>
-      </div>
 
-      {children}
+        <span aria-hidden="true" className="text-sm text-fg-3">
+          <Wordmark />
+        </span>
+      </header>
+
+      <main className="dl-enter">{children}</main>
     </div>
   );
 }
