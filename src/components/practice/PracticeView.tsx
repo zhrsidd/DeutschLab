@@ -1,8 +1,15 @@
+import { lazy, Suspense, useState } from "react";
+
+import { MessagesSquare } from "lucide-react";
+
 import { starterTasks, taskWeek, type LessonType } from "../../data/unit1";
 import type { ProgressData } from "../../lib/db";
 import { iconForType } from "../lessonIcons";
 import { Page, PageHeader, Section } from "../shell/AppShell";
-import { InlineLoader } from "../shell/Loaders";
+import { InlineLoader, SectionLoader } from "../shell/Loaders";
+
+// Loaded only when opened, so AI code never slows down Practice or startup.
+const TutorView = lazy(() => import("../ai/TutorView"));
 
 /*
  * Practice by skill. It exposes only what exists: every lesson can be
@@ -17,7 +24,7 @@ const SKILLS: { type: LessonType; label: string; note: string }[] = [
   { type: "listening", label: "Listening", note: "Clips with Play and Slower; the transcript stays hidden until you answer." },
   { type: "reading", label: "Reading", note: "Short texts with evidence for every answer." },
   { type: "writing", label: "Writing", note: "Guided paragraphs with a saved draft and an honest self-check." },
-  { type: "speaking", label: "Speaking", note: "Prompts and a timed talk; nothing is recorded." },
+  { type: "speaking", label: "Speaking", note: "Prompts and a timed talk. Recording is optional and stays on this Mac unless you send it for AI feedback." },
 ];
 
 interface PracticeViewProps {
@@ -27,6 +34,18 @@ interface PracticeViewProps {
 }
 
 export default function PracticeView({ progress, completedTasks, startLesson }: PracticeViewProps) {
+  const [tutorOpen, setTutorOpen] = useState(false);
+
+  if (tutorOpen) {
+    return (
+      <Page>
+        <Suspense fallback={<SectionLoader label="Opening the tutor…" />}>
+          <TutorView onBack={() => setTutorOpen(false)} startLesson={startLesson} />
+        </Suspense>
+      </Page>
+    );
+  }
+
   const latest = new Map(
     (progress?.lessonScores ?? []).map((score) => [score.taskId, `${score.latestScore}/${score.latestTotal}`]),
   );
@@ -39,6 +58,23 @@ export default function PracticeView({ progress, completedTasks, startLesson }: 
       <PageHeader kicker="Practice" title="Practise by skill">
         Re-run any lesson you like. For spaced recall of single words and patterns, use Review.
       </PageHeader>
+
+      <Section title="Deutsch mit KI" label="AI tutor">
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+          <p className="flex items-start gap-2 text-sm leading-6 text-fg-2">
+            <MessagesSquare size={15} strokeWidth={1.8} aria-hidden="true" className="mt-1 shrink-0 text-fg-3" />
+            Optional: short guided or free conversations with an AI tutor that uses the German you have learned so
+            far. Needs the app and a Gemini API key (Settings → AI feedback).
+          </p>
+          <button
+            type="button"
+            onClick={() => setTutorOpen(true)}
+            className="dl-press inline-flex items-center justify-center gap-2 rounded-md border border-line-strong bg-elevated px-4 py-2.5 text-sm font-medium hover:border-accent"
+          >
+            Open the tutor
+          </button>
+        </div>
+      </Section>
 
       <Section title="Needs attention" label="Weak spots">
         {weak.length === 0 ? (
