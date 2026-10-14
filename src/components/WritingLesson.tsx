@@ -16,6 +16,7 @@ import { countWords } from "../lib/text";
 
 import { ErrorMessage, LessonShell, Stat } from "./lesson/LessonParts";
 
+import AIWritingExaminer from "./ai/AIWritingExaminer";
 import WritingSection from "./checkpoint/WritingSection";
 import { SectionLoader } from "./shell/Loaders";
 
@@ -27,6 +28,8 @@ interface WritingLessonProps {
   onBack: () => void;
   onFinish: () => Promise<void>;
   onSaveAttempt: (score: number, total: number) => Promise<void>;
+  /** Opens a lesson recommended by AI feedback (the draft is saved first). */
+  onOpenLesson?: (taskId: string) => void;
 }
 
 const SAVE_DELAY_MS = 400;
@@ -41,6 +44,7 @@ export default function WritingLesson({
   onBack,
   onFinish,
   onSaveAttempt,
+  onOpenLesson,
 }: WritingLessonProps) {
   const TASK_ID = config.taskId;
   const TOTAL = config.checklist.length;
@@ -356,6 +360,23 @@ export default function WritingLesson({
             onTextChange={onTextChange}
             onClear={onClear}
             onComplete={(selfCheckScore) => void submit(selfCheckScore)}
+            belowEditor={(text) => (
+              <AIWritingExaminer
+                taskId={TASK_ID}
+                task={{
+                  prompt: config.prompt,
+                  targetWords: config.targetWords,
+                  cues: config.cues,
+                  checklist: config.checklist,
+                }}
+                text={text}
+                onOpenLesson={
+                  onOpenLesson
+                    ? (taskId) => void persist().finally(() => onOpenLesson(taskId))
+                    : undefined
+                }
+              />
+            )}
           />
 
           {error ? <ErrorMessage>{error}</ErrorMessage> : null}

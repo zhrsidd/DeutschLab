@@ -18,6 +18,7 @@ import {
 import { formatTime, useCountdown } from "../hooks/useCountdown";
 import { useGermanSpeech } from "../hooks/useGermanSpeech";
 
+import AISpeakingExaminer from "./ai/AISpeakingExaminer";
 import {
   ErrorMessage,
   LessonShell,
@@ -28,8 +29,12 @@ import {
 type Stage = "intro" | "prep" | "drills" | "final" | "assess" | "results";
 
 interface SpeakingLessonProps {
+  /** Task id (for optional AI feedback history); defaults to speaking-001. */
+  taskId?: string;
   /** Lesson content; defaults to the Week 1 self-introduction. */
   config?: SpeakingLessonConfig;
+  /** Opens a lesson recommended by AI feedback. */
+  onOpenLesson?: (taskId: string) => void;
   onBack: () => void;
   onFinish: () => Promise<void>;
   onSaveAttempt: (score: number, total: number) => Promise<void>;
@@ -46,7 +51,9 @@ const STAGE_PROGRESS: Record<Stage, number> = {
 };
 
 export default function SpeakingLesson({
+  taskId = "speaking-001",
   config = week1SpeakingConfig,
+  onOpenLesson,
   onBack,
   onFinish,
   onSaveAttempt,
@@ -302,6 +309,16 @@ export default function SpeakingLesson({
           <FinalChallenge
             config={config}
             onContinue={() => goTo("assess")}
+          />
+
+          <AISpeakingExaminer
+            taskId={taskId}
+            task={{
+              prompt: config.finalHeading,
+              cues: config.finalCues,
+              checklist: selfAssessment,
+            }}
+            onOpenLesson={onOpenLesson}
           />
         </div>
       </LessonShell>

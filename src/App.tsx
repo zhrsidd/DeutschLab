@@ -1,4 +1,5 @@
 import {
+  Fragment,
   useCallback,
   useEffect,
   useMemo,
@@ -90,6 +91,8 @@ interface LessonProps {
   onBack: () => void;
   onFinish: () => Promise<void>;
   onSaveAttempt: (score: number, total: number) => Promise<void>;
+  /** Opens another lesson (AI feedback links to recommended practice). */
+  onOpenLesson: (taskId: string) => void;
 }
 
 /** Every lesson, by task id. Lessons render full-screen without the sidebar. */
@@ -101,7 +104,7 @@ const LESSONS: Record<string, (props: LessonProps) => ReactNode> = {
   "grammar-002": (props) => <RegularVerbsLesson {...props} />,
   "grammar-003": (props) => <QuestionsLesson {...props} />,
   "listening-001": (props) => <ListeningLesson {...props} />,
-  "speaking-001": (props) => <SpeakingLesson {...props} />,
+  "speaking-001": (props) => <SpeakingLesson taskId="speaking-001" {...props} />,
   // Week 2
   "vocab-002": (props) => <VocabularyLesson set={week2VocabularySet} {...props} />,
   "grammar-004": (props) => <HabenLesson {...props} />,
@@ -124,7 +127,7 @@ const LESSONS: Record<string, (props: LessonProps) => ReactNode> = {
   "reading-003": (props) => <Week4ReadingLesson {...props} />,
   "listening-004": (props) => <Week4ListeningLesson {...props} />,
   "writing-003": (props) => <WritingLesson config={everydayWriting} {...props} />,
-  "speaking-002": (props) => <SpeakingLesson config={week4SpeakingConfig} {...props} />,
+  "speaking-002": (props) => <SpeakingLesson taskId="speaking-002" config={week4SpeakingConfig} {...props} />,
 };
 
 const CHECKPOINTS: Record<string, CheckpointDefinition> = {
@@ -350,11 +353,17 @@ function App() {
       const lesson = LESSONS[id];
 
       if (lesson) {
-        return lesson({
-          onBack: back,
-          onSaveAttempt: (score, total) => saveLessonAttempt(id, score, total),
-          onFinish: () => finishLesson(id),
-        });
+        // Keyed by id so a lesson opened from AI feedback always starts fresh.
+        return (
+          <Fragment key={id}>
+            {lesson({
+              onBack: back,
+              onSaveAttempt: (score, total) => saveLessonAttempt(id, score, total),
+              onFinish: () => finishLesson(id),
+              onOpenLesson: (next) => setActiveLessonId(next),
+            })}
+          </Fragment>
+        );
       }
     }
 

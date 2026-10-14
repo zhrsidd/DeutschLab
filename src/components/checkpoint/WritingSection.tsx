@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { ArrowRight } from "lucide-react";
 
@@ -19,6 +19,8 @@ interface WritingSectionProps {
   /** When given, shows "Clear and start again". */
   onClear?: () => void;
   onComplete: (score: number) => void;
+  /** Optional tools under the editor (e.g. AI feedback on the current text). */
+  belowEditor?: (text: string) => ReactNode;
 }
 
 /*
@@ -31,6 +33,7 @@ export default function WritingSection({
   onTextChange,
   onClear,
   onComplete,
+  belowEditor,
 }: WritingSectionProps) {
   const [text, setText] = useState(initialText);
   const [submitted, setSubmitted] = useState(false);
@@ -137,6 +140,8 @@ export default function WritingSection({
         Submit writing
         <ArrowRight size={17} />
       </button>
+
+      {belowEditor?.(text)}
     </>
   );
 }
