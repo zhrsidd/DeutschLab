@@ -5,6 +5,9 @@ DeutschLab is a **local-first macOS German-learning app** built with **Tauri v2,
 
 **Learner goal:** A0 → strong A1 by January 2027; eventual C1 and academic German for Physics at ETH Zürich by March 2028. Keep workload realistic alongside school.
 
+**Optional AI (v1.1):** Gemini-backed writing/speaking feedback and the "Deutsch mit KI" tutor. Off by default,
+advisory only, never required for core learning. See **AI** below.
+
 **Current implementation:** Weeks **1–4** of Unit 1 (October Foundations, the v1.0 scope) are implemented, including lessons, checkpoints, mistakes, active-recall spaced review, and the daily planner. Week 4 ends with `checkpoint-004` (the October Foundations Checkpoint); Weeks 5–16 are planned only. An implemented feature is **not** automatically verified in the native macOS window.
 
 ## Curriculum: source of truth
@@ -47,6 +50,22 @@ DeutschLab is a **local-first macOS German-learning app** built with **Tauri v2,
 
 Discover exact paths from the repo before assuming a file exists.
 
+## AI (v1.1): docs/AI_ARCHITECTURE.md, AI_ASSESSMENT.md, AI_PRIVACY.md
+- `src-tauri/src/ai.rs` is the only code that sees the Gemini key (macOS Keychain) or calls Google: six
+  narrow commands, fixed host, key in `x-goog-api-key`, `store: false`, model allowlist. Never add a
+  generic HTTP proxy, never return the key, never store it in SQLite/app_state/localStorage/logs.
+- `src/lib/ai/`: `models.ts` (capability registry, must match Rust lists; free-tier models only),
+  `request.ts` (enabled/consent/daily-limit guard + usage log; no auto-retry, no provider/model fallback),
+  `schemas.ts` (structured-output schemas + runtime validation), `prompts.ts`, `context.ts` (curriculum
+  context), `assessment.ts`, `tutor.ts`, `store.ts` (ai_* tables). UI: `src/components/ai/`,
+  `settings/AISettings.tsx`, `hooks/useRecorder.ts`.
+- AI output is untrusted: corrections must quote the learner's text; lesson ids must exist and be in scope;
+  no CEFR claims; **no pronunciation score** (speaking is transcript-based). AI never changes attempts,
+  completion, checkpoints, mastery, mistakes or Review/SRS.
+- Tests mock the native layer (`src/test/fakeAI.ts`); never require a real key. The live examiner
+  evaluation (`src/lib/ai/liveEval.test.ts`) is opt-in via `DEUTSCHLAB_LIVE_EVAL=1 GEMINI_API_KEY=…`.
+- Rust checks: `cd src-tauri && cargo test` (the real-Keychain test is `--ignored`).
+
 ## Non-negotiable engineering rules
 1. Preserve existing learner progress, completion records, review/mistake history, and writing drafts.
 2. **Never recycle or rename existing lesson/item IDs** without an explicit backward-compatible migration.
@@ -54,6 +73,7 @@ Discover exact paths from the repo before assuming a file exists.
 4. Keep Review creation structured and compatible with legacy review items; don't change SRS intervals without approval.
 5. Keep the Today planner deterministic; persist preferences and learning data, **not** a generated daily plan.
 6. Remain local/offline for core features; no new cloud services, dependencies, or major abstractions without clear need.
+   The optional Gemini AI layer is the only cloud integration; core features must never depend on it.
 7. Preserve working lessons and UI. Avoid unrelated refactors and broad formatting churn.
 8. Follow the current minimal, consistent macOS-style UI and accessible keyboard interactions.
 

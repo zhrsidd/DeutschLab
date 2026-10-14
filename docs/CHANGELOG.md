@@ -3,6 +3,23 @@
 Newest first. Versions before 1.0 were internal milestones; dates are commit dates.
 Details of each audit live in `docs/QUALITY_AUDIT.md` (v0.8) and `docs/V1_RELEASE_REPORT.md` (v1.0).
 
+## Unreleased — DeutschLab AI v1.1 foundations (2026-10-14)
+
+Optional, advisory AI. No curriculum, grading, checkpoint, mastery, SRS or planner changes. Details:
+`docs/AI_ARCHITECTURE.md`, `docs/AI_ASSESSMENT.md`, `docs/AI_PRIVACY.md`.
+
+- **Gemini provider in Rust** (`src-tauri/src/ai.rs`): key in the macOS Keychain, six narrow commands,
+  Interactions API with `store: false`, free-tier model allowlist (3.5 Flash-Lite, 3.8 Flash, 3.5 Transcribe).
+- **AI Writing Examiner** in writing lessons: 4 × 0–5 rubric, validated corrections, revision and reassessment.
+- **AI Speaking Examiner** in speaking lessons: record, play back, transcribe, edit the transcript, assess;
+  pronunciation explicitly not assessed.
+- **Deutsch mit KI** tutor in Practice: guided and free modes, curriculum-aware, immediate or delayed
+  corrections, turn-based voice, saved sessions with summaries.
+- **Safeguards:** off by default, consent notice, daily request / tutor turn / recording limits, local usage
+  log, no automatic retry or fallback; Settings → AI feedback; Delete AI history.
+- **Data:** additive `ai_assessments`, `ai_tutor_sessions`, `ai_usage` tables; backup format 3 (1–2 still valid).
+- **Quality:** 27-case German evaluation set; opt-in live evaluation.
+
 ## Unreleased — Schwarzrot brand identity (2026-10-14)
 
 Brand identity and motion only: no curriculum, grading, scoring, SRS or persistence changes. The system:

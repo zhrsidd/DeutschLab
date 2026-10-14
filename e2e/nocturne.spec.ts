@@ -65,10 +65,11 @@ test.describe("Schwarzrot shell (browser, mocked Tauri SQL)", () => {
     await expect(page.getByRole("heading", { name: GREETING })).toBeVisible();
     await expect(page.getByTestId("intro")).toHaveCount(0);
 
-    // Entrance animations resolve at once, so content is fully opaque.
-    const opacity = await page
-      .getByRole("button", { name: /Everyday German in context/ })
-      .evaluate((element) => getComputedStyle(element.closest("main") ?? element).opacity);
-    expect(opacity).toBe("1");
+    // Entrance animations resolve at once, so content is fully opaque. Polled
+    // briefly: a single read could land on the first frame of the ~0 ms
+    // reduced-motion animation (a race that made this test flaky); 500 ms is
+    // far shorter than any real entrance animation, so a regression still fails.
+    await expect(page.getByRole("main")).toHaveCSS("opacity", "1", { timeout: 500 });
+    await expect(page.getByRole("button", { name: /Everyday German in context/ })).toBeVisible();
   });
 });

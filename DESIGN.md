@@ -445,6 +445,24 @@ below `lg` (1024) Home stacks and hides the week numeral. The opening scales wit
 Fonts, icons, the mark, gradients, grain and motion are all local. The opening and celebrations never
 wait on a network.
 
+## 19a. AI feedback and the tutor (v1.1)
+
+- **Energy:** the examiner panels sit inside lessons but behave like assessment (Focused): no motion while
+  the learner writes or speaks; results rise in with `.dl-feedback` only. The tutor lives in Practice
+  (Learning energy, but calm): rules and kickers, not chat bubbles.
+- **One crimson action:** AI actions are secondary buttons (`border-line-strong`, crimson border on hover);
+  the lesson's own primary button stays the only crimson fill. The tutor's Send is its screen's primary.
+- **Feedback layout:** kicker "AI feedback · advisory" → score in `text-stat` → rubric rows with a
+  five-segment meter (`progress` crimson for earned, `surface` + `line-strong` for not) → corrections
+  (`<del>` stone → `<ins>` fg, severity chips: Error = error tint, Small slip = warning tint, Optional =
+  outline) → strengths / to improve → recommended practice (underlined links) → corrected version in
+  `<details>` → notes in `fg-3`. Speaking always shows "Pronunciation not formally assessed."
+- **Honesty:** "DeutschLab practice marks, not a CEFR grade"; no fake progress (loaders are `SectionLoader`
+  / `ButtonLoader` with a sentence); usage numbers are labelled approximate.
+- **Recording:** a still crimson dot + clock, never pulsing; playback via native `<audio controls>`, never
+  autoplay. Errors in error tint with a typed alternative always offered.
+- **Unavailable states** are one quiet `fg-3` sentence; they never block a lesson.
+
 ## 20. Governance for future features
 
 1. Decide the energy level first (§1) and stay inside it.
