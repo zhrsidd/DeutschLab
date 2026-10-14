@@ -27,21 +27,35 @@ export interface GenerateArgs {
 /** True where the native AI layer exists (the DeutschLab app, not a browser). */
 export const nativeAIAvailable = () => isTauri();
 
-async function call<T>(command: string, args?: Record<string, unknown>): Promise<T> {
+/** Keychain commands answer within their own native deadline; this is the backstop. */
+const KEY_CALL_TIMEOUT_MS = 35_000;
+
+async function call<T>(command: string, args?: Record<string, unknown>, timeoutMs?: number): Promise<T> {
   if (!nativeAIAvailable()) throw new AIError("unavailable");
 
+  let timer: ReturnType<typeof setTimeout> | undefined;
   try {
-    return await invoke<T>(command, args);
+    const pending = invoke<T>(command, args);
+    if (!timeoutMs) return await pending;
+    const deadline = new Promise<never>((_, reject) => {
+      timer = setTimeout(
+        () => reject(new AIError("keychain", "The Keychain did not respond. Check for a permission dialog, then try again.")),
+        timeoutMs,
+      );
+    });
+    return await Promise.race([pending, deadline]);
   } catch (error) {
     throw toAIError(error);
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 }
 
-export const getKeyStatus = () => call<KeyStatus>("ai_key_status");
+export const getKeyStatus = () => call<KeyStatus>("ai_key_status", undefined, KEY_CALL_TIMEOUT_MS);
 
-export const saveKey = (key: string) => call<KeyStatus>("ai_save_key", { key });
+export const saveKey = (key: string) => call<KeyStatus>("ai_save_key", { key }, KEY_CALL_TIMEOUT_MS);
 
-export const removeKey = () => call<KeyStatus>("ai_remove_key");
+export const removeKey = () => call<KeyStatus>("ai_remove_key", undefined, KEY_CALL_TIMEOUT_MS);
 
 export const testConnection = () => call<{ models: string[] }>("ai_test_connection");
 

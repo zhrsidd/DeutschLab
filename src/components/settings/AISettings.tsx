@@ -98,7 +98,13 @@ export default function AISettings() {
     if (native) getKeyStatus().then(setKey, (e) => setError(toAIError(e)));
   }, [native, refreshUsage]);
 
-  if (!settings) return <p className="text-sm text-fg-3">Loading…</p>;
+  if (!settings) {
+    return error ? (
+      <p role="alert" className="text-sm text-fg-3">AI settings could not be loaded. Reopen Settings to try again.</p>
+    ) : (
+      <p className="text-sm text-fg-3">Loading…</p>
+    );
+  }
 
   const update = async (patch: Partial<Settings>) => {
     try {

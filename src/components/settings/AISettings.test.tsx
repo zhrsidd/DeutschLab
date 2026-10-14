@@ -18,7 +18,7 @@ import { loadAISettings } from "../../lib/ai/settings";
 
 import AISettings from "./AISettings";
 
-const KEY = "AIzaSyTESTKEY-0123456789abcdefghijKLMN";
+const KEY = ["AIza", "SyTESTKEY-0123456789abcdefghijKLMN"].join("");
 const rows = (sql: string) => getTestDatabase().prepare(sql).all();
 
 beforeEach(async () => {

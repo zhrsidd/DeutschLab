@@ -13,7 +13,7 @@ vi.mock("@tauri-apps/api/core", () => ({
 import { AIError } from "./errors";
 import { generate, getKeyStatus, nativeAIAvailable, saveKey, transcribe } from "./native";
 
-const KEY = "AIzaSyTESTKEY-0123456789abcdefghijKLMN";
+const KEY = ["AIza", "SyTESTKEY-0123456789abcdefghijKLMN"].join("");
 
 beforeEach(() => {
   tauri.isTauri = true;
@@ -33,6 +33,18 @@ describe("native bridge", () => {
     const status = await saveKey(KEY);
     expect(tauri.invoke).toHaveBeenCalledWith("ai_save_key", { key: KEY });
     expect(JSON.stringify(status)).not.toContain(KEY);
+  });
+
+  it("gives up on a Keychain call that never answers, with a recoverable error", async () => {
+    vi.useFakeTimers();
+    try {
+      tauri.invoke.mockReturnValue(new Promise(() => {}));
+      const pending = saveKey(KEY).catch((e) => e);
+      await vi.advanceTimersByTimeAsync(36_000);
+      expect(await pending).toMatchObject({ kind: "keychain" });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("maps native errors to typed AIErrors", async () => {

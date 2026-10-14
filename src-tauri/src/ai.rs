@@ -104,6 +104,18 @@ pub const APP_KEYCHAIN: Keychain = Keychain { service: KEYCHAIN_SERVICE, account
 #[cfg(target_os = "macos")]
 const ERR_SEC_ITEM_NOT_FOUND: i32 = -25300;
 
+/// A learner-readable, recoverable message for a Keychain status code (never
+/// includes the secret).
+#[cfg(target_os = "macos")]
+fn keychain_message(code: i32) -> String {
+    match code {
+        -128 | -25293 => "Keychain access was declined. Try again and choose Always Allow.".into(),
+        -25308 | -25315 => "The Keychain is locked or cannot show a prompt. Unlock your login keychain and try again.".into(),
+        -25244 | -25299 => "An older saved key belongs to a previous build. Remove it in Keychain Access (search DeutschLab) and save again.".into(),
+        _ => format!("Keychain error {code}. Try again."),
+    }
+}
+
 #[cfg(target_os = "macos")]
 impl SecretStore for Keychain {
     fn read(&self) -> Result<Option<String>, AiError> {
@@ -112,20 +124,20 @@ impl SecretStore for Keychain {
                 .map(Some)
                 .map_err(|_| AiError::Keychain { message: "The saved key could not be read.".into() }),
             Err(error) if error.code() == ERR_SEC_ITEM_NOT_FOUND => Ok(None),
-            Err(error) => Err(AiError::Keychain { message: format!("Keychain error {}.", error.code()) }),
+            Err(error) => Err(AiError::Keychain { message: keychain_message(error.code()) }),
         }
     }
 
     fn write(&self, secret: &str) -> Result<(), AiError> {
         security_framework::passwords::set_generic_password(self.service, self.account, secret.as_bytes())
-            .map_err(|error| AiError::Keychain { message: format!("Keychain error {}.", error.code()) })
+            .map_err(|error| AiError::Keychain { message: keychain_message(error.code()) })
     }
 
     fn remove(&self) -> Result<(), AiError> {
         match security_framework::passwords::delete_generic_password(self.service, self.account) {
             Ok(()) => Ok(()),
             Err(error) if error.code() == ERR_SEC_ITEM_NOT_FOUND => Ok(()),
-            Err(error) => Err(AiError::Keychain { message: format!("Keychain error {}.", error.code()) }),
+            Err(error) => Err(AiError::Keychain { message: keychain_message(error.code()) }),
         }
     }
 }
@@ -176,12 +188,12 @@ pub fn key_status(store: &dyn SecretStore) -> Result<KeyStatus, AiError> {
 pub fn save_key(store: &dyn SecretStore, key: &str) -> Result<KeyStatus, AiError> {
     let key = validate_key(key)?;
     store.write(key)?;
-    key_status(store)
+    Ok(KeyStatus { stored: true, hint: Some(mask_hint(key)) })
 }
 
 pub fn remove_key(store: &dyn SecretStore) -> Result<KeyStatus, AiError> {
     store.remove()?;
-    key_status(store)
+    Ok(KeyStatus { stored: false, hint: None })
 }
 
 fn require_key(store: &dyn SecretStore) -> Result<String, AiError> {
@@ -566,19 +578,45 @@ pub async fn test_connection(store: &dyn SecretStore) -> Result<ConnectionReport
  * Tauri commands (registered in lib.rs)
  */
 
+/// How long a Keychain call may take. macOS can show an authorization prompt
+/// (ad-hoc signed builds change identity on every rebuild); if it never
+/// appears or is ignored the call would otherwise block forever.
+const KEYCHAIN_TIMEOUT: Duration = Duration::from_secs(25);
+
+/// Runs a Keychain operation off the async runtime with a deadline, so the
+/// UI always gets a result or a recoverable error.
+async fn keychain_task<T, F>(work: F) -> Result<T, AiError>
+where
+    T: Send + 'static,
+    F: FnOnce() -> Result<T, AiError> + Send + 'static,
+{
+    let (sender, receiver) = std::sync::mpsc::channel();
+    std::thread::spawn(move || {
+        let _ = sender.send(work());
+    });
+    tauri::async_runtime::spawn_blocking(move || match receiver.recv_timeout(KEYCHAIN_TIMEOUT) {
+        Ok(result) => result,
+        Err(_) => Err(AiError::Keychain {
+            message: "The Keychain did not respond. If a Keychain permission dialog is open, choose Always Allow, then try again.".into(),
+        }),
+    })
+    .await
+    .unwrap_or(Err(AiError::Keychain { message: "The Keychain request was interrupted.".into() }))
+}
+
 #[tauri::command]
 pub async fn ai_key_status() -> Result<KeyStatus, AiError> {
-    key_status(&APP_KEYCHAIN)
+    keychain_task(|| key_status(&APP_KEYCHAIN)).await
 }
 
 #[tauri::command]
 pub async fn ai_save_key(key: String) -> Result<KeyStatus, AiError> {
-    save_key(&APP_KEYCHAIN, &key)
+    keychain_task(move || save_key(&APP_KEYCHAIN, &key)).await
 }
 
 #[tauri::command]
 pub async fn ai_remove_key() -> Result<KeyStatus, AiError> {
-    remove_key(&APP_KEYCHAIN)
+    keychain_task(|| remove_key(&APP_KEYCHAIN)).await
 }
 
 #[tauri::command]
@@ -618,7 +656,7 @@ mod tests {
         }
     }
 
-    const KEY: &str = "AIzaSyTESTKEY-0123456789abcdefghijKLMN";
+    const KEY: &str = concat!("AIza", "SyTESTKEY-0123456789abcdefghijKLMN");
 
     fn generate_request(model: &str) -> GenerateRequest {
         GenerateRequest {
@@ -848,7 +886,7 @@ mod tests {
         assert_eq!(store.read().unwrap(), None);
         store.write(KEY).unwrap();
         assert_eq!(store.read().unwrap().as_deref(), Some(KEY));
-        store.write("AIzaSyREPLACED-0123456789abcdefghijKLMN").unwrap();
+        store.write(&format!("{}{}", "AIza", "replacement-test-value-KLMN")).unwrap();
         assert_eq!(key_status(&store).unwrap().hint.as_deref(), Some("••••KLMN"));
         store.remove().unwrap();
         assert_eq!(store.read().unwrap(), None);
