@@ -81,7 +81,7 @@ describe("JSON export", () => {
 
     expect(exported).toMatchObject({
       format: "deutschlab-backup",
-      version: 2,
+      version: 3,
       exportedAt: NOW.toISOString(),
       app: { name: "DeutschLab", version: "1.0.0" },
     });
@@ -108,6 +108,7 @@ describe("JSON export", () => {
       expect(result.counts).toEqual({
         task_progress: 2, lesson_attempts: 1, checkpoint_attempts: 1,
         review_items: 1, mistakes: 1, app_state: 3, study_events: 0,
+        ai_assessments: 0, ai_tutor_sessions: 0, ai_usage: 0,
       });
     }
   });
@@ -180,6 +181,23 @@ describe("backup versions", () => {
     if (result.ok) expect(result.counts.study_events).toBe(0);
   });
 
+  it("still accepts a version 2 file, which has no AI tables (AI v1.1)", async () => {
+    const current = JSON.parse(backup.serializeBackup(await backup.buildBackup(NOW)));
+    const { ai_assessments: _a, ai_tutor_sessions: _b, ai_usage: _c, ...v2Tables } = current.tables;
+    const result = backup.validateBackup({ ...current, version: 2, tables: v2Tables });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.counts).toMatchObject({ ai_assessments: 0, ai_tutor_sessions: 0, ai_usage: 0, study_events: 0 });
+    }
+  });
+
+  it("requires the AI tables from version 3 on", async () => {
+    const current = JSON.parse(backup.serializeBackup(await backup.buildBackup(NOW)));
+    const { ai_usage: _dropped, ...tables } = current.tables;
+    expect(backup.validateBackup({ ...current, tables }).ok).toBe(false);
+  });
+
   it("requires study_events from version 2 on", async () => {
     const current = JSON.parse(backup.serializeBackup(await backup.buildBackup(NOW)));
     const { study_events: _dropped, ...tables } = current.tables;
@@ -193,7 +211,7 @@ describe("backup validation rejects bad input", () => {
   it.each([
     ["not an object", () => "hello", /Not a DeutschLab backup/],
     ["wrong format", (b: Record<string, unknown>) => ({ ...b, format: "other" }), /Not a DeutschLab backup/],
-    ["a newer version", (b: Record<string, unknown>) => ({ ...b, version: 3 }), /newer than this app/],
+    ["a newer version", (b: Record<string, unknown>) => ({ ...b, version: 4 }), /newer than this app/],
     ["a bad date", (b: Record<string, unknown>) => ({ ...b, exportedAt: "yesterday" }), /export date/],
     [
       "a missing table",

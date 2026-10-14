@@ -1,3 +1,5 @@
+mod ai;
+
 use std::fs;
 use std::path::PathBuf;
 
@@ -159,7 +161,13 @@ pub fn run() {
             seal_backup_file,
             selftest_report_path,
             selftest_wal_bytes,
-            finish_selftest
+            finish_selftest,
+            ai::ai_key_status,
+            ai::ai_save_key,
+            ai::ai_remove_key,
+            ai::ai_test_connection,
+            ai::ai_generate,
+            ai::ai_transcribe
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

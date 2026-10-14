@@ -64,7 +64,13 @@ describe("v0.8 indexes", () => {
   it("are created on a fresh database", async () => {
     await db.initialiseDatabase();
 
-    expect(indexNames()).toEqual(["idx_mistakes_open_key", "idx_review_items_due", "idx_study_events_time"]);
+    expect(indexNames()).toEqual([
+      "idx_ai_assessments_task",
+      "idx_ai_usage_time",
+      "idx_mistakes_open_key",
+      "idx_review_items_due",
+      "idx_study_events_time",
+    ]);
   });
 
   it("are added to an existing database without touching any row", async () => {
@@ -80,7 +86,13 @@ describe("v0.8 indexes", () => {
 
     await db.initialiseDatabase();
 
-    expect(indexNames()).toEqual(["idx_mistakes_open_key", "idx_review_items_due", "idx_study_events_time"]);
+    expect(indexNames()).toEqual([
+      "idx_ai_assessments_task",
+      "idx_ai_usage_time",
+      "idx_mistakes_open_key",
+      "idx_review_items_due",
+      "idx_study_events_time",
+    ]);
     expect(rows(`SELECT * FROM task_progress ORDER BY task_id`)).toEqual(before.tasks);
     expect(rows(`SELECT * FROM app_state ORDER BY key`)).toEqual(before.state);
     expect(rows(`SELECT * FROM lesson_attempts`)).toEqual(before.attempts);
@@ -99,7 +111,7 @@ describe("v0.8 indexes", () => {
     await db.initialiseDatabase();
     await db.initialiseDatabase();
 
-    expect(indexNames()).toHaveLength(3);
+    expect(indexNames()).toHaveLength(5);
     expect(rows(`SELECT name FROM sqlite_master WHERE name = 'study_events'`)).toHaveLength(1);
     expect(rows(`SELECT * FROM review_items`)).toHaveLength(1);
     expect(rows<{ name: string }>(`PRAGMA table_info(review_items)`).filter((c) => c.name === "exercise_json")).toHaveLength(1);

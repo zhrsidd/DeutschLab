@@ -36,7 +36,8 @@ let databaseUrl = DATABASE_URL;
 
 let databasePromise: Promise<Database> | null = null;
 
-async function getDatabase() {
+/** Shared connection; also used by the AI store (src/lib/ai/store.ts). */
+export async function getDatabase() {
   if (!databasePromise) {
     databasePromise = Database.load(databaseUrl);
   }
@@ -165,6 +166,66 @@ export async function initialiseDatabase() {
 
   await db.execute(
     `CREATE INDEX IF NOT EXISTS idx_study_events_time ON study_events (occurred_at)`,
+  );
+
+  // AI v1.1: optional AI feedback history, tutor sessions and a local usage
+  // log. Additive and idempotent; nothing existing is read or changed, and
+  // no credential is ever stored here (the API key lives in the Keychain).
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS ai_assessments (
+      id TEXT PRIMARY KEY NOT NULL,
+      task_id TEXT NOT NULL,
+      kind TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      provider TEXT NOT NULL,
+      model TEXT NOT NULL,
+      rubric_version TEXT NOT NULL,
+      input_text TEXT NOT NULL,
+      input_source TEXT NOT NULL,
+      original_transcript TEXT,
+      feedback_json TEXT NOT NULL,
+      score INTEGER NOT NULL,
+      max_score INTEGER NOT NULL,
+      revision_of TEXT
+    )
+  `);
+
+  await db.execute(
+    `CREATE INDEX IF NOT EXISTS idx_ai_assessments_task ON ai_assessments (task_id, created_at)`,
+  );
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS ai_tutor_sessions (
+      id TEXT PRIMARY KEY NOT NULL,
+      mode TEXT NOT NULL,
+      topic TEXT NOT NULL,
+      level TEXT NOT NULL,
+      grammar_focus TEXT,
+      correction_mode TEXT NOT NULL,
+      context_week INTEGER NOT NULL,
+      model TEXT NOT NULL,
+      started_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      messages_json TEXT NOT NULL,
+      summary_json TEXT
+    )
+  `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS ai_usage (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      occurred_at TEXT NOT NULL,
+      feature TEXT NOT NULL,
+      model TEXT NOT NULL,
+      outcome TEXT NOT NULL,
+      error_kind TEXT,
+      input_tokens INTEGER,
+      output_tokens INTEGER
+    )
+  `);
+
+  await db.execute(
+    `CREATE INDEX IF NOT EXISTS idx_ai_usage_time ON ai_usage (occurred_at)`,
   );
 }
 
@@ -867,6 +928,9 @@ export const LEARNER_TABLES = [
   "mistakes",
   "app_state",
   "study_events",
+  "ai_assessments",
+  "ai_tutor_sessions",
+  "ai_usage",
 ] as const;
 
 export type LearnerTable = (typeof LEARNER_TABLES)[number];

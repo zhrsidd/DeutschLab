@@ -1,6 +1,7 @@
 import { APP_NAME, APP_VERSION } from "../../lib/appInfo";
 import { STUDY_TIME_OPTIONS } from "../../lib/dailyPlanner";
 import DataView from "../DataView";
+import AISettings from "./AISettings";
 import { Page, PageHeader, Section } from "../shell/AppShell";
 
 interface SettingsViewProps {
@@ -55,6 +56,10 @@ export default function SettingsView({ studyMinutes, setStudyMinutes }: Settings
         </p>
       </Section>
 
+      <Section title="AI feedback">
+        <AISettings />
+      </Section>
+
       <Section title="Your data">
         <DataView />
       </Section>
@@ -68,7 +73,9 @@ export default function SettingsView({ studyMinutes, setStudyMinutes }: Settings
           <dt className="text-fg-3">Scope</dt>
           <dd className="m-0">Unit 1, October Foundations (Weeks 1–4)</dd>
           <dt className="text-fg-3">Data</dt>
-          <dd className="m-0">Stored only on this Mac. No account, no cloud.</dd>
+          <dd className="m-0">
+            Stored only on this Mac. No account. Optional AI feedback sends only what you submit to Google.
+          </dd>
           <dt className="text-fg-3">Fonts</dt>
           <dd className="m-0">Bricolage Grotesque, DM Sans and Instrument Serif (SIL Open Font License)</dd>
         </dl>

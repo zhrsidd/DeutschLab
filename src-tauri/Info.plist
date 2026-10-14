@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Merged into the app bundle by Tauri. Needed for optional speaking recordings (AI v1.1). -->
+  <key>NSMicrophoneUsageDescription</key>
+  <string>DeutschLab records your spoken German only when you press Record, so you can listen back and, if you choose, send it for AI feedback.</string>
+</dict>
+</plist>

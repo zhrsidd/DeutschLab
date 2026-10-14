@@ -26,8 +26,11 @@ import {
 } from "./db";
 
 export const BACKUP_FORMAT = "deutschlab-backup";
-/** 2 adds study_events (v1.1); version 1 files are still accepted. */
-export const BACKUP_VERSION = 2;
+/**
+ * 2 adds study_events; 3 adds the AI tables (AI v1.1). Older files are still
+ * accepted: tables they predate count as empty.
+ */
+export const BACKUP_VERSION = 3;
 
 export interface LearnerBackup {
   format: typeof BACKUP_FORMAT;
@@ -55,10 +58,18 @@ const REQUIRED_COLUMNS: Record<LearnerTable, string[]> = {
   mistakes: ["lesson_id", "item_key", "prompt", "expected_answer", "times_missed"],
   app_state: ["key", "value"],
   study_events: ["kind", "occurred_at"],
+  ai_assessments: ["id", "task_id", "kind", "created_at", "model", "input_text", "feedback_json", "score"],
+  ai_tutor_sessions: ["id", "mode", "topic", "started_at", "messages_json"],
+  ai_usage: ["occurred_at", "feature", "model", "outcome"],
 };
 
 /** Tables a given backup version does not contain yet. */
-const ADDED_IN: Partial<Record<LearnerTable, number>> = { study_events: 2 };
+const ADDED_IN: Partial<Record<LearnerTable, number>> = {
+  study_events: 2,
+  ai_assessments: 3,
+  ai_tutor_sessions: 3,
+  ai_usage: 3,
+};
 
 const BROWSER_PREFIX = "deutschlab:";
 

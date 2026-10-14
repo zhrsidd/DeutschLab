@@ -78,7 +78,7 @@ test.describe("v1.0 shell (browser, mocked Tauri SQL)", () => {
 
     expect(file.suggestedFilename()).toMatch(/^deutschlab-backup-\d{4}-\d{2}-\d{2}-\d{6}\.json$/);
     const backup = JSON.parse(readFileSync((await file.path())!, "utf8"));
-    expect(backup).toMatchObject({ format: "deutschlab-backup", version: 2, app: { name: "DeutschLab" } });
+    expect(backup).toMatchObject({ format: "deutschlab-backup", version: 3, app: { name: "DeutschLab" } });
     expect(backup.tables.task_progress.map((row: { task_id: string }) => row.task_id).sort()).toEqual([
       "pronunciation-001",
       "vocab-001",
