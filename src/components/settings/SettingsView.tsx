@@ -2,11 +2,14 @@ import { APP_NAME, APP_VERSION } from "../../lib/appInfo";
 import { STUDY_TIME_OPTIONS } from "../../lib/dailyPlanner";
 import DataView from "../DataView";
 import AISettings from "./AISettings";
+import UpdateSettings from "./UpdateSettings";
+import type { Updater } from "../../lib/updater";
 import { Page, PageHeader, Section } from "../shell/AppShell";
 
 interface SettingsViewProps {
   studyMinutes: number;
   setStudyMinutes: (minutes: number) => void;
+  updater: Updater;
 }
 
 /*
@@ -14,7 +17,7 @@ interface SettingsViewProps {
  * tools (backup, snapshot, restore steps) and app information. It adds no
  * settings that the app does not actually honour.
  */
-export default function SettingsView({ studyMinutes, setStudyMinutes }: SettingsViewProps) {
+export default function SettingsView({ studyMinutes, setStudyMinutes, updater }: SettingsViewProps) {
   return (
     <Page narrow>
       <PageHeader kicker="Settings" title="Settings" />
@@ -62,6 +65,10 @@ export default function SettingsView({ studyMinutes, setStudyMinutes }: Settings
 
       <Section title="Your data">
         <DataView />
+      </Section>
+
+      <Section title="Updates">
+        <UpdateSettings updater={updater} />
       </Section>
 
       <Section title="About">

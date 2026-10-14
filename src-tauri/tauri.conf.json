@@ -34,6 +34,18 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "createUpdaterArtifacts": true,
+    "macOS": {
+      "signingIdentity": "-"
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDJBM0Q4NkY2QTRDMDY0QjUKUldTMVpNQ2s5b1k5S3JncHNuQlpsTngzT05UdHZqVUg2ZDdOTHdDbVh6RjZZQStJVlEzc3RRbWcK",
+      "endpoints": [
+        "https://github.com/zhrsidd/DeutschLab/releases/latest/download/latest.json"
+      ]
+    }
   }
 }

@@ -3,6 +3,12 @@
 Newest first. Versions before 1.0 were internal milestones; dates are commit dates.
 Details of each audit live in `docs/QUALITY_AUDIT.md` (v0.8) and `docs/V1_RELEASE_REPORT.md` (v1.0).
 
+## Unreleased — In-app updates (2026-10-14)
+
+Tauri v2 updater + process plugins, signed updater artifacts, tag-only release workflow
+(`.github/workflows/release.yml`), Settings → Updates, `docs/UPDATING.md`. Verified natively: a signed
+1.0.0 → 1.0.1 update installed and relaunched in a disposable HOME with the SQLite data intact.
+
 ## Unreleased — DeutschLab AI v1.1 foundations (2026-10-14)
 
 Optional, advisory AI. No curriculum, grading, checkpoint, mastery, SRS or planner changes. Details:

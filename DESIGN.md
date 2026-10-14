@@ -248,6 +248,10 @@ reading measure `max-w-reading`; `h1–h3` hyphenate; at most two families per c
 - **Course timeline**: a gold dot for the current month (a soft gold halo, no glow), light dots for
   built months, hollow for planned; the current week has a crimson edge rule and a gold week number.
 - **Loading**: see §12.1.
+- **Update notice** (`update/UpdateNotice.tsx`): a small bottom-right card, `elevated` with a `line-strong`
+  border; gold "Update available" kicker, crimson "Update now", secondary "Later", a 1 px crimson progress
+  bar while downloading. Errors use `role="alert"` plain language. Never shown in lessons or checkpoints.
+  Settings → Updates (`settings/UpdateSettings.tsx`) shows the version and "Check for updates".
 
 ## 8. Gradients
 

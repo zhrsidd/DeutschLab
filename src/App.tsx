@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -23,6 +24,9 @@ import GrammarLesson from "./components/GrammarLesson";
 import HabenLesson from "./components/HabenLesson";
 import IrregularVerbsLesson from "./components/IrregularVerbsLesson";
 import ListeningLesson from "./components/ListeningLesson";
+import UpdateNotice from "./components/update/UpdateNotice";
+import { APP_VERSION } from "./lib/appInfo";
+import { getUpdater } from "./lib/updater";
 import NegationLesson from "./components/NegationLesson";
 import PronounsLesson from "./components/PronounsLesson";
 import PronunciationLesson from "./components/PronunciationLesson";
@@ -138,6 +142,7 @@ const CHECKPOINTS: Record<string, CheckpointDefinition> = {
 };
 
 function App() {
+  const updater = useMemo(() => getUpdater(APP_VERSION), []);
   const [view, setView] = useState<View>("home");
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
   const [databaseReady, setDatabaseReady] = useState(false);
@@ -208,6 +213,21 @@ function App() {
       void refreshPlanData();
     }
   }, [databaseReady, activeLessonId, view, refreshPlanData]);
+
+  // Updates never interrupt a lesson or checkpoint: the guard blocks installs
+  // and restarts while one is open, and the notice is not rendered there.
+  const lessonOpenRef = useRef(false);
+  lessonOpenRef.current = activeLessonId !== null;
+  useEffect(() => {
+    updater.setBusyGuard(() => lessonOpenRef.current);
+  }, [updater]);
+
+  // Quiet background check shortly after the app is usable; never delays launch.
+  useEffect(() => {
+    if (!databaseReady) return;
+    const timer = window.setTimeout(() => void updater.check(false), 4000);
+    return () => window.clearTimeout(timer);
+  }, [databaseReady, updater]);
 
   const plan: DailyPlan = useMemo(
     () =>
@@ -287,6 +307,7 @@ function App() {
       {celebration && activeLessonId === null ? (
         <Celebration data={celebration} onDone={() => setCelebration(null)} />
       ) : null}
+      {databaseReady && activeLessonId === null ? <UpdateNotice updater={updater} /> : null}
       <Intro ready={databaseReady} failed={databaseError} />
     </MotionProvider>
   );
@@ -419,6 +440,7 @@ function App() {
             <SettingsView
               studyMinutes={studyMinutes}
               setStudyMinutes={(minutes) => void changeStudyMinutes(minutes)}
+              updater={updater}
             />
           )}
         </AppShell>

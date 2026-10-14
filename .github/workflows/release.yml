@@ -1,0 +1,64 @@
+name: release
+
+# Releases are explicit. This runs ONLY when a version tag (vX.Y.Z) is pushed
+# or when someone starts it by hand from the Actions tab. Ordinary commits and
+# pull requests never publish anything. See docs/UPDATING.md.
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "release" to build a signed draft release from the selected ref'
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.event_name == 'push' || github.event.inputs.confirm == 'release'
+    runs-on: macos-latest # Apple Silicon (arm64)
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: ./src-tauri -> target
+
+      - run: npm ci
+
+      - name: Versions must agree (and match the tag)
+        run: node scripts/check-version.mjs "${{ github.ref_type == 'tag' && github.ref_name || '' }}"
+
+      - name: Test
+        run: npx tsc --noEmit && npx vitest run
+
+      - name: Build, sign updater artifacts, create draft release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: v__VERSION__
+          releaseName: DeutschLab v__VERSION__
+          releaseBody: See the assets to install. Existing installs update from inside the app.
+          releaseDraft: true # you publish it by hand: latest.json only goes live then
+          prerelease: false
+          includeUpdaterJson: true
+          args: --target aarch64-apple-darwin
