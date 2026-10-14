@@ -138,7 +138,7 @@ export default function HomeView({
           {/* The week as an editorial numeral: fills the upper right with real position. */}
           <div aria-hidden="true" className="hidden min-w-0 lg:col-span-4 lg:block lg:text-right">
             <p className={kicker}>{complete ? "Unit 1" : "Woche"}</p>
-            <p className="tabular -mr-2 font-display text-[9.5rem] leading-[0.8] font-extralight tracking-[-0.06em] text-accent">
+            <p className="tabular -mr-2 font-display text-[9.5rem] leading-[0.8] font-extralight tracking-[-0.06em] text-fg">
               {complete ? "✓" : String(week).padStart(2, "0")}
             </p>
             {summary ? (
@@ -156,7 +156,7 @@ export default function HomeView({
           <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
             <h2 className={kicker}>Today's plan</h2>
             <span className="tabular text-sm text-fg-2">
-              {plan.totalMinutes} of {plan.budgetMinutes} min · {plan.dueReviewCount}{" "}
+              {plan.totalMinutes} min planned of {plan.budgetMinutes} · {plan.dueReviewCount}{" "}
               {plan.dueReviewCount === 1 ? "review" : "reviews"} due
             </span>
           </div>
@@ -188,11 +188,11 @@ export default function HomeView({
                     onClick={() => startPlanItem(item)}
                     className="dl-press group grid w-full grid-cols-[2rem_minmax(0,1fr)_auto] items-baseline gap-3 py-4 text-left"
                   >
-                    <span className="tabular text-sm text-fg-3 group-hover:text-accent">
+                    <span className="tabular text-sm text-fg-3 group-hover:text-highlight">
                       {String(index + 2).padStart(2, "0")}
                     </span>
                     <span className="min-w-0">
-                      <span className="block font-medium group-hover:text-accent-hover">{item.title}</span>
+                      <span className="block font-medium group-hover:text-highlight">{item.title}</span>
                       <span className="mt-0.5 block truncate text-sm text-fg-2">
                         {item.reason} · {item.description}
                       </span>
@@ -205,7 +205,7 @@ export default function HomeView({
           )}
 
           <p className="mt-4 text-sm text-fg-2">
-            Planned for {plan.budgetMinutes} minutes a day.{" "}
+            Daily budget: {plan.budgetMinutes} minutes. Times are estimates; DeutschLab doesn't time your study.{" "}
             <button
               type="button"
               onClick={openSettings}
@@ -223,17 +223,21 @@ export default function HomeView({
               <h2 className={kicker}>Reviews due</h2>
               {plan.dueReviewCount > 0 ? (
                 <p className="tabular mt-2 font-display text-stat font-semibold">{plan.dueReviewCount}</p>
-              ) : (
+              ) : nextReviewAt ? (
                 <p lang="de" className="mt-2 font-display text-2xl font-semibold tracking-tight">
                   Alles erledigt.
+                </p>
+              ) : (
+                <p lang="de" className="mt-2 font-display text-2xl font-semibold tracking-tight">
+                  Noch nichts geplant.
                 </p>
               )}
               <p className="mt-1 text-sm text-fg-2">
                 {plan.dueReviewCount > 0
                   ? "Spaced recall of words and patterns you learned or missed."
                   : nextReviewAt
-                    ? `Nothing due. Next: ${formatReviewDate(nextReviewAt)}`
-                    : "Nothing due, and nothing scheduled yet."}
+                    ? `All due reviews are done. Next: ${formatReviewDate(nextReviewAt)}`
+                    : "No reviews scheduled yet. Items enter Review when you finish lessons or miss an answer."}
               </p>
             </div>
             <button
@@ -269,7 +273,17 @@ export default function HomeView({
               description="Lessons, checkpoints and review answers you recorded each day. This counts activity, not time."
               aside={<span className="tabular text-sm text-fg-2">{activeDays(days)} of 7 days active</span>}
               empty={activityLoaded && total === 0}
-              emptyText="Nothing recorded this week yet. Finish a lesson or a review and it appears here."
+              emptyText="Nothing recorded in the last seven days. Finish a lesson or a review and that day fills in."
+              emptyHint={
+                <ol aria-hidden="true" className="mt-4 flex gap-1.5">
+                  {days.map((day) => (
+                    <li key={day.date} className="flex-1 text-center text-[11px] text-fg-3">
+                      <span className={["mx-auto mb-2 block h-1.5 w-1.5 rounded-full", day.isToday ? "bg-highlight" : "ring-1 ring-line-strong"].join(" ")} />
+                      {day.label}
+                    </li>
+                  ))}
+                </ol>
+              }
               table={{
                 columns: ["Day", "Lessons", "Checkpoints", "Review answers"],
                 rows: days.map((day) => [day.date, day.lessons, day.checkpoints, day.reviews]),
@@ -303,10 +317,10 @@ function NextActivity({ item, onStart }: { item: PlanItem; onStart: () => void }
     <button
       type="button"
       onClick={onStart}
-      className="nc-luminous dl-press group relative mb-2 block w-full overflow-hidden rounded-lg p-6 text-left transition-shadow duration-base hover:shadow-[0_0_48px_-16px_rgb(124_58_237/0.7)] md:p-7"
+      className="nc-luminous dl-press group relative mb-2 block w-full overflow-hidden rounded-lg p-6 text-left transition-shadow duration-base hover:shadow-[0_0_48px_-20px_rgb(181_37_50/0.55)] md:p-7"
     >
       <span className="flex flex-wrap items-center gap-x-3 text-[11px] font-medium uppercase tracking-[0.12em] text-fg-3">
-        <span className="tabular text-accent">01</span>
+        <span className="tabular text-highlight">01</span>
         <span>Next</span>
         <span aria-hidden="true">·</span>
         <span>{kind}</span>

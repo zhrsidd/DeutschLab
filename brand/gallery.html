@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DeutschLab Schwarzrot — logomark explorations</title>
+<style>
+  @font-face { font-family: "Bricolage Grotesque"; font-weight: 200 800; src: url("../src/assets/fonts/bricolage-grotesque-normal-latin.woff2") format("woff2"); }
+  @font-face { font-family: "DM Sans"; font-weight: 100 1000; src: url("../src/assets/fonts/dm-sans-normal-latin.woff2") format("woff2"); }
+  :root { --ink:#090909; --char:#161414; --paper:#F5F1EA; --ox:#751B25; --crimson:#B52532; --gold:#D6A437; --line:#2D2827; --fg3:#978F86; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ink); color: var(--paper); font: 14px/1.5 "DM Sans", system-ui, sans-serif; padding: 48px; }
+  h1 { font: 600 40px/1 "Bricolage Grotesque"; letter-spacing: -0.03em; margin: 0 0 6px; }
+  h2 { font: 600 22px/1.1 "Bricolage Grotesque"; letter-spacing: -0.02em; margin: 0; }
+  .kicker { font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--fg3); }
+  .row { display: grid; grid-template-columns: 260px repeat(5, auto) 1fr; gap: 28px; align-items: end; border-top: 1px solid var(--line); padding: 28px 0; }
+  .cell { display: grid; gap: 8px; justify-items: center; }
+  .cell small { color: var(--fg3); font-size: 11px; }
+  .light { background: var(--paper); border-radius: 8px; padding: 10px; display: flex; gap: 14px; align-items: end; }
+  .tile { background: var(--char); border-radius: 8px; padding: 14px; display: flex; gap: 14px; align-items: end; }
+  .notes { color: #B8B0A6; max-width: 34ch; font-size: 13px; }
+  .word { font: 700 44px/1 "Bricolage Grotesque"; letter-spacing: -0.035em; display: flex; align-items: center; gap: 14px; }
+  .words { display: grid; gap: 22px; border-top: 1px solid var(--line); padding: 28px 0; }
+  svg { display: block; }
+</style>
+</head>
+<body>
+  <p class="kicker">Schwarzrot · Phase 2</p>
+  <h1>Logomark explorations</h1>
+  <p class="notes" style="max-width:80ch">Same palette for all three; each is evaluated at display, 128, 64, 32 and 16 px, as a single-colour mark, and on paper. No gradients, glows or lighting.</p>
+  <div id="rows"></div>
+  <div class="words" id="words"></div>
+
+<script>
+const marks = {
+  A: { name: "A — Geometric", u: "M8 22 H20 V38 A12 12 0 0 0 44 38 V22 H56 V38 A24 24 0 0 1 8 38 Z", d: [[14,10,6],[50,10,6]],
+       note: "One stroke, one radius family, perfect symmetry. Very clean, but a symmetric U with two circles is the most generic of the three." },
+  B: { name: "B — Expressive", u: "M9 24 A5 5 0 0 1 19 24 V38 A13 13 0 0 0 45 38 V21 A5 5 0 0 1 55 21 V38 A23 23 0 0 1 9 38 Z", d: [[14,10.5,5],[50.6,7.6,5.6]],
+       note: "Round terminals and a raised right dot give it a glance. Charming large; at 16–32 px the offset reads as an error and the soft ends turn the mark into a smiley." },
+  C: { name: "C — Hybrid", u: "M8 22 H20 V38 A12 12 0 0 0 44 38 V22 H56 V62 H32 A24 24 0 0 1 8 38 Z", d: [[14,10,6],[50,10,6]],
+       note: "A's construction, but the right stem drops to a square foot: round left, square right, a lowercase-ü skeleton. The asymmetric silhouette survives at 16 px." },
+};
+const svg = (m, size, { u = "#F5F1EA", a = "#B52532", b = "#D6A437" } = {}) =>
+  `<svg width="${size}" height="${size}" viewBox="0 0 64 64"><path fill="${u}" d="${m.u}"/>` +
+  `<circle cx="${m.d[0][0]}" cy="${m.d[0][1]}" r="${m.d[0][2]}" fill="${a}"/><circle cx="${m.d[1][0]}" cy="${m.d[1][1]}" r="${m.d[1][2]}" fill="${b}"/></svg>`;
+const rows = document.getElementById("rows");
+for (const key of ["A","B","C"]) {
+  const m = marks[key];
+  const mono = { u: "#F5F1EA", a: "#F5F1EA", b: "#F5F1EA" };
+  const ink = { u: "#090909", a: "#090909", b: "#090909" };
+  const paper = { u: "#090909" };
+  rows.insertAdjacentHTML("beforeend", `
+  <section class="row">
+    <div><h2>${m.name}</h2><p class="notes">${m.note}</p></div>
+    <div class="cell">${svg(m, 200)}<small>display</small></div>
+    <div class="cell">${svg(m, 128)}<small>128</small></div>
+    <div class="cell"><div class="tile">${svg(m,64)}${svg(m,32)}${svg(m,16)}</div><small>64 · 32 · 16</small></div>
+    <div class="cell"><div class="tile">${svg(m,64,mono)}${svg(m,32,mono)}${svg(m,16,mono)}</div><small>mono</small></div>
+    <div class="cell"><div class="light">${svg(m,64,paper)}${svg(m,32,paper)}${svg(m,16,ink)}</div><small>on paper</small></div>
+    <div></div>
+  </section>`);
+}
+const words = document.getElementById("words");
+const C = marks.C;
+words.insertAdjacentHTML("beforeend", `<p class="kicker">Wordmark options (with mark C)</p>
+  <div class="word">${svg(C,48)}<span>Deutsch<span style="color:#B52532">Lab</span></span><small class="kicker" style="margin-left:24px">1 · Lab in crimson (3.1:1)</small></div>
+  <div class="word">${svg(C,48)}<span>Deutsch<span style="color:#D6A437">Lab</span></span><small class="kicker" style="margin-left:24px">2 · Lab in gold</small></div>
+  <div class="word">${svg(C,48)}<span>Deutsch<span style="font-weight:300">Lab</span></span><small class="kicker" style="margin-left:24px">3 · weight contrast 700 / 300</small></div>
+  <div class="word">${svg(C,48)}<span>Deutsch<span style="color:#978F86">Lab</span></span><small class="kicker" style="margin-left:24px">4 · Lab in stone</small></div>`);
+</script>
+</body>
+</html>

@@ -17,15 +17,18 @@ DeutschLab is a **local-first macOS German-learning app** built with **Tauri v2,
 - Writing/speaking self-checks are honest self-assessment; **never claim automatic linguistic grading** without a real grader.
 
 ## Design system: DESIGN.md
-- **`DESIGN.md` is authoritative for all UI** (the NOCTURNE system: obsidian × violet, Neo-Swiss grid,
+- **`DESIGN.md` is authoritative for all UI** (Editorial Motion × Neo-Swiss, **Schwarzrot** identity: obsidian ×
+  crimson × gold, the geometric ü mark, Neo-Swiss grid,
   tokens, motion, feedback, celebrations, charts, accessibility). Read the relevant section before UI work
   and update it in the same change when the system changes.
 - Energy levels: **Home = cinematic, Learning = playful, Assessment = focused.** Don't bring Home's
   atmosphere into lessons or checkpoints.
 - New markup uses semantic tokens (`bg-elevated`, `text-fg-2`, `bg-accent text-on-accent`). Legacy light
-  utilities in lessons are remapped in `src/index.css` (DESIGN.md §3.4); `text-neutral-900` is violet there.
+  utilities in lessons are remapped in `src/index.css` (DESIGN.md §3.4); `text-neutral-900` is crimson there.
 - Completion moments appear only after a saved, first-time completion (`src/lib/celebration.ts`).
-- `docs/UI_REDESIGN_REPORT.md` records the Nocturne redesign, its verification and limitations.
+- `docs/UI_REDESIGN_REPORT.md` records the earlier Nocturne (violet) redesign; Schwarzrot superseded its colour.
+- `brand/` holds the logomark, wordmark and app-icon sources (`brand/build.py` regenerates them). Loaders live in
+  `src/components/shell/Loaders.tsx`; colour roles: crimson = action/progress, gold = now/attention, red text = errors only.
 
 ## Key code locations
 - `src/App.tsx` — navigation, lesson routing, dashboard/Today
@@ -37,7 +40,7 @@ DeutschLab is a **local-first macOS German-learning app** built with **Tauri v2,
 - `src/lib/` — SQLite, scoring, answer grading, planner, review scheduler, backup (`backup.ts`), resume state (`vocabResume.ts`)
 - `src/components/shell/` (AppShell, Intro, Atmosphere, Brand), `home/`, `course/`, `practice/`, `progress/`,
   `settings/` (+ `DataView.tsx`), `ReviewView.tsx` — the six sections; `App.tsx` holds the lesson registry
-- `src/components/celebrate/`, `charts/`, `lesson/KineticSentence.tsx`, `vocabulary/GermanWord.tsx` — Nocturne
+- `src/components/celebrate/`, `charts/`, `lesson/KineticSentence.tsx`, `vocabulary/GermanWord.tsx` — brand
   moments, charts and educational motion
 - `src-tauri/` — native Tauri integration
 - Existing Vitest/Testing Library and Playwright tests — product regression suite

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 /*
- * Soft violet light in a dark room (DESIGN.md §8). Three radial-gradient
+ * Low crimson light in a dark room (DESIGN.md §8). Three radial-gradient
  * layers and a static grain sit behind a hero; on a fine pointer the light
  * leans a few pixels toward the cursor. Updates are throttled to one per
  * animation frame, move only `transform` (via --mx / --my), and are skipped
@@ -53,8 +53,8 @@ export default function Atmosphere({ interactive = true }: { interactive?: boole
 
   return (
     <div ref={ref} aria-hidden="true" className="nc-atmosphere" data-testid="atmosphere">
-      <span className="nc-light nc-light--violet" />
-      <span className="nc-light nc-light--orchid" />
+      <span className="nc-light nc-light--crimson" />
+      <span className="nc-light nc-light--gold" />
       <span className="nc-light nc-light--low" />
       <span className="nc-grain" />
     </div>

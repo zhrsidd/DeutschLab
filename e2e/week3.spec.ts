@@ -295,9 +295,9 @@ test.describe("Week 3 (browser, mocked Tauri SQL)", () => {
     await page.goto("/");
     await goTo(page, "Course");
 
-    await expect(page.getByRole("region", { name: "Week 3 progress" })).toContainText("Mastered");
+    await expect(page.getByRole("region", { name: "Week 3 progress" })).toContainText("Completed");
     await expect(page.getByRole("region", { name: "Week 3 progress" })).toContainText("8 of 8 activities complete");
-    await expect(page.getByRole("region", { name: "Week 2 progress" })).toContainText("Mastered");
+    await expect(page.getByRole("region", { name: "Week 2 progress" })).toContainText("Completed");
     await goTo(page, "Home");
     await expect(
       planSection(page).getByRole("button", { name: /Everyday German in context/ }),
@@ -310,6 +310,6 @@ test.describe("Week 3 (browser, mocked Tauri SQL)", () => {
     await goTo(page, "Course");
 
     await expect(page.getByRole("region", { name: "Week 3 progress" })).toBeVisible();
-    await expect(page.getByRole("region", { name: "Week 3 progress" })).not.toContainText("Mastered");
+    await expect(page.getByRole("region", { name: "Week 3 progress" })).not.toContainText("Completed");
   });
 });

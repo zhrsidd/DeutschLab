@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>DeutschLab Schwarzrot — final assets</title>
+<style>
+  @font-face { font-family: "Bricolage Grotesque"; font-weight: 200 800; src: url("../src/assets/fonts/bricolage-grotesque-normal-latin.woff2") format("woff2"); }
+  @font-face { font-family: "DM Sans"; font-weight: 100 1000; src: url("../src/assets/fonts/dm-sans-normal-latin.woff2") format("woff2"); }
+  body { margin: 0; background: #090909; color: #F5F1EA; font: 14px/1.5 "DM Sans", sans-serif; padding: 48px; }
+  h1 { font: 600 40px/1 "Bricolage Grotesque"; letter-spacing: -0.03em; margin: 0 0 32px; }
+  .kicker { font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: #978F86; margin: 0 0 14px; }
+  section { border-top: 1px solid #2D2827; padding: 28px 0; display: flex; gap: 40px; align-items: end; flex-wrap: wrap; }
+  .paper { background: #F5F1EA; padding: 28px; border-radius: 8px; }
+  figure { margin: 0; display: grid; gap: 10px; justify-items: start; }
+  figcaption { font-size: 11px; color: #978F86; }
+  .paper figcaption { color: #5A524E; }
+  .mono { color: #F5F1EA; } .mono-ink { color: #090909; }
+  .icons { display: flex; gap: 20px; align-items: end; }
+  .icons.dock { background: linear-gradient(#5d6b7a, #2f3a46); padding: 24px; border-radius: 12px; }
+</style>
+</head>
+<body>
+  <p class="kicker">Schwarzrot · final</p>
+  <h1>DeutschLab brand assets</h1>
+
+  <p class="kicker">Wordmark lockup</p>
+  <section>
+    <figure><img src="wordmark-lockup.svg" height="88" alt="" /><figcaption>wordmark-lockup.svg</figcaption></figure>
+    <figure class="paper"><img src="wordmark-lockup-light.svg" height="88" alt="" /><figcaption>wordmark-lockup-light.svg</figcaption></figure>
+    <figure><img src="wordmark-lockup.svg" height="28" alt="" /><figcaption>28 px</figcaption></figure>
+  </section>
+
+  <p class="kicker">Logomark</p>
+  <section>
+    <figure><img src="logomark.svg" width="160" alt="" /><figcaption>logomark.svg (primary)</figcaption></figure>
+    <figure><img src="logomark-on-dark.svg" width="128" alt="" /><figcaption>on dark</figcaption></figure>
+    <figure><img src="logomark-on-light.svg" width="128" alt="" /><figcaption>on light</figcaption></figure>
+    <figure class="mono" id="mono"></figure>
+  </section>
+
+  <p class="kicker">App icon</p>
+  <section>
+    <figure><img src="app-icon.svg" width="512" alt="" /><figcaption>app-icon.svg · 512</figcaption></figure>
+    <figure>
+      <div class="icons"><img src="app-icon.svg" width="128" alt="" /><img src="app-icon.svg" width="64" alt="" /><img src="app-icon.svg" width="32" alt="" /><img src="app-icon.svg" width="16" alt="" /></div>
+      <div class="icons dock"><img src="app-icon.svg" width="96" alt="" /><img src="app-icon.svg" width="48" alt="" /><img src="app-icon.svg" width="24" alt="" /></div>
+      <figcaption>128 · 64 · 32 · 16, and on a light-grey dock</figcaption>
+    </figure>
+  </section>
+<script>
+  // Inline the mono mark so currentColor works.
+  fetch("logomark-mono.svg").catch(() => null);
+  document.getElementById("mono").innerHTML =
+    '<svg width="96" viewBox="0 0 64 64" fill="currentColor"><path d="M8 22H20V38A12 12 0 0 0 44 38V22H56V62H32A24 24 0 0 1 8 38Z"/><circle cx="14" cy="10" r="6"/><circle cx="50" cy="10" r="6"/></svg>' +
+    '<div class="mono-ink" style="background:#F5F1EA;padding:8px;border-radius:6px"><svg width="48" viewBox="0 0 64 64" fill="currentColor"><path d="M8 22H20V38A12 12 0 0 0 44 38V22H56V62H32A24 24 0 0 1 8 38Z"/><circle cx="14" cy="10" r="6"/><circle cx="50" cy="10" r="6"/></svg></div><figcaption>logomark-mono.svg (currentColor)</figcaption>';
+</script>
+</body>
+</html>

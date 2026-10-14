@@ -1,6 +1,6 @@
 /*
  * Vocabulary typography (DESIGN.md §12, §14). The article is part of the
- * word, so it is set apart in violet; letters rise in when a card changes.
+ * word, so it is set apart in gold; letters rise in when a card changes.
  * PluralShift shows singular → plural and marks only what changes (the
  * article, an umlaut, an ending), so the learner notices the pattern.
  * All of it reads correctly as static text; motion only draws attention.
@@ -32,7 +32,7 @@ function Letters({ text, offset = 0 }: { text: string; offset?: number }) {
   );
 }
 
-/** "der Stift" with the article in violet; a plain word for verbs and phrases. */
+/** "der Stift" with the article in gold; a plain word for verbs and phrases. */
 export function GermanWord({ word }: { word: string }) {
   const { article, noun } = split(word);
 
@@ -41,7 +41,7 @@ export function GermanWord({ word }: { word: string }) {
       <span className="sr-only">{word}</span>
       {article ? (
         <>
-          <span className="text-accent">
+          <span className="text-highlight">
             <Letters text={article} />
           </span>{" "}
         </>
@@ -74,11 +74,11 @@ export function PluralShift({ singular, plural }: { singular: string; plural: st
       <span className="dl-plural__arrow text-fg-3">→</span>
       <span className="dl-plural__to font-medium text-fg">
         {to.article ? (
-          <span className={articleChanged ? "text-accent" : ""}>{to.article} </span>
+          <span className={articleChanged ? "text-highlight" : ""}>{to.article} </span>
         ) : null}
         {to.noun.slice(0, stem)}
         {stem < to.noun.length ? (
-          <mark className="dl-plural__change rounded-sm bg-accent/15 px-0.5 text-accent">{to.noun.slice(stem)}</mark>
+          <mark className="dl-plural__change rounded-sm bg-highlight/15 px-0.5 text-highlight">{to.noun.slice(stem)}</mark>
         ) : null}
       </span>
       {stem >= to.noun.length && to.noun === from.noun ? (

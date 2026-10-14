@@ -42,7 +42,7 @@ export default function KineticSentence({ title, steps }: { title: string; steps
               <span
                 className={[
                   "mb-1.5 h-4 text-[10px] font-medium uppercase tracking-[0.1em] whitespace-nowrap",
-                  part.emphasis ? "text-accent" : "text-fg-3",
+                  part.emphasis ? "text-highlight" : "text-fg-3",
                 ].join(" ")}
               >
                 {part.tag ?? ""}
@@ -54,7 +54,7 @@ export default function KineticSentence({ title, steps }: { title: string; steps
                 transition={spring}
                 className={[
                   "rounded-md px-2 py-1 font-display text-2xl font-semibold tracking-tight md:text-3xl",
-                  part.emphasis ? "bg-accent/15 text-accent ring-1 ring-accent/50" : "text-fg",
+                  part.emphasis ? "bg-highlight/15 text-highlight ring-1 ring-highlight/50" : "text-fg",
                 ].join(" ")}
               >
                 {part.text}

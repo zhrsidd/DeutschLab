@@ -28,8 +28,8 @@ interface AppShellProps {
 }
 
 /*
- * The Nocturne shell (DESIGN.md §5). From 960 px a quiet left rail; below,
- * a top bar. The active destination carries a violet marker that springs
+ * The shell (DESIGN.md §7). From 960 px a quiet left rail; below,
+ * a top bar. The active destination carries a crimson marker that springs
  * between items (Motion layoutId): a bar on the rail, an underline on top.
  */
 export default function AppShell({
@@ -66,7 +66,7 @@ export default function AppShell({
                           data-testid="nav-indicator"
                           className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-accent rail:inset-x-0 rail:inset-y-0 rail:h-auto rail:rounded-md rail:bg-surface"
                         >
-                          <span className="absolute inset-y-2 left-0 hidden w-0.5 rounded-full bg-accent shadow-[0_0_12px_rgb(167_139_250/0.8)] rail:block" />
+                          <span className="absolute inset-y-2 left-0 hidden w-0.5 rounded-full bg-progress rail:block" />
                         </m.span>
                       ) : null}
 
@@ -81,7 +81,7 @@ export default function AppShell({
                       >
                         <span
                           aria-hidden="true"
-                          className={["tabular hidden w-5 text-[11px] rail:inline", active ? "text-accent" : "text-fg-3"].join(" ")}
+                          className={["tabular hidden w-5 text-[11px] rail:inline", active ? "text-fg" : "text-fg-3"].join(" ")}
                         >
                           {String(index + 1).padStart(2, "0")}
                         </span>

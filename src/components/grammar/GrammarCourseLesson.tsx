@@ -214,7 +214,7 @@ export default function GrammarCourseLesson({
 
         <div className="mx-auto mt-5 h-2 max-w-xs overflow-hidden rounded-full bg-neutral-100">
           <div
-            className="h-full rounded-full bg-neutral-900 transition-all duration-300"
+            className="h-full rounded-full bg-progress transition-all duration-300"
             style={{ width: `${(score / total) * 100}%` }}
           />
         </div>

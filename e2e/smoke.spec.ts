@@ -33,12 +33,12 @@ test.describe("DeutschLab smoke tests (browser, mocked Tauri SQL)", () => {
     await fifteen.click();
     await expect(fifteen).toHaveAttribute("aria-pressed", "true");
     await goTo(page, "Home");
-    await expect(page.getByText(/of 15 min/)).toBeVisible();
+    await expect(page.getByText(/planned of 15 ·/)).toBeVisible();
 
     await goTo(page, "Settings");
     await sixty.click();
     await goTo(page, "Home");
-    await expect(page.getByText(/of 60 min/)).toBeVisible();
+    await expect(page.getByText(/planned of 60 ·/)).toBeVisible();
 
     // Persisted in app_state, and restored after a reload.
     const saved = db

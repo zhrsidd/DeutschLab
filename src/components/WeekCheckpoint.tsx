@@ -32,6 +32,7 @@ import GrammarSection from "./checkpoint/GrammarSection";
 import SpeakingSection from "./checkpoint/SpeakingSection";
 import VocabularySection from "./checkpoint/VocabularySection";
 import WritingSection from "./checkpoint/WritingSection";
+import { InlineLoader } from "./shell/Loaders";
 
 type Stage = "intro" | SectionKey | "results";
 
@@ -253,7 +254,7 @@ export default function WeekCheckpoint({
 
           <h1 className="mt-6 text-center text-3xl font-semibold tracking-tight">
             {result.passed
-              ? `${definition.weekLabel} mastered`
+              ? `${definition.weekLabel} completed`
               : "Review recommended"}
           </h1>
 
@@ -496,7 +497,7 @@ export default function WeekCheckpoint({
           <>
             {saving ? (
               <p className="mt-4 text-center text-sm text-neutral-400">
-                Saving…
+                <InlineLoader label="Saving…" />
               </p>
             ) : null}
 

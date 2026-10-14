@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { Wordmark } from "../shell/Brand";
 
 /**
- * Thin lesson progress rule (DESIGN.md §12): a violet fill that springs
+ * Thin lesson progress rule (DESIGN.md §12): a crimson fill that springs
  * forward by transform as real work is completed. It shows progress through
  * the questions, never proficiency.
  */
@@ -22,7 +22,7 @@ export function ProgressBar({ value }: { value: number }) {
       aria-valuenow={Math.round(safeValue)}
     >
       <div
-        className="dl-progress-fill h-full rounded-full bg-accent shadow-[0_0_10px_rgb(167_139_250/0.6)]"
+        className="dl-progress-fill h-full rounded-full bg-progress"
         style={{ transform: `scaleX(${safeValue / 100})` }}
       />
     </div>

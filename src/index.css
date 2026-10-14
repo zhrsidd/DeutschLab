@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * DeutschLab design tokens: NOCTURNE. DESIGN.md is the authoritative
+ * DeutschLab design tokens: SCHWARZROT. DESIGN.md is the authoritative
  * description; keep the two in step. Components use these tokens through
  * Tailwind utilities (bg-canvas, text-fg-2, font-display, duration-base, ...).
  */
@@ -102,70 +102,79 @@
   --text-stat--line-height: 1;
 
   /*
-   * NOCTURNE palette. 70–80% of a screen is obsidian and dark neutrals,
-   * 15–20% violet-tinted surfaces and details, 5–10% strong violet/orchid.
-   * Semantic names (DESIGN.md §3 maps them to the spec's roles).
+   * SCHWARZROT palette (DESIGN.md §3). About 75–80% of a screen is obsidian
+   * and warm charcoal; crimson and gold are selective. Three roles that never
+   * swap: CRIMSON = action and progress (fills, never body text),
+   * GOLD = "now" and attention (ink, outlines, current marks),
+   * STONE = data and supporting text. Red *text* belongs to errors only.
    */
-  --color-canvas: #09080d; /* background */
-  --color-elevated: #15121d; /* background-elevated: cards, inputs, rail */
-  --color-surface: #211a2c; /* deep violet surface: tracks, quiet fills */
-  --color-surface-hover: #2a2138; /* surface-interactive: hover and pressed fills */
-  --color-line: #352b42; /* border: hairlines */
-  --color-line-strong: #54466a; /* border-strong: section rules, outlines */
-  --color-fg: #f5f2ff; /* text-primary */
-  --color-fg-2: #b4adc5; /* text-secondary */
-  --color-fg-3: #958ca8; /* text-muted (≥ 4.5:1 on canvas, elevated and surface) */
-  --color-accent: #a78bfa; /* electric violet: the primary action, "now", data marks */
-  --color-accent-hover: #bba5fc;
-  --color-accent-active: #9273f5;
-  --color-on-accent: #120d1c; /* text on accent fills (6.9:1) */
-  --color-ultraviolet: #7c3aed; /* light sources and gradients, never text */
-  --color-orchid: #d946ef; /* gradient partner; emphasis only */
-  --color-focus: #c4b5fd; /* focus ring */
-  --color-success: #6ee7b7;
-  --color-success-soft: #0f2a20;
-  --color-error: #ffa3a3;
-  --color-error-soft: #2c1418;
-  --color-warning: #f5c56b;
-  --color-warning-soft: #2a2010;
+  --color-canvas: #090909; /* obsidian: background */
+  --color-elevated: #161414; /* charcoal: cards, inputs, rail */
+  --color-surface: #1e1b1a; /* tracks, quiet fills */
+  --color-surface-hover: #282423; /* hover and pressed fills */
+  --color-line: #2d2827; /* hairlines */
+  --color-line-strong: #4a4341; /* section rules, outlines */
+  --color-fg: #f5f1ea; /* warm off-white: text-primary */
+  --color-fg-2: #b8b0a6; /* text-secondary */
+  --color-fg-3: #978f86; /* stone: text-muted, data marks (≥ 5.4:1 on every surface) */
+
+  /* Brand primitives: light sources, the logomark, gradients. */
+  --color-oxblood: #751b25;
+  --color-crimson: #b52532;
+  --color-gold: #d6a437;
+
+  --color-accent: #b52532; /* crimson fill: the primary action, progress, the nav marker */
+  --color-accent-hover: #c42f3d;
+  --color-accent-active: #9c1f2b;
+  --color-progress: #cc3644; /* crimson for progress marks and indicators: ≥ 3:1 on every surface */
+  --color-on-accent: #f5f1ea; /* off-white on crimson (5.7:1; 4.9:1 on hover) */
+  --color-highlight: #d6a437; /* gold ink: current position, emphasis, German articles (8.7:1) */
+  --color-on-highlight: #090909;
+  --color-focus: #e6be5a; /* focus ring (≥ 9:1 on every surface) */
+  --color-success: #74d9a8;
+  --color-success-soft: #0e2419;
+  --color-error: #ff9c94; /* light salmon text on a dark tint: distinct from crimson fills */
+  --color-error-soft: #2b1311;
+  --color-warning: #efa35c; /* orange-amber, kept clear of brand gold */
+  --color-warning-soft: #2a1b0d;
 
   /*
-   * Compatibility layer for v1.0 lesson markup (DESIGN.md §3.3). Lessons were
+   * Compatibility layer for v1.0 lesson markup (DESIGN.md §3.4). Lessons were
    * written with Tailwind's light utilities; remapping the scales here gives
-   * every lesson the Nocturne identity without rewriting its markup.
-   *   white   → elevated surface (cards), and dark text on primary buttons
+   * every lesson the Schwarzrot identity without rewriting its markup.
+   *   white   → elevated surface (cards); `text-white` is re-pointed below
    *   black   → light ink, so border-black/10 becomes a faint light hairline
-   *   neutral → inverted: 50–200 dark fills/lines, 400–700 text, 800/900 violet
+   *   neutral → inverted: 50–200 dark fills/lines, 400–700 text, 800/900 crimson
    *   red / emerald / amber → dark error / success / warning tints
    */
-  --color-white: #15121d;
-  --color-black: #f5f2ff;
-  --color-neutral-50: #1b1625;
-  --color-neutral-100: #211a2c;
-  --color-neutral-200: #352b42;
-  --color-neutral-300: #5f5373;
-  --color-neutral-400: #958ca8;
-  --color-neutral-500: #b4adc5;
-  --color-neutral-600: #c8c2d6;
-  --color-neutral-700: #ddd8ea;
-  --color-neutral-800: #bba5fc; /* primary button hover */
-  --color-neutral-900: #a78bfa; /* primary button fill */
-  --color-neutral-950: #f5f2ff;
-  --color-emerald-50: #0f2a20;
-  --color-emerald-100: #133426;
-  --color-emerald-200: #1f5a43;
-  --color-emerald-700: #6ee7b7;
-  --color-emerald-800: #8cefc8;
-  --color-emerald-900: #a7f3d0;
-  --color-red-50: #2c1418;
-  --color-red-100: #3a1a20;
-  --color-red-200: #6b2c36;
-  --color-red-700: #ff8f8f;
-  --color-red-800: #ff9e9e;
-  --color-red-900: #ffb8b8;
-  --color-amber-50: #2a2010;
-  --color-amber-200: #5c4520;
-  --color-amber-900: #fcd68a;
+  --color-white: #161414;
+  --color-black: #f5f1ea;
+  --color-neutral-50: #1a1716;
+  --color-neutral-100: #1e1b1a;
+  --color-neutral-200: #2d2827;
+  --color-neutral-300: #5a524e;
+  --color-neutral-400: #978f86;
+  --color-neutral-500: #b8b0a6;
+  --color-neutral-600: #cbc4ba;
+  --color-neutral-700: #ddd7ce;
+  --color-neutral-800: #c42f3d; /* primary button hover */
+  --color-neutral-900: #b52532; /* primary button fill */
+  --color-neutral-950: #f5f1ea;
+  --color-emerald-50: #0e2419;
+  --color-emerald-100: #12301f;
+  --color-emerald-200: #1e5038;
+  --color-emerald-700: #74d9a8;
+  --color-emerald-800: #8fe2b9;
+  --color-emerald-900: #a9eac9;
+  --color-red-50: #2b1311;
+  --color-red-100: #381a17;
+  --color-red-200: #66302b;
+  --color-red-700: #ff8e85;
+  --color-red-800: #ff9c94;
+  --color-red-900: #ffb5ae;
+  --color-amber-50: #2a1b0d;
+  --color-amber-200: #5c3d1c;
+  --color-amber-900: #f5b97a;
 
   /* The side rail appears at 960 px; below it the shell uses a top bar. */
   --breakpoint-rail: 60rem;
@@ -255,6 +264,15 @@ h3 {
   hyphens: auto;
 }
 
+/*
+ * Legacy primary buttons are always `bg-neutral-900 text-white`. `white` is the
+ * card colour in the compatibility layer, so its *text* is re-pointed to the
+ * ink that sits on crimson. Unlayered, so it wins over Tailwind's utilities.
+ */
+.text-white {
+  color: var(--color-on-accent);
+}
+
 ::selection {
   background: color-mix(in oklab, var(--color-accent) 45%, transparent);
   color: var(--color-fg);
@@ -270,7 +288,7 @@ h3 {
 /* ---------- light and atmosphere (DESIGN.md §8) ---------- */
 
 /*
- * Soft violet light in a dark room. Layers are radial gradients (no blur
+ * Low crimson light in a dark room. Layers are radial gradients (no blur
  * filter) moved only by transform; --mx / --my (−1…1) come from
  * <Atmosphere> and drift each layer a few pixels toward the pointer.
  */
@@ -291,21 +309,22 @@ h3 {
   transition: transform 900ms var(--ease-out-quint);
 }
 
-.nc-light--violet {
+.nc-light--crimson {
   width: 70vmax;
   height: 70vmax;
   top: -38vmax;
   right: -18vmax;
-  background: radial-gradient(closest-side, rgb(124 58 237 / 0.34), rgb(124 58 237 / 0.1) 55%, transparent);
+  background: radial-gradient(closest-side, rgb(181 37 50 / 0.26), rgb(117 27 37 / 0.12) 55%, transparent);
   transform: translate3d(calc(var(--mx) * 28px), calc(var(--my) * 22px), 0);
 }
 
-.nc-light--orchid {
-  width: 46vmax;
-  height: 46vmax;
-  top: -14vmax;
-  right: 14vmax;
-  background: radial-gradient(closest-side, rgb(217 70 239 / 0.16), transparent 70%);
+.nc-light--gold {
+  width: 40vmax;
+  height: 40vmax;
+  top: -16vmax;
+  right: 16vmax;
+  /* A trace of warmth, never a second light competing with the crimson. */
+  background: radial-gradient(closest-side, rgb(214 164 55 / 0.07), transparent 70%);
   transform: translate3d(calc(var(--mx) * -18px), calc(var(--my) * 16px), 0);
 }
 
@@ -314,7 +333,7 @@ h3 {
   height: 40vmax;
   bottom: -30vmax;
   left: -20vmax;
-  background: radial-gradient(closest-side, rgb(167 139 250 / 0.1), transparent 70%);
+  background: radial-gradient(closest-side, rgb(117 27 37 / 0.14), transparent 70%);
   transform: translate3d(calc(var(--mx) * 12px), calc(var(--my) * -10px), 0);
 }
 
@@ -346,7 +365,7 @@ h3 {
   border: 1px solid transparent;
   background:
     linear-gradient(var(--color-elevated), var(--color-elevated)) padding-box,
-    linear-gradient(135deg, rgb(167 139 250 / 0.9), rgb(217 70 239 / 0.45) 35%, var(--color-line) 70%) border-box;
+    linear-gradient(135deg, rgb(181 37 50 / 0.95), rgb(117 27 37 / 0.55) 35%, var(--color-line) 70%) border-box;
 }
 
 /* ---------- motion primitives ---------- */
@@ -416,20 +435,20 @@ h3 {
 
 /*
  * Answer feedback (DESIGN.md §12). Classes are added when a grade arrives,
- * which starts the animation once. Correct: a small spring and a violet
- * glow. Wrong: a gentle sideways nudge, never a shake-and-flash.
+ * which starts the animation once. Correct: a small spring and a green
+ * ring. Wrong: a gentle sideways nudge, never a shake-and-flash.
  */
 @keyframes dl-correct {
   0% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgb(167 139 250 / 0.55);
+    box-shadow: 0 0 0 0 rgb(116 217 168 / 0.45);
   }
   35% {
     transform: scale(1.012);
   }
   100% {
     transform: scale(1);
-    box-shadow: 0 0 0 10px rgb(167 139 250 / 0);
+    box-shadow: 0 0 0 10px rgb(116 217 168 / 0);
   }
 }
 
@@ -520,23 +539,162 @@ h3 {
   font-variant-numeric: tabular-nums;
 }
 
-/* ---------- the Umlaut mark ---------- */
+/* ---------- the logomark and its motion (DESIGN.md §2, §11) ---------- */
 
-.nc-mark {
-  fill: currentColor;
+/*
+ * The two umlaut dots are DeutschLab's motion identity. Every loader uses the
+ * same loop: the dots leave alignment, crimson arcs over while gold dips
+ * under (each dot rides an x and a y transform, so the path curves), they
+ * trade places, hold, and come back. --span is the distance between the dots,
+ * --lift and --dip the height of each arc. Transforms only; the loop pauses
+ * between passes, so it reads as intention rather than a spinner.
+ */
+.dl-logo {
   overflow: visible;
+  --span: 36px; /* SVG user units: the dots sit 36 apart on the 64-unit grid */
+  --lift: 9px;
+  --dip: 11px; /* gold dips into the Ü's open counter */
 }
 
-.nc-mark__dot {
-  transform-box: fill-box;
-  transform-origin: center;
+.dl-logo__u {
+  fill: currentColor;
 }
 
-/* The dots fall onto the bar one after the other, landing on a spring. */
-@keyframes nc-dot-drop {
+.dl-logo__dot--a {
+  fill: var(--dl-dot-a, var(--color-crimson));
+}
+
+.dl-logo__dot--b {
+  fill: var(--dl-dot-b, var(--color-gold));
+}
+
+.dl-logo--mono {
+  --dl-dot-a: currentColor;
+  --dl-dot-b: currentColor;
+}
+
+.dl-loop-x,
+.dl-loop-y {
+  transform-box: view-box;
+}
+
+[data-loading="true"] .dl-loop-x--a {
+  animation: dl-loop-x-a 1800ms infinite both;
+}
+
+[data-loading="true"] .dl-loop-x--b {
+  animation: dl-loop-x-b 1800ms infinite both;
+}
+
+[data-loading="true"] .dl-loop-y--a {
+  animation: dl-loop-y-a 1800ms infinite both;
+}
+
+[data-loading="true"] .dl-loop-y--b {
+  animation: dl-loop-y-b 1800ms infinite both;
+}
+
+@keyframes dl-loop-x-a {
+  0%,
+  8% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  42%,
+  58% {
+    transform: translateX(var(--span));
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  92%,
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes dl-loop-x-b {
+  0%,
+  8% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  42%,
+  58% {
+    transform: translateX(calc(var(--span) * -1));
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  92%,
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes dl-loop-y-a {
+  0%,
+  8% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0.33, 0, 0.2, 1);
+  }
+  25% {
+    transform: translateY(calc(var(--lift) * -1));
+    animation-timing-function: cubic-bezier(0.8, 0, 0.67, 1);
+  }
+  42%,
+  58% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0.33, 0, 0.2, 1);
+  }
+  75% {
+    transform: translateY(calc(var(--lift) * -1));
+    animation-timing-function: cubic-bezier(0.8, 0, 0.67, 1);
+  }
+  92%,
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes dl-loop-y-b {
+  0%,
+  8% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0.33, 0, 0.2, 1);
+  }
+  25% {
+    transform: translateY(var(--dip));
+    animation-timing-function: cubic-bezier(0.8, 0, 0.67, 1);
+  }
+  42%,
+  58% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0.33, 0, 0.2, 1);
+  }
+  75% {
+    transform: translateY(var(--dip));
+    animation-timing-function: cubic-bezier(0.8, 0, 0.67, 1);
+  }
+  92%,
+  100% {
+    transform: none;
+  }
+}
+
+/* Success: the dots come to rest with a small spring, once. */
+[data-settle="true"] .dl-loop-y--a,
+[data-settle="true"] .dl-loop-y--b {
+  animation: dl-settle 640ms 120ms var(--ease-spring) both;
+}
+
+[data-settle="true"] .dl-loop-y--b {
+  animation-delay: 190ms;
+}
+
+@keyframes dl-settle {
   from {
     opacity: 0;
-    transform: translateY(-140%);
+    transform: translateY(-7px);
+  }
+  40% {
+    opacity: 1;
   }
   to {
     opacity: 1;
@@ -544,31 +702,80 @@ h3 {
   }
 }
 
-@keyframes nc-bar-draw {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: none;
-  }
+/* Dots-only loaders (HTML): the same loop at text sizes. */
+.dl-dots {
+  --size: 0.4em;
+  --span: 0.95em;
+  --lift: 0.32em;
+  --dip: 0.32em;
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: calc(var(--span) + var(--size));
+  height: calc(var(--size) + var(--lift) + var(--dip));
+  vertical-align: middle;
 }
 
-.nc-mark--animate .nc-mark__dot {
-  animation: nc-dot-drop 620ms 120ms var(--ease-spring) both;
+.dl-dots > span {
+  position: absolute;
+  top: var(--lift);
+  left: 0;
 }
 
-.nc-mark--animate .nc-mark__dot--2 {
-  animation-delay: 210ms;
+.dl-dots > span:last-child {
+  left: var(--span);
 }
 
-.nc-mark--animate .nc-mark__bar {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: nc-bar-draw 520ms var(--ease-out-quint) both;
+.dl-dots .dl-loop-y {
+  display: block;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 9999px;
+}
+
+.dl-dots .dl-loop-y--a {
+  background: var(--dl-dot-a, var(--color-crimson));
+}
+
+.dl-dots .dl-loop-y--b {
+  background: var(--dl-dot-b, var(--color-gold));
+}
+
+.dl-dots--mono {
+  --dl-dot-a: currentColor;
+  --dl-dot-b: currentColor;
+}
+
+.dl-dots--section {
+  --size: 8px;
+  --span: 22px;
+  --lift: 8px;
+  --dip: 8px;
+}
+
+.dl-dots--button {
+  --size: 0.34em;
+  --span: 0.8em;
+  --lift: 0.24em;
+  --dip: 0.24em;
+}
+
+/* Loaders appear only after a short delay, then fade in (no flash for quick work). */
+.dl-loader {
+  animation: nc-emerge 240ms var(--ease-standard) both;
 }
 
 /* ---------- opening sequence (DESIGN.md §10) ---------- */
 
+/*
+ * Five stages, ~1.35 s when startup takes that long:
+ *   1 emergence  0–260 ms   two points of light inside the Ü's counter
+ *   2 movement   200–960    each rises and travels outward on a curve
+ *   3 formation  360–1100   the bowl draws along its centreline; the square foot is set
+ *   4 identity   600–1340   the dots settle; "DeutschLab" rises; a hairline draws
+ *   5 transition on ready    the stage splits along its centre line onto Home
+ * When the database is ready early, Intro fast-forwards the same choreography.
+ */
 .dl-intro {
   position: fixed;
   inset: 0;
@@ -578,6 +785,8 @@ h3 {
   overflow: hidden;
 }
 
+/* The app underneath is live the moment its data is ready. */
+.dl-intro[data-ready="true"],
 .dl-intro[data-phase="out"] {
   pointer-events: none;
 }
@@ -587,7 +796,7 @@ h3 {
   inset-inline: 0;
   height: 50.5%;
   background: var(--color-canvas);
-  transition: transform var(--dl-intro-exit, 760ms) var(--ease-in-out-expo);
+  transition: transform var(--dl-intro-exit, 640ms) var(--ease-in-out-expo);
 }
 
 .dl-intro__panel--top {
@@ -608,20 +817,18 @@ h3 {
 
 .dl-intro__glow {
   position: absolute;
-  width: 90vmin;
-  height: 90vmin;
+  width: 80vmin;
+  height: 80vmin;
   border-radius: 9999px;
-  background:
-    radial-gradient(closest-side, rgb(124 58 237 / 0.42), rgb(124 58 237 / 0.12) 50%, transparent),
-    radial-gradient(closest-side at 70% 35%, rgb(217 70 239 / 0.2), transparent 60%);
+  background: radial-gradient(closest-side, rgb(117 27 37 / 0.34), rgb(117 27 37 / 0.1) 55%, transparent);
   animation: dl-intro-glow 1400ms var(--ease-out-quint) both;
-  transition: opacity 420ms var(--ease-standard);
+  transition: opacity 360ms var(--ease-standard);
 }
 
 @keyframes dl-intro-glow {
   from {
     opacity: 0;
-    transform: scale(0.55);
+    transform: scale(0.5);
   }
   to {
     opacity: 1;
@@ -634,8 +841,8 @@ h3 {
   display: grid;
   justify-items: center;
   transition:
-    opacity 360ms var(--ease-standard),
-    transform 760ms var(--ease-in-out-expo);
+    opacity 320ms var(--ease-standard),
+    transform 640ms var(--ease-in-out-expo);
 }
 
 .dl-intro[data-phase="out"] .dl-intro__glow,
@@ -644,24 +851,130 @@ h3 {
 }
 
 .dl-intro[data-phase="out"] .dl-intro__stage {
-  transform: scale(1.04);
+  transform: scale(1.03);
 }
 
 .dl-intro__mark {
-  width: 3.25rem;
+  width: 6.25rem;
   height: auto;
-  color: var(--color-accent);
+  color: var(--color-fg);
 }
 
+/* Stage 3: the bowl is a 12-unit stroke along the Ü's centreline, drawn left to right. */
+.dl-intro__bowl {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 12;
+  stroke-dasharray: 1;
+  animation: dl-intro-draw 600ms 360ms cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+@keyframes dl-intro-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ...and the square foot is set like a block, after the line has passed. */
+.dl-intro__foot {
+  fill: currentColor;
+  transform-box: fill-box;
+  transform-origin: 100% 0;
+  animation: dl-intro-foot 320ms 780ms var(--ease-out-quint) both;
+}
+
+@keyframes dl-intro-foot {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Stages 1–2: the dots emerge inside the counter and travel to their stems. */
+.dl-intro__dot-x,
+.dl-intro__dot-y {
+  transform-box: view-box;
+}
+
+.dl-intro__dot-x--a {
+  animation: dl-intro-dot-x-a 620ms 220ms cubic-bezier(0.6, 0, 0.3, 1) both;
+}
+
+.dl-intro__dot-x--b {
+  animation: dl-intro-dot-x-b 620ms 280ms cubic-bezier(0.6, 0, 0.3, 1) both;
+}
+
+.dl-intro__dot-y--a {
+  animation: dl-intro-dot-y 700ms 200ms var(--ease-spring) both;
+}
+
+.dl-intro__dot-y--b {
+  animation: dl-intro-dot-y 700ms 260ms var(--ease-spring) both;
+}
+
+@keyframes dl-intro-dot-x-a {
+  from {
+    transform: translateX(13px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes dl-intro-dot-x-b {
+  from {
+    transform: translateX(-13px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes dl-intro-dot-y {
+  from {
+    transform: translateY(24px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.dl-intro__dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dl-intro-emerge 300ms var(--ease-out-quint) both;
+}
+
+.dl-intro__dot--b {
+  animation-delay: 60ms;
+}
+
+@keyframes dl-intro-emerge {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Stage 4: the wordmark rises from behind its baseline. */
 .dl-intro__word {
-  margin: 1.25rem 0 0;
+  margin: 1.5rem 0 0;
   font-family: var(--font-display);
-  font-size: clamp(2.75rem, 7vw, 5.5rem);
-  font-weight: 600;
+  font-size: clamp(2.25rem, 5vw, 3.75rem);
   line-height: 1;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.03em;
   color: var(--color-fg);
-  /* Letters rise from behind this edge. */
   clip-path: inset(-0.1em -0.2em 0 -0.2em);
 }
 
@@ -669,7 +982,6 @@ h3 {
   from {
     opacity: 0;
     transform: translateY(0.9em);
-    letter-spacing: 0.12em;
   }
   to {
     opacity: 1;
@@ -679,22 +991,32 @@ h3 {
 
 .dl-intro__letter {
   display: inline-block;
-  animation: dl-intro-letter 640ms var(--ease-out-quint) both;
-  animation-delay: calc(240ms + var(--i) * 32ms);
+  font-weight: 700;
+  animation: dl-intro-letter 480ms var(--ease-out-quint) both;
+  animation-delay: calc(600ms + var(--i) * 24ms);
 }
 
-/* The last three letters ("Lab") carry the violet. */
+/* "Lab" in the light weight (DESIGN.md §2.4). */
 .dl-intro__letter:nth-child(n + 8) {
-  color: var(--color-accent);
+  font-weight: 300;
 }
 
 .dl-intro__line {
   display: block;
-  width: min(22rem, 60vw);
+  width: min(18rem, 56vw);
   height: 1px;
   margin-top: 1.5rem;
-  background: linear-gradient(90deg, transparent, var(--color-accent) 30%, var(--color-orchid) 70%, transparent);
-  animation: nc-bar-draw 900ms 380ms var(--ease-out-quint) both;
+  background: linear-gradient(90deg, transparent, var(--color-crimson) 30%, var(--color-gold) 70%, transparent);
+  animation: nc-bar-draw 520ms 820ms var(--ease-out-quint) both;
+}
+
+@keyframes nc-bar-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: none;
+  }
 }
 
 .dl-intro__note {
@@ -710,13 +1032,32 @@ h3 {
 }
 
 /* A reload in the same session skips straight to the reveal. */
-.dl-intro[data-brief="true"] .dl-intro__letter,
-.dl-intro[data-brief="true"] .nc-mark__dot,
-.dl-intro[data-brief="true"] .nc-mark__bar,
-.dl-intro[data-brief="true"] .dl-intro__line,
+.dl-intro[data-brief="true"] *,
 .dl-intro[data-brief="true"] .dl-intro__glow {
-  animation-duration: 1ms;
-  animation-delay: 0ms;
+  animation-duration: 1ms !important;
+  animation-delay: 0ms !important;
+}
+
+/* Reduced motion: still dots that breathe instead of travelling (opacity only). */
+@media (prefers-reduced-motion: reduce) {
+  [data-loading="true"] .dl-loop-y--a,
+  [data-loading="true"] .dl-loop-y--b {
+    animation: dl-breathe 1800ms ease-in-out infinite !important;
+  }
+
+  [data-loading="true"] .dl-loop-y--b {
+    animation-delay: 300ms !important;
+  }
+}
+
+@keyframes dl-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 /* ---------- completion moments (DESIGN.md §13) ---------- */
@@ -728,7 +1069,7 @@ h3 {
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: rgb(9 8 13 / 0.82);
+  background: rgb(9 9 9 / 0.84);
   animation: nc-emerge 260ms var(--ease-standard) both;
 }
 
@@ -742,7 +1083,7 @@ h3 {
 
 .dl-celebrate--week,
 .dl-celebrate--unit {
-  background: rgb(9 8 13 / 0.94);
+  background: rgb(9 9 9 / 0.95);
 }
 
 @keyframes dl-celebrate-out {
@@ -756,7 +1097,7 @@ h3 {
   width: 80vmin;
   height: 80vmin;
   border-radius: 9999px;
-  background: radial-gradient(closest-side, rgb(124 58 237 / 0.38), rgb(124 58 237 / 0.1) 55%, transparent);
+  background: radial-gradient(closest-side, rgb(181 37 50 / 0.3), rgb(117 27 37 / 0.1) 55%, transparent);
   animation: dl-celebrate-glow 1100ms var(--ease-out-quint) both;
 }
 
@@ -770,8 +1111,8 @@ h3 {
   width: 140vmax;
   height: 140vmax;
   background:
-    radial-gradient(closest-side, rgb(124 58 237 / 0.42), rgb(124 58 237 / 0.12) 45%, transparent),
-    radial-gradient(closest-side at 62% 40%, rgb(217 70 239 / 0.22), transparent 55%);
+    radial-gradient(closest-side, rgb(181 37 50 / 0.34), rgb(117 27 37 / 0.12) 45%, transparent),
+    radial-gradient(closest-side at 62% 40%, rgb(214 164 55 / 0.12), transparent 55%);
   animation-duration: 2000ms;
 }
 
@@ -825,7 +1166,7 @@ h3 {
 }
 
 .dl-celebrate__line {
-  background: linear-gradient(90deg, transparent, var(--color-accent) 25%, var(--color-orchid) 75%, transparent);
+  background: linear-gradient(90deg, transparent, var(--color-crimson) 25%, var(--color-gold) 75%, transparent);
   transform-origin: left center;
   animation: nc-bar-draw 900ms 900ms var(--ease-out-quint) both;
 }
@@ -891,9 +1232,9 @@ h3 {
 
 @keyframes dl-plural-change {
   from {
-    background-color: rgb(167 139 250 / 0.45);
+    background-color: rgb(214 164 55 / 0.4);
   }
   to {
-    background-color: rgb(167 139 250 / 0.15);
+    background-color: rgb(214 164 55 / 0.14);
   }
 }

@@ -81,6 +81,7 @@ import {
 import { celebrationFor } from "./lib/celebration";
 import { allWeeksMastered, currentWeek, weekSummaries } from "./lib/progress";
 import { dailyActivity, windowStart } from "./lib/progressStats";
+import { BrandLoader } from "./components/shell/Loaders";
 
 /** Days of history loaded for Home (last 7) and Progress (last 28). */
 const HISTORY_DAYS = 28;
@@ -312,9 +313,7 @@ function App() {
     if (!databaseReady) {
       return (
         <div className="flex min-h-screen items-center justify-center bg-canvas">
-          <div role="status" className="text-sm text-fg-3">
-            Opening DeutschLab…
-          </div>
+          <BrandLoader label="Opening DeutschLab…" />
         </div>
       );
     }

@@ -99,7 +99,7 @@ async function runThrough(user: User) {
   await click(user, "finish writing");
   await click(user, "finish speaking");
 
-  await screen.findByText(/Week 4 mastered|Review recommended/);
+  await screen.findByText(/Week 4 completed|Review recommended/);
 }
 
 function setScores(partial: Partial<typeof board>) {
@@ -153,7 +153,7 @@ describe("checkpoint-004 (October Foundations Checkpoint)", () => {
     setScores({ vocabulary: 6, grammar: 9, reading: 4, listening: 4, writing: 6, speaking: 3 });
     await runThrough(user);
 
-    expect(screen.getByText("Week 4 mastered")).toBeInTheDocument();
+    expect(screen.getByText("Week 4 completed")).toBeInTheDocument();
     expect(screen.getByText(/October Foundations complete/)).toBeInTheDocument();
     expect(screen.getByText(/not a CEFR A1 certificate/)).toBeInTheDocument();
     expect(onSaveAttempt).toHaveBeenCalledWith(
@@ -230,7 +230,7 @@ describe("checkpoint-004 (October Foundations Checkpoint)", () => {
     await click(user, "finish listening");
     await click(user, "finish writing");
     await click(user, "finish speaking");
-    await screen.findByText("Week 4 mastered");
+    await screen.findByText("Week 4 completed");
 
     expect(onSaveAttempt.mock.calls.map((call) => call[0].passed)).toEqual([false, true]);
   });

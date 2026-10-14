@@ -17,7 +17,7 @@ test.describe("Week 2 (browser, mocked Tauri SQL)", () => {
     await page.goto("/");
     await goTo(page, "Course");
 
-    await expect(page.getByRole("region", { name: "Week 1 progress" })).toContainText("Mastered");
+    await expect(page.getByRole("region", { name: "Week 1 progress" })).toContainText("Completed");
     await goTo(page, "Home");
 
     const plan = planSection(page);

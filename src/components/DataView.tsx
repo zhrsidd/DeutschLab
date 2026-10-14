@@ -12,6 +12,7 @@ import {
 } from "../lib/backup";
 
 import { ErrorMessage } from "./lesson/LessonParts";
+import { ButtonLoader } from "./shell/Loaders";
 
 type Busy = "export" | "snapshot" | null;
 
@@ -77,7 +78,15 @@ export default function DataView() {
             onClick={() => void run("export")}
             className="dl-press justify-self-start rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-on-accent enabled:hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {busy === "export" ? "Exporting…" : "Export backup"}
+            <span className="inline-flex items-center gap-2">
+              {busy === "export" ? (
+                <>
+                  Exporting… <ButtonLoader />
+                </>
+              ) : (
+                "Export backup"
+              )}
+            </span>
           </button>
 
           {exported ? (
@@ -109,7 +118,15 @@ export default function DataView() {
             onClick={() => void run("snapshot")}
             className="dl-press justify-self-start rounded-md border border-line bg-white px-4 py-2.5 text-sm font-medium enabled:hover:border-line-strong disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {busy === "snapshot" ? "Saving…" : "Save snapshot"}
+            <span className="inline-flex items-center gap-2">
+              {busy === "snapshot" ? (
+                <>
+                  Saving… <ButtonLoader />
+                </>
+              ) : (
+                "Save snapshot"
+              )}
+            </span>
           </button>
 
           {snapshot ? (

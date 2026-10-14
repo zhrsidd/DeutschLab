@@ -25,6 +25,7 @@ import {
 import { ErrorMessage, ProgressBar } from "./lesson/LessonParts";
 import ReviewCard from "./review/ReviewCard";
 import { shuffleArray } from "./lesson/shuffle";
+import { ButtonLoader } from "./shell/Loaders";
 
 interface ReviewViewProps {
   /** Items planned by Today; omit/null to use the default maximum. */
@@ -49,6 +50,7 @@ export default function ReviewView({
   const [mistakes, setMistakes] = useState<MistakeRow[]>([]);
   const [session, setSession] = useState<ReviewItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [starting, setStarting] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -70,6 +72,8 @@ export default function ReviewView({
   }, [load]);
 
   const startSession = async () => {
+    if (starting) return;
+    setStarting(true);
     try {
       setError(null);
       const due = await getDueReviewItems(resolveReviewLimit(sessionLimit));
@@ -85,6 +89,8 @@ export default function ReviewView({
     } catch (startError) {
       console.error("Failed to start review:", startError);
       setError("The review session could not be started.");
+    } finally {
+      setStarting(false);
     }
   };
 
@@ -118,10 +124,11 @@ export default function ReviewView({
           <button
             type="button"
             onClick={() => void startSession()}
+            aria-busy={starting}
             className="dl-press mt-7 flex w-full items-center justify-center gap-2 rounded-md bg-accent px-4 py-3.5 text-sm font-semibold text-on-accent hover:bg-accent-hover sm:w-auto sm:px-6"
           >
             Start Review
-            <ArrowRight size={16} aria-hidden="true" />
+            {starting ? <ButtonLoader /> : <ArrowRight size={16} aria-hidden="true" />}
           </button>
         ) : stats ? (
           <p className="mt-6 text-sm text-fg-2">
@@ -152,7 +159,7 @@ export default function ReviewView({
                 <span
                   className={[
                     "shrink-0 rounded-full px-2.5 py-1 text-xs font-medium",
-                    mistake.resolved ? "bg-success-soft text-success" : "text-accent ring-1 ring-accent/60",
+                    mistake.resolved ? "bg-success-soft text-success" : "text-highlight ring-1 ring-highlight/60",
                   ].join(" ")}
                 >
                   {mistake.resolved ? "Resolved" : "Unresolved"}
@@ -178,9 +185,9 @@ export default function ReviewView({
 
 function ReviewStat({ label, value, highlight = false }: { label: string; value: number | string; highlight?: boolean }) {
   return (
-    <div className={["border-t pt-3", highlight ? "border-accent" : "border-line-strong"].join(" ")}>
+    <div className={["border-t pt-3", highlight ? "border-highlight" : "border-line-strong"].join(" ")}>
       <dt className="text-[11px] font-medium uppercase tracking-[0.12em] text-fg-3">{label}</dt>
-      <dd className={["tabular m-0 mt-2 font-display text-stat font-semibold", highlight ? "text-accent" : ""].join(" ")}>
+      <dd className={["tabular m-0 mt-2 font-display text-stat font-semibold", highlight ? "text-highlight" : ""].join(" ")}>
         {value}
       </dd>
     </div>
@@ -229,7 +236,7 @@ function ReviewSession({
         <div className="dl-enter mx-auto max-w-xl py-12 text-center">
           <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-fg-3">Review complete</p>
 
-          <div className="tabular mt-6 font-display text-[5rem] leading-none font-extralight tracking-tight text-accent">
+          <div className="tabular mt-6 font-display text-[5rem] leading-none font-extralight tracking-tight text-highlight">
             {correctCount}/{items.length}
           </div>
 

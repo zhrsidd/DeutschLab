@@ -121,7 +121,7 @@ async function runThrough(user: User) {
   await click(user, "finish speaking");
 
   // Saving is async; wait for the results screen.
-  await screen.findByText(/Week 1 mastered|Review recommended/);
+  await screen.findByText(/Week 1 completed|Review recommended/);
 }
 
 function setScores(partial: Partial<typeof scoreBoard>) {
@@ -165,7 +165,7 @@ describe("WeekCheckpoint", () => {
     setScores({ vocabulary: 7, grammar: 6, reading: 4, listening: 3, writing: 4, speaking: 4 });
     await runThrough(user);
 
-    expect(screen.getByText("Week 1 mastered")).toBeInTheDocument();
+    expect(screen.getByText("Week 1 completed")).toBeInTheDocument();
     expect(screen.getByText(/28 \/ 34 — 82%/)).toBeInTheDocument();
     expect(onSaveAttempt).toHaveBeenCalledWith(
       expect.objectContaining({ total: 28, passed: true }),
@@ -244,7 +244,7 @@ describe("WeekCheckpoint", () => {
     await click(user, "finish listening");
     await click(user, "finish writing");
     await click(user, "finish speaking");
-    await screen.findByText("Week 1 mastered");
+    await screen.findByText("Week 1 completed");
 
     expect(onSaveAttempt).toHaveBeenCalledTimes(2);
     expect(onSaveAttempt.mock.calls[0][0].passed).toBe(false);

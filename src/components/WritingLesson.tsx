@@ -17,6 +17,7 @@ import { countWords } from "../lib/text";
 import { ErrorMessage, LessonShell, Stat } from "./lesson/LessonParts";
 
 import WritingSection from "./checkpoint/WritingSection";
+import { SectionLoader } from "./shell/Loaders";
 
 type Stage = "intro" | "prep" | "plan" | "write" | "results";
 
@@ -167,8 +168,8 @@ export default function WritingLesson({
   if (!loaded) {
     return (
       <LessonShell onBack={onBack}>
-        <div className="mx-auto max-w-2xl px-8 py-12 text-neutral-400">
-          Opening your draft…
+        <div className="mx-auto max-w-2xl px-8 py-12">
+          <SectionLoader label="Opening your draft…" />
         </div>
       </LessonShell>
     );

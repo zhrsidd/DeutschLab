@@ -3,7 +3,7 @@ import { Check, CornerDownRight } from "lucide-react";
 import type { Grade } from "../../lib/reviewExercises";
 
 /*
- * Answer feedback (DESIGN.md §12). Correct: a drawn check and a violet
+ * Answer feedback (DESIGN.md §12). Correct: a drawn check and a green
  * spring. Not quite: the right answer, stated plainly, with a gentle nudge.
  * Words carry the meaning; colour and motion only reinforce it.
  */

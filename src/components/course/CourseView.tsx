@@ -48,7 +48,7 @@ export default function CourseView({ summaries, completedTasks, startLesson }: C
         aside={
           <p className="tabular text-sm text-fg-2">
             {done} of {total} activities · {summaries.filter((summary) => summary.mastered).length} of{" "}
-            {summaries.length} weeks mastered
+            {summaries.length} weeks completed
           </p>
         }
       >
@@ -63,7 +63,7 @@ export default function CourseView({ summaries, completedTasks, startLesson }: C
         <section key={unit.id} aria-label={unit.title} className="mt-10">
           <div className="grid gap-x-8 md:grid-cols-[10rem_minmax(0,1fr)]">
             <div className="mb-4 md:mb-0">
-              <p className="tabular font-display text-display-md font-extralight tracking-tight text-accent">
+              <p className="tabular font-display text-display-md font-extralight tracking-tight text-highlight">
                 {String(unit.number).padStart(2, "0")}
               </p>
               <p className="mt-1 text-sm font-medium">{unit.target}</p>
@@ -84,7 +84,7 @@ export default function CourseView({ summaries, completedTasks, startLesson }: C
                           className={[
                             "-ml-[4.5px] h-[9px] w-[9px] shrink-0 rounded-full",
                             now
-                              ? "bg-accent shadow-[0_0_0_4px_rgb(167_139_250/0.18),0_0_14px_rgb(167_139_250/0.7)]"
+                              ? "bg-highlight shadow-[0_0_0_4px_rgb(214_164_55/0.16)]"
                               : built
                                 ? "bg-fg-2"
                                 : "border border-line-strong bg-canvas",
@@ -150,8 +150,9 @@ function WeekNode({
   onSelect: (id: string) => void;
   startLesson: (taskId: string) => void;
 }) {
+  // The week's checkpoint is passed: completion of the week, not a claim of mastery.
   const status = summary.mastered
-    ? "Mastered"
+    ? "Completed"
     : summary.done > 0
       ? `${summary.done} of ${summary.tasks.length} done`
       : "Available";
@@ -168,11 +169,11 @@ function WeekNode({
           onClick={onToggle}
           className="dl-press group flex w-full items-center gap-4 py-3.5 text-left"
         >
-          <span className={["tabular w-16 shrink-0 text-sm font-medium", current ? "text-accent" : ""].join(" ")}>
+          <span className={["tabular w-16 shrink-0 text-sm font-medium", current ? "text-highlight" : ""].join(" ")}>
             Week {week.week}
           </span>
           <span className="min-w-0 flex-1">
-            <span className={["block truncate group-hover:text-accent-hover", current ? "font-display text-lg font-semibold tracking-tight" : "font-medium"].join(" ")}>
+            <span className={["block truncate group-hover:text-highlight", current ? "font-display text-lg font-semibold tracking-tight" : "font-medium"].join(" ")}>
               {week.title}
             </span>
             <span className="tabular block text-xs text-fg-3">
@@ -185,7 +186,7 @@ function WeekNode({
               summary.mastered
                 ? "bg-success-soft text-success"
                 : current
-                  ? "bg-accent font-semibold text-on-accent"
+                  ? "font-semibold text-highlight ring-1 ring-highlight/60"
                   : "text-fg-2 ring-1 ring-line",
             ].join(" ")}
           >
@@ -245,7 +246,7 @@ function ActivityRow({
         onClick={onSelect}
         className="dl-press group grid w-full grid-cols-[1.25rem_minmax(0,1fr)_auto] items-center gap-3 rounded-md px-2 py-2.5 text-left hover:bg-surface"
       >
-        <Icon size={16} strokeWidth={1.8} aria-hidden="true" className={complete ? "text-success" : "text-fg-3 group-hover:text-accent"} />
+        <Icon size={16} strokeWidth={1.8} aria-hidden="true" className={complete ? "text-success" : "text-fg-3 group-hover:text-highlight"} />
         <span className="min-w-0">
           <span className={["block truncate text-sm font-medium", complete ? "text-fg-2" : ""].join(" ")}>
             {task.title}

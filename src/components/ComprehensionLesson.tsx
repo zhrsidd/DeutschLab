@@ -17,6 +17,7 @@ import {
 } from "./lesson/LessonParts";
 
 import ComprehensionSection from "./checkpoint/ComprehensionSection";
+import { InlineLoader } from "./shell/Loaders";
 
 export interface ComprehensionGroup {
   id: string;
@@ -219,7 +220,9 @@ export default function ComprehensionLesson({
           ) : null}
 
           {savingAttempt ? (
-            <p className="mt-4 text-center text-sm text-neutral-400">Saving…</p>
+            <p className="mt-4 text-center text-sm text-neutral-400">
+              <InlineLoader label="Saving…" />
+            </p>
           ) : null}
 
           {error ? <ErrorMessage>{error}</ErrorMessage> : null}
@@ -239,7 +242,7 @@ export default function ComprehensionLesson({
 
         <div className="mx-auto mt-5 h-2 max-w-xs overflow-hidden rounded-full bg-neutral-100">
           <div
-            className="h-full rounded-full bg-neutral-900 transition-all duration-300"
+            className="h-full rounded-full bg-progress transition-all duration-300"
             style={{ width: `${(score / total) * 100}%` }}
           />
         </div>

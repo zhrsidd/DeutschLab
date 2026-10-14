@@ -3,7 +3,23 @@
 Newest first. Versions before 1.0 were internal milestones; dates are commit dates.
 Details of each audit live in `docs/QUALITY_AUDIT.md` (v0.8) and `docs/V1_RELEASE_REPORT.md` (v1.0).
 
-## Unreleased — Nocturne redesign (2026-10-13)
+## Unreleased — Schwarzrot brand identity (2026-10-14)
+
+Brand identity and motion only: no curriculum, grading, scoring, SRS or persistence changes. The system:
+`DESIGN.md` §2, §3, §10–12; assets and explorations: `brand/`.
+
+- **Logomark:** a geometric ü (round left, square foot right) with crimson and gold umlaut dots, chosen
+  from three explorations (`brand/gallery.html`). Mono, light, dark, lockup and app-icon SVGs.
+- **Wordmark:** "Deutsch" 700 / "Lab" 300, one colour.
+- **Colour:** violet Nocturne replaced by Schwarzrot tokens (obsidian, charcoal, warm off-white, crimson,
+  gold, oxblood light) with three fixed roles; warning moved to orange-amber, correct-answer ring to green.
+- **Opening:** the dots emerge, travel and the ü is constructed; fast-forwarded when data is ready early,
+  loops when slow; never delays readiness.
+- **Loaders:** `BrandLoader`, `SectionLoader`, `InlineLoader`, `ButtonLoader`, `StartupLoader`, all in
+  one dot language, delayed to avoid flashes, with status text and a reduced-motion variant.
+- **App icon:** regenerated from `brand/app-icon.svg`; previous icons kept in `brand/icon-backup-tauri-default/`.
+
+## Nocturne redesign (2026-10-13)
 
 Interface and interaction redesign only: no new curriculum, no change to grading, checkpoint scoring,
 SRS intervals or mistake resolution. Details, verification and limitations: `docs/UI_REDESIGN_REPORT.md`;

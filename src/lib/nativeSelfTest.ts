@@ -239,9 +239,9 @@ export async function runNativeSelfTest(reportPath: string, renderApp: () => voi
   // Shell navigation buttons read "01Home", "02Course", ... (number + label).
   const nav = (label: string) => new RegExp(`^(\\d\\d)?${label}(\\d+ due)?$`);
 
-  await check("Nocturne dark background in WKWebView", async () => {
+  await check("Schwarzrot obsidian background in WKWebView", async () => {
     const background = getComputedStyle(document.body).backgroundColor;
-    if (background !== "rgb(9, 8, 13)") throw new Error(background);
+    if (background !== "rgb(9, 9, 9)") throw new Error(background);
     return background;
   });
 

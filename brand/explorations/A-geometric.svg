@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="DeutschLab exploration A: geometric">
+  <!-- A · GEOMETRIC: a symmetric Ü from one 12-unit stroke; circular bowl (r 24 / 12), equal stems, dots = stroke width. -->
+  <path fill="#F5F1EA" d="M8 22 H20 V38 A12 12 0 0 0 44 38 V22 H56 V38 A24 24 0 0 1 8 38 Z"/>
+  <circle cx="14" cy="10" r="6" fill="#B52532"/>
+  <circle cx="50" cy="10" r="6" fill="#D6A437"/>
+</svg>

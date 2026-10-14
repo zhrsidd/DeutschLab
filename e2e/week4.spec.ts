@@ -132,7 +132,7 @@ test.describe("Week 4 (browser, mocked Tauri SQL)", () => {
     await expect(page.getByText(/unfinished Week 4 lessons/)).toHaveCount(0);
   });
 
-  test("after checkpoint-004: Week 4 mastered, October complete, reviews still offered", async ({
+  test("after checkpoint-004: Week 4 completed, October complete, reviews still offered", async ({
     page,
     db,
   }) => {
@@ -141,7 +141,7 @@ test.describe("Week 4 (browser, mocked Tauri SQL)", () => {
     await page.goto("/");
     await goTo(page, "Course");
 
-    await expect(page.getByRole("region", { name: "Week 4 progress" })).toContainText("Mastered");
+    await expect(page.getByRole("region", { name: "Week 4 progress" })).toContainText("Completed");
     await goTo(page, "Home");
     await expect(page.getByText(/October Foundations complete/).first()).toBeVisible();
 

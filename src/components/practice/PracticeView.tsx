@@ -2,6 +2,7 @@ import { starterTasks, taskWeek, type LessonType } from "../../data/unit1";
 import type { ProgressData } from "../../lib/db";
 import { iconForType } from "../lessonIcons";
 import { Page, PageHeader, Section } from "../shell/AppShell";
+import { InlineLoader } from "../shell/Loaders";
 
 /*
  * Practice by skill. It exposes only what exists: every lesson can be
@@ -42,9 +43,11 @@ export default function PracticeView({ progress, completedTasks, startLesson }: 
       <Section title="Needs attention" label="Weak spots">
         {weak.length === 0 ? (
           <p className="text-sm leading-6 text-fg-2">
-            {progress
-              ? "No open mistakes. When you miss something, the lesson it came from appears here."
-              : "Loading…"}
+            {progress ? (
+              "No open mistakes. When you miss something, the lesson it came from appears here."
+            ) : (
+              <InlineLoader label="Loading…" />
+            )}
           </p>
         ) : (
           <ul>

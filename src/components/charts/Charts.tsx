@@ -3,9 +3,9 @@ import { useEffect, useState, type ReactNode } from "react";
 import { niceMax } from "../../lib/progressStats";
 
 /*
- * Hand-built charts (see DESIGN.md §15). Marks are violet (≥ 3:1 on the
- * dark surfaces), the "current" mark is full-strength with a dot marker and
- * a bright label while the rest sit at 60%, every chart is a
+ * Hand-built charts (see DESIGN.md §15). Marks are stone (≥ 5:1 on the
+ * dark surfaces); the "current" mark is gold with a dot marker and a
+ * bright label, every chart is a
  * figure with a caption and a visually hidden data table, and marks are
  * focusable with a tooltip on hover or focus.
  */
@@ -26,6 +26,7 @@ export function ChartFigure({
   table,
   empty,
   emptyText,
+  emptyHint,
   aside,
   children,
 }: {
@@ -35,6 +36,8 @@ export function ChartFigure({
   table: { columns: string[]; rows: (string | number)[][] };
   empty?: boolean;
   emptyText?: string;
+  /** Optional honest scaffold shown under the empty text (e.g. the day labels, no values). */
+  emptyHint?: ReactNode;
   aside?: ReactNode;
   children: ReactNode;
 }) {
@@ -48,7 +51,10 @@ export function ChartFigure({
 
       <div className="mt-4">
         {empty ? (
-          <p className="border-t border-line pt-4 text-sm leading-6 text-fg-2">{emptyText}</p>
+          <div className="border-t border-line pt-4">
+            <p className="text-sm leading-6 text-fg-2">{emptyText}</p>
+            {emptyHint}
+          </div>
         ) : (
           children
         )}
@@ -143,8 +149,8 @@ export function BarChart({ bars, height = 120, unit }: { bars: Bar[]; height?: n
                   "mx-auto w-full max-w-3 origin-bottom rounded-t-full transition-[transform,background-color] duration-chart ease-out-quint",
                   bar.value > 0
                     ? bar.current
-                      ? "bg-accent shadow-[0_0_16px_rgb(167_139_250/0.45)] group-hover:bg-accent-hover"
-                      : "bg-accent/60 group-hover:bg-accent"
+                      ? "bg-highlight"
+                      : "bg-fg-3 group-hover:bg-fg-2"
                     : "",
                 ].join(" ")}
                 style={{
@@ -167,7 +173,7 @@ export function BarChart({ bars, height = 120, unit }: { bars: Bar[]; height?: n
               ].join(" ")}
             >
               {bar.label}
-              {bar.current ? <span className="mx-auto mt-1 block h-1 w-1 rounded-full bg-accent" /> : null}
+              {bar.current ? <span className="mx-auto mt-1 block h-1 w-1 rounded-full bg-highlight" /> : null}
             </span>
           ))}
         </div>
@@ -182,17 +188,18 @@ export interface Segment {
   state: "done" | "next" | "todo";
 }
 
-/** One block per activity: done (violet), next (violet outline), to do (surface). */
+/** One block per activity: completed (crimson), current (gold outline), upcoming (hairline outline), with a legend. */
 export function SegmentMeter({ segments }: { segments: Segment[] }) {
   const mounted = useMounted();
 
   return (
+    <div>
     <ol className="flex gap-1" aria-label="Activities this week">
       {segments.map((segment, index) => (
         <li
           key={segment.key}
           tabIndex={0}
-          aria-label={`${segment.label}: ${segment.state === "done" ? "complete" : segment.state === "next" ? "next" : "to do"}`}
+          aria-label={`${segment.label}: ${segment.state === "done" ? "completed" : segment.state === "next" ? "current" : "upcoming"}`}
           className="group relative h-2 flex-1"
         >
           <Tooltip>{segment.label}</Tooltip>
@@ -200,10 +207,10 @@ export function SegmentMeter({ segments }: { segments: Segment[] }) {
             className={[
               "block h-full rounded-full transition-[opacity,transform] duration-chart ease-out-quint",
               segment.state === "done"
-                ? "bg-accent"
+                ? "bg-progress"
                 : segment.state === "next"
-                  ? "bg-accent/15 ring-1 ring-inset ring-accent"
-                  : "bg-surface",
+                  ? "bg-highlight/25 ring-1 ring-inset ring-highlight"
+                  : "bg-surface ring-1 ring-inset ring-line-strong",
             ].join(" ")}
             style={{
               opacity: mounted ? 1 : 0,
@@ -214,6 +221,12 @@ export function SegmentMeter({ segments }: { segments: Segment[] }) {
         </li>
       ))}
     </ol>
+      <ul aria-hidden="true" className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-fg-3">
+        <li className="flex items-center gap-1.5"><span className="h-2 w-3 rounded-full bg-progress" />Completed</li>
+        <li className="flex items-center gap-1.5"><span className="h-2 w-3 rounded-full bg-highlight/25 ring-1 ring-inset ring-highlight" />Current</li>
+        <li className="flex items-center gap-1.5"><span className="h-2 w-3 rounded-full bg-surface ring-1 ring-inset ring-line-strong" />Upcoming</li>
+      </ul>
+    </div>
   );
 }
 

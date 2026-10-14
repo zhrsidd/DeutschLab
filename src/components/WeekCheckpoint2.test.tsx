@@ -89,7 +89,7 @@ async function runThrough(user: User) {
   await click(user, "finish listening");
   await click(user, "finish writing");
 
-  await screen.findByText(/Week 2 mastered|Review recommended/);
+  await screen.findByText(/Week 2 completed|Review recommended/);
 }
 
 function setScores(partial: Partial<typeof board>) {
@@ -143,7 +143,7 @@ describe("checkpoint-002 (Week 2 Checkpoint)", () => {
     setScores({ vocabulary: 6, grammar: 7, reading: 4, listening: 3, writing: 6 });
     await runThrough(user);
 
-    expect(screen.getByText("Week 2 mastered")).toBeInTheDocument();
+    expect(screen.getByText("Week 2 completed")).toBeInTheDocument();
     expect(screen.getByText(/26 \/ 32 — 81%/)).toBeInTheDocument();
     expect(onSaveAttempt).toHaveBeenCalledWith(
       expect.objectContaining({ total: 26, possible: 32, passed: true }),
@@ -216,7 +216,7 @@ describe("checkpoint-002 (Week 2 Checkpoint)", () => {
     await click(user, "finish reading");
     await click(user, "finish listening");
     await click(user, "finish writing");
-    await screen.findByText("Week 2 mastered");
+    await screen.findByText("Week 2 completed");
 
     expect(onSaveAttempt).toHaveBeenCalledTimes(2);
     expect(onSaveAttempt.mock.calls.map((call) => call[0].passed)).toEqual([false, true]);
@@ -252,7 +252,7 @@ describe("checkpoint-002 (Week 2 Checkpoint)", () => {
     expect(onSaveAttempt).not.toHaveBeenCalled();
     await click(user, "finish writing");
 
-    await screen.findByText("Week 2 mastered");
+    await screen.findByText("Week 2 completed");
     expect(onSaveAttempt).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-import { UmlautMark } from "../shell/Brand";
+import { Logomark } from "../shell/Brand";
 
 /*
  * Completion moments (DESIGN.md §13). App shows one only after the
@@ -36,7 +36,7 @@ const LESSON_PHRASES = [
 /** How long the lesson-level moment stays before dismissing itself. */
 export const LESSON_CELEBRATION_MS = 2000;
 
-/** Letters that rise in one by one; `ramp` tints them violet → orchid across the word. */
+/** Letters that rise in one by one; `ramp` warms them from crimson to gold across the word. */
 function Letters({ text, delay = 0, step = 38, ramp = false }: { text: string; delay?: number; step?: number; ramp?: boolean }) {
   return (
     <span aria-hidden="true" className="dl-celebrate__letters">
@@ -50,7 +50,7 @@ function Letters({ text, delay = 0, step = 38, ramp = false }: { text: string; d
             style={{
               animationDelay: `${delay + index * step}ms`,
               color: ramp
-                ? `color-mix(in oklab, var(--color-orchid) ${Math.round((index / Math.max(1, text.length - 1)) * 70)}%, var(--color-accent))`
+                ? `color-mix(in oklab, var(--color-gold) ${Math.round((index / Math.max(1, text.length - 1)) * 100)}%, var(--color-crimson))`
                 : undefined,
             }}
           >
@@ -102,6 +102,7 @@ export default function Celebration({ data, onDone }: { data: CelebrationData; o
         </span>
         <div className="dl-celebrate__glow" aria-hidden="true" />
         <div aria-hidden="true" className="relative text-center">
+          <Logomark state="success" className="mx-auto mb-6 h-auto w-9 text-fg" />
           <p lang="de" className="font-display text-display-lg font-semibold tracking-tight md:text-display-xl">
             <Letters text={phrase.german} />
           </p>
@@ -113,7 +114,7 @@ export default function Celebration({ data, onDone }: { data: CelebrationData; o
           <div className="dl-celebrate__fade mx-auto mt-6 w-64">
             <div className="h-[3px] overflow-hidden rounded-full bg-surface">
               <div
-                className="dl-celebrate__progress h-full origin-left rounded-full bg-accent"
+                className="dl-celebrate__progress h-full origin-left rounded-full bg-progress"
                 style={{
                   ["--from" as string]: data.total ? data.before / data.total : 0,
                   ["--to" as string]: data.total ? data.after / data.total : 0,
@@ -130,7 +131,7 @@ export default function Celebration({ data, onDone }: { data: CelebrationData; o
   }
 
   const unit = data.kind === "unit";
-  const kicker = unit ? "October Foundations" : `Week ${data.week} mastered`;
+  const kicker = unit ? "October Foundations" : `Week ${data.week} completed`;
   const lineOne = unit ? "Oktober" : `Woche ${data.week}`;
 
   return (
@@ -143,7 +144,7 @@ export default function Celebration({ data, onDone }: { data: CelebrationData; o
       <div className="dl-celebrate__glow" aria-hidden="true" />
 
       <div className="relative w-full max-w-xl px-6 text-center">
-        <UmlautMark animate className="mx-auto h-auto w-12 text-accent" />
+        <Logomark state="success" className="mx-auto h-auto w-14 text-fg" />
         <p className="dl-celebrate__fade mt-6 text-[11px] font-medium uppercase tracking-[0.16em] text-fg-3">{kicker}</p>
 
         <h2 id="celebration-title" lang="de" className="mt-4 font-display font-semibold leading-[0.92] tracking-tight">
@@ -153,7 +154,7 @@ export default function Celebration({ data, onDone }: { data: CelebrationData; o
           <span aria-hidden="true" className="block text-display-lg md:text-display-xl">
             <Letters text={lineOne} delay={200} step={45} />
           </span>
-          <span aria-hidden="true" className="block text-display-lg text-accent md:text-display-xl">
+          <span aria-hidden="true" className="block text-display-lg text-highlight md:text-display-xl">
             <Letters text="geschafft." delay={unit ? 620 : 520} step={unit ? 52 : 40} ramp={unit} />
           </span>
         </h2>
@@ -163,7 +164,7 @@ export default function Celebration({ data, onDone }: { data: CelebrationData; o
         <dl className="dl-celebrate__results mx-auto mt-8 grid max-w-sm grid-cols-2 gap-6 text-left">
           {unit ? (
             <>
-              <Result label="Weeks mastered" value={`${data.weeks} of ${data.weeks}`} />
+              <Result label="Weeks completed" value={`${data.weeks} of ${data.weeks}`} />
               <Result label="Activities complete" value={String(data.activities)} />
             </>
           ) : (
@@ -176,7 +177,7 @@ export default function Celebration({ data, onDone }: { data: CelebrationData; o
 
         <p className="dl-celebrate__results mx-auto mt-6 max-w-md text-sm leading-6 text-fg-2">
           {unit
-            ? "Weeks 1–4 are mastered in DeutschLab. This is the app's own milestone, not a CEFR certificate. Keep your reviews going."
+            ? "Weeks 1–4 are completed in DeutschLab. This is the app's own milestone, not a CEFR certificate. Keep your reviews going."
             : `${data.title}. ${data.nextWeek ? `Week ${data.nextWeek} is open on Home.` : ""} Your review queue keeps these words and patterns fresh.`}
         </p>
 

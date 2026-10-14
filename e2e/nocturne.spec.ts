@@ -2,17 +2,17 @@ import { expect, test } from "./fixtures";
 import { GREETING, WEEK_3_MASTERED, goTo, seedCompleted } from "./helpers";
 
 /*
- * The Nocturne shell (DESIGN.md): dark from the first paint, an opening
+ * The Schwarzrot shell (DESIGN.md): dark from the first paint, an opening
  * that never delays the app, navigation state and reduced motion.
  */
-test.describe("Nocturne shell (browser, mocked Tauri SQL)", () => {
+test.describe("Schwarzrot shell (browser, mocked Tauri SQL)", () => {
   test("paints obsidian before the app renders, with no white flash", async ({ page }) => {
     // Block the app's script and stylesheet: only index.html's inline CSS applies.
     await page.route(/\/assets\/index-.*\.(js|css)$/, (route) => route.abort());
     await page.goto("/", { waitUntil: "domcontentloaded" });
 
     const background = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-    expect(background).toBe("rgb(9, 8, 13)");
+    expect(background).toBe("rgb(9, 9, 9)");
   });
 
   test("the opening reveals Home as soon as the database is ready, then leaves", async ({ page }) => {

@@ -13,6 +13,7 @@ import {
 import { BarChart, ChartFigure, HBarList, ScoreDots } from "../charts/Charts";
 import { Stat } from "../lesson/LessonParts";
 import { Page, PageHeader, Section } from "../shell/AppShell";
+import { SectionLoader } from "../shell/Loaders";
 
 const pct = (value: number) => `${Math.round(value * 100)}%`;
 const shortDate = (iso: string) =>
@@ -33,9 +34,7 @@ export default function ProgressView({ progress, days, summaries }: ProgressView
     return (
       <Page>
         <PageHeader kicker="Progress" title="Your learning, measured" />
-        <p role="status" className="mt-8 text-sm text-fg-2">
-          Loading your records…
-        </p>
+        <SectionLoader label="Loading your records…" className="mt-8" />
       </Page>
     );
   }
@@ -98,16 +97,16 @@ export default function ProgressView({ progress, days, summaries }: ProgressView
         <Section title="Course completion">
           <ChartFigure
             title="Activities complete per week"
-            description="Weeks 1–4 of Unit 1. A week is mastered when its checkpoint is passed."
+            description="Weeks 1–4 of Unit 1. A week is completed when its checkpoint is passed."
             table={{
-              columns: ["Week", "Complete", "Activities", "Mastered"],
+              columns: ["Week", "Complete", "Activities", "Checkpoint passed"],
               rows: summaries.map((week) => [week.week, week.done, week.tasks.length, week.mastered ? "yes" : "no"]),
             }}
           >
             <HBarList
               rows={summaries.map((week) => ({
                 key: String(week.week),
-                label: `Week ${week.week}${week.mastered ? " · mastered" : ""}`,
+                label: `Week ${week.week}${week.mastered ? " · completed" : ""}`,
                 value: week.done,
                 max: week.tasks.length,
                 display: `${week.done}/${week.tasks.length}`,
