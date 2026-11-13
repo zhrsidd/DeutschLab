@@ -34,7 +34,7 @@ has one job: make that daily practice feel intentional and enjoyable without get
 
 | Level | Where | Character |
 |---|---|---|
-| **Cinematic** | Opening sequence, Home hero, week and October milestones | Low crimson light, display type at full size, the week as a numeral, the mark in motion |
+| **Cinematic** | Opening sequence, Home hero, week and Foundations milestones | Low crimson light, display type at full size, the week as a numeral, the mark in motion |
 | **Playful** | Lessons: vocabulary, grammar teaching, exercises, lesson completion | Spring feedback on answers, letters rising in, plural shifts, kinetic grammar demonstrations |
 | **Focused** | Checkpoints, Review sessions, reading passages, writing | Calm dark surfaces, no atmosphere, no decorative motion behind questions; celebration only after a saved completion |
 
@@ -245,8 +245,12 @@ reading measure `max-w-reading`; `h1–h3` hyphenate; at most two families per c
   evidence of completion, not of mastery) `bg-success-soft text-success`; **Current** gold outline
   `text-highlight ring-1 ring-highlight/60`; Planned `ring-1 ring-line text-fg-3`; Unresolved
   `text-highlight ring-highlight/60`. No filled crimson badges: they read as alerts.
-- **Course timeline**: a gold dot for the current month (a soft gold halo, no glow), light dots for
-  built months, hollow for planned; the current week has a crimson edge rule and a gold week number.
+- **Course timeline**: a gold dot for the current four-week learning block (a soft gold halo, no glow),
+  light dots for built blocks, hollow for planned; the current week has a crimson edge rule and a gold week number.
+  Blocks use thematic names rather than calendar months. Expanded built weeks and planned weeks show a
+  suggested Sunday–Saturday date range and can-do outcome. A native details/summary reveals planned
+  module outcomes and later practice; it does not appear as a runnable lesson or completion marker.
+  Dates are guidance, never unlock rules; current week still comes from saved progress.
 - **Loading**: see §12.1.
 - **Update notice** (`update/UpdateNotice.tsx`): a small bottom-right card, `elevated` with a `line-strong`
   border; gold "Update available" kicker, crimson "Update now", secondary "Later", a 1 px crimson progress
@@ -259,7 +263,7 @@ Gradients are **light, not decoration**. Allowed:
 - radial crimson/oxblood light in the atmosphere, the opening and milestones (gold only as a faint trace);
 - the 1 px luminous border (`nc-luminous`);
 - the crimson → gold hairline under the opening wordmark and milestones;
-- the per-letter crimson → gold ramp on "geschafft." in the October moment.
+- the per-letter crimson → gold ramp on "geschafft." in the Foundations moment.
 
 Not allowed: red-and-gold gradients on surfaces, gradient buttons, gradient text on headings or metrics,
 gradients in the mark, rainbow or rotating gradients.
@@ -329,7 +333,7 @@ nested transforms (x eased in-out, y eased out then in), giving a true curve wit
 |---|---|
 | Idle | Static |
 | Loading | The loop (on the mark, gold dips into the Ü's open counter) |
-| Success | The dots drop 7 units and settle once on the spring (week/October moments, lesson completion) |
+| Success | The dots drop 7 units and settle once on the spring (week/Foundations moments, lesson completion) |
 
 Not allowed: bouncing, squash and stretch, eyes or expressions, particles, continuous glows.
 
@@ -390,9 +394,9 @@ Moments appear **only after `markTaskComplete` has succeeded** and **only the fi
 | Answer | `.dl-correct` spring and drawn check | ~0.3 s | n/a |
 | Lesson | The mark's dots settle (success); "Geschafft!" / "Sehr gut!" / "Weiter so!" rises over a low crimson light; the week's real progress line moves | 2 s, then leaves by itself | Click, Escape or Enter |
 | Week completed | The mark settles, "Woche N" / "geschafft." (gold), a crimson → gold line draws, then results | ~1.8 s to results, then waits | "Weiter", Escape |
-| October Foundations | Larger crimson light with a trace of gold, "Oktober" / "geschafft." with a crimson → gold letter ramp, then results and the note that this is **not a CEFR certificate** | ~2.3 s to results, then waits | "Weiter", Escape |
+| Foundations | Larger crimson light with a trace of gold, "Grundlagen" / "geschafft." with a crimson → gold letter ramp, then results and the note that this is **not a CEFR certificate** | ~2.3 s to results, then waits | "Weiter", Escape |
 
-The lesson level is a `role="status"` announcement; week and October are labelled dialogs that focus
+The lesson level is a `role="status"` announcement; week and Foundations are labelled dialogs that focus
 "Weiter". Under reduced motion every level shows its final state at once.
 
 ## 14. Vocabulary typography and educational motion

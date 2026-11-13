@@ -109,13 +109,13 @@ test.describe("Week 4 (browser, mocked Tauri SQL)", () => {
     await page.goto("/");
 
     await expect(
-      planSection(page).getByRole("button", { name: /October Foundations Checkpoint/ }),
+      planSection(page).getByRole("button", { name: /Foundations Checkpoint/ }),
     ).toHaveCount(0);
 
     await openWeek(page, 4);
-    await page.getByRole("button", { name: /The Week 4 mastery check and October assessment/ }).click();
+    await page.getByRole("button", { name: /The Week 4 mastery check and Foundations assessment/ }).click();
     await page.getByRole("button", { name: "Start lesson" }).click();
-    await expect(page.getByRole("heading", { name: "October Foundations Checkpoint" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Foundations Checkpoint" })).toBeVisible();
     await expect(page.getByText(/You still have unfinished Week 4 lessons/)).toBeVisible();
     await expect(page.getByText(/80% overall \(32\/39\)/)).toBeVisible();
   });
@@ -127,12 +127,12 @@ test.describe("Week 4 (browser, mocked Tauri SQL)", () => {
 
     await expect(page.getByRole("region", { name: "Week 4 progress" })).toContainText("7 of 8 activities complete");
     await goTo(page, "Home");
-    await planSection(page).getByRole("button", { name: /October Foundations Checkpoint/ }).click();
+    await planSection(page).getByRole("button", { name: /Foundations Checkpoint/ }).click();
     await expect(page.getByText("Week 4 · Checkpoint")).toBeVisible();
     await expect(page.getByText(/unfinished Week 4 lessons/)).toHaveCount(0);
   });
 
-  test("after checkpoint-004: Week 4 completed, October complete, reviews still offered", async ({
+  test("after checkpoint-004: Week 4 completed, Foundations complete, reviews still offered", async ({
     page,
     db,
   }) => {
@@ -143,7 +143,7 @@ test.describe("Week 4 (browser, mocked Tauri SQL)", () => {
 
     await expect(page.getByRole("region", { name: "Week 4 progress" })).toContainText("Completed");
     await goTo(page, "Home");
-    await expect(page.getByText(/October Foundations complete/).first()).toBeVisible();
+    await expect(page.getByText(/Foundations complete/).first()).toBeVisible();
 
     const review = planSection(page).getByRole("button", { name: /1 review due/ });
     await expect(review).toBeVisible();

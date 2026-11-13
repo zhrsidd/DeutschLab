@@ -49,7 +49,7 @@ describe("Celebration", () => {
   it("frames October mastery as the app's milestone, never a CEFR level", () => {
     render(<Celebration data={{ kind: "unit", weeks: 4, activities: 31 }} onDone={() => {}} />);
 
-    expect(screen.getByRole("dialog", { name: "Oktober geschafft." })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Grundlagen geschafft." })).toBeInTheDocument();
     expect(screen.getByText(/not a CEFR certificate/)).toBeInTheDocument();
     expect(screen.getByText("4 of 4")).toBeInTheDocument();
   });

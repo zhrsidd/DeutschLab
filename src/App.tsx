@@ -398,7 +398,7 @@ function App() {
           view={view}
           onNavigate={(next) => (next === "review" ? openReview(null) : setView(next))}
           dueReviewCount={planData.dueReviewCount}
-          weekLabel={complete ? "October complete" : `Week ${week} of 4`}
+          weekLabel={complete ? "Foundations complete" : `Week ${week} of 4`}
           weekDetail={weekSummary ? `${weekSummary.done} of ${weekSummary.tasks.length} activities` : ""}
           weekShare={complete ? 1 : weekSummary ? weekSummary.done / Math.max(1, weekSummary.tasks.length) : 0}
         >

@@ -51,7 +51,7 @@ export function currentWeek(summaries: WeekSummary[]): number {
   return (summaries.find((summary) => !summary.mastered) ?? summaries[summaries.length - 1])?.week ?? 1;
 }
 
-/** True once every implemented week is mastered (October Foundations, in v1.0). */
+/** True once every implemented week is mastered (Foundations, in v1.0). */
 export function allWeeksMastered(summaries: WeekSummary[]): boolean {
   return summaries.length > 0 && summaries.every((summary) => summary.mastered);
 }

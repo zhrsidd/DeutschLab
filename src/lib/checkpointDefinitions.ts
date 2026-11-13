@@ -284,9 +284,9 @@ export const week3CheckpointDefinition: CheckpointDefinition = {
 export const week4CheckpointDefinition: CheckpointDefinition = {
   config: WEEK4_CHECKPOINT,
   weekLabel: "Week 4",
-  title: "October Foundations Checkpoint",
+  title: "Foundations Checkpoint",
   summary:
-    "The Week 4 mastery check and the October Foundations assessment in one. It covers everything from Weeks 1–4, with most weight on Week 4: vocabulary, grammar, reading, listening, a paragraph about your day and a 2–3 minute spoken introduction.",
+    "The Week 4 mastery check and the Foundations assessment in one. It covers everything from Weeks 1–4, with most weight on Week 4: vocabulary, grammar, reading, listening, a paragraph about your day and a 2–3 minute spoken introduction.",
   time: "35–40 min",
   sections: ["vocabulary", "grammar", "reading", "listening", "writing", "speaking"],
   scoringNote:
@@ -303,7 +303,7 @@ export const week4CheckpointDefinition: CheckpointDefinition = {
   },
   speaking: checkpoint4Speaking,
   passNote:
-    "October Foundations complete within DeutschLab. This is the app's own milestone, not a CEFR A1 certificate.",
+    "Foundations complete within DeutschLab. This is the app's own milestone, not a CEFR A1 certificate.",
   buildVocabulary: buildWeek4CheckpointVocabulary,
   buildGrammar: buildWeek4CheckpointGrammar,
   recommend: (result, missedGrammarLessons) => {

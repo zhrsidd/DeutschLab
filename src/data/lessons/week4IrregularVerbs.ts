@@ -187,7 +187,7 @@ export const irregularVerbsCourse: GrammarCourse = {
   goal: "Score at least 13/16 to complete this lesson.",
   questions: week4IrregularVerbsQuiz,
   passMessage:
-    "You can use the new verb forms and build complete sentences with a direct object. That is the core of October's grammar.",
+    "You can use the new verb forms and build complete sentences with a direct object. That is the core of Foundations grammar.",
   failMessage:
     "You need at least 13/16 before this lesson is marked complete. Check which verbs change with du and er/sie/es, remember der → den and er → ihn, and try again.",
   pages: [

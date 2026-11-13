@@ -1,0 +1,26 @@
+{
+  "source": "https://github.com/GarethManning/education-agent-skills",
+  "commit": "135d6275e7db0657d70b147f46d3191c5430677d",
+  "author": "Gareth Manning",
+  "license": "CC-BY-SA-4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "installed_at": "2026-11-13",
+  "modifications": "None; identical copies in both discovery directories",
+  "skills": [
+    {
+      "name": "formative-assessment-loop-designer",
+      "upstream_path": "skills/ai-learning-science/formative-assessment-loop-designer",
+      "sha256": "f98a439600f9e8c8796113d24f195496e55d6f7013515fbe24d6d94f37d8b133"
+    },
+    {
+      "name": "spaced-practice-scheduler",
+      "upstream_path": "skills/memory-learning-science/spaced-practice-scheduler",
+      "sha256": "7e6af9e05bde5277598864c8bfa7f5e9f6c9318606cff1baaee378c4c9f5db2a"
+    },
+    {
+      "name": "cognitive-load-analyser",
+      "upstream_path": "skills/memory-learning-science/cognitive-load-analyser",
+      "sha256": "6368ddea1a5f1562f9c2b4ac070d489cbf1645ef312cb5d0eeb0c9dc40761b1c"
+    }
+  ]
+}

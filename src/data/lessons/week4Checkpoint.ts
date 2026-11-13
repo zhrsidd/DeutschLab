@@ -7,7 +7,7 @@ import type {
 import { week4SpeakingChecklist, week4SpeakingCues } from "./week4Speaking";
 
 /*
- * checkpoint-004: the Week 4 mastery checkpoint and the October Foundations
+ * checkpoint-004: the Week 4 mastery checkpoint and the Foundations
  * assessment. Cumulative (Weeks 1–4) with most weight on Week 4. Fresh
  * questions, not replays of the lessons.
  *

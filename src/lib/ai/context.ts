@@ -176,7 +176,7 @@ export async function loadLearnerContext(): Promise<LearnerContext> {
 /** The compact text block sent with a request. */
 export function contextForPrompt(context: LearnerContext, options: { vocabulary?: boolean } = {}): string {
   const lines = [
-    `Course: DeutschLab Unit 1 (A0 → A1), October Foundations. The learner is working on Week ${context.currentWeek}.`,
+    `Course: DeutschLab Unit 1 (A0 → A1), Foundations. The learner is working on Week ${context.currentWeek}.`,
     `Weeks mastered (checkpoint passed): ${context.masteredWeeks.length ? context.masteredWeeks.join(", ") : "none yet"}.`,
     `Lessons completed: ${context.completedLessons.length ? context.completedLessons.map((l) => l.title).join("; ") : "none yet"}.`,
     "Note: grammar listed as in scope has been introduced in the course; it is not proof the learner has mastered it.",

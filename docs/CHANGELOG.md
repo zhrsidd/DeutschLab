@@ -3,6 +3,17 @@
 Newest first. Versions before 1.0 were internal milestones; dates are commit dates.
 Details of each audit live in `docs/QUALITY_AUDIT.md` (v0.8) and `docs/V1_RELEASE_REPORT.md` (v1.0).
 
+## Unreleased — Sunday-start modular curriculum (2026-11-13)
+
+Curriculum starts 15 November 2026, with sixteen A1 weeks through 6 March 2027. Four thematic blocks and
+35 planned module recipes replace the calendar-month roadmap. Course shows dates, outcomes and
+planned module outlines; Foundations replaces the October display name. Existing task IDs, lesson
+order, progress, checkpoint scoring and SRS are preserved. See docs/CURRICULUM_RESTRUCTURE.md.
+
+The learner requires adaptive sentence formation, varied response modes and recent-repeat avoidance.
+docs/ADAPTIVE_PRACTICE.md specifies those behaviours for the next runtime pilot; the generator and
+module runner are not yet implemented.
+
 ## Unreleased — In-app updates (2026-10-14)
 
 Tauri v2 updater + process plugins, signed updater artifacts, tag-only release workflow

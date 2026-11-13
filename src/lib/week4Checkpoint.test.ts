@@ -123,7 +123,7 @@ describe("checkpoint-004 marks and thresholds", () => {
 });
 
 describe("mastery helpers", () => {
-  it("marks Week 4 (October Foundations) mastered only once checkpoint-004 is complete", () => {
+  it("marks Week 4 (Foundations) mastered only once checkpoint-004 is complete", () => {
     expect(isWeek4Mastered([])).toBe(false);
     expect(isWeek4Mastered(["checkpoint-001", "checkpoint-002", "checkpoint-003"])).toBe(false);
     expect(isWeek4Mastered(["checkpoint-004"])).toBe(true);
@@ -224,7 +224,7 @@ describe("checkpoint-004 content", () => {
 
   it("does not present the result as a CEFR certificate", () => {
     expect(week4CheckpointDefinition.passNote).toMatch(/not a CEFR A1 certificate/);
-    expect(week4CheckpointDefinition.title).toBe("October Foundations Checkpoint");
+    expect(week4CheckpointDefinition.title).toBe("Foundations Checkpoint");
   });
 
   it("recommends the Week 4 lessons for weak sections", () => {

@@ -92,7 +92,7 @@ export const WEEK3_CHECKPOINT: CheckpointConfig = {
 export const WEEK4_CHECKPOINT_ID = "checkpoint-004";
 
 /**
- * Week 4 / October Foundations: all six sections, 39 marks. Pass with 80%
+ * Week 4 / Foundations: all six sections, 39 marks. Pass with 80%
  * overall (32/39) and these section minimums; reading has none.
  */
 export const WEEK4_SECTION_RULES: SectionRule[] = [
@@ -250,7 +250,7 @@ export function isWeek3Mastered(completedTaskIds: string[]): boolean {
 }
 
 /**
- * Week 4 (and with it the October Foundations curriculum) is mastered once
+ * Week 4 (and with it the Foundations curriculum) is mastered once
  * checkpoint-004 has been completed (passed). This is DeutschLab's own
  * milestone, not a CEFR certificate.
  */

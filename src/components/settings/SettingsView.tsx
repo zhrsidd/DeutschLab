@@ -78,7 +78,7 @@ export default function SettingsView({ studyMinutes, setStudyMinutes, updater }:
             {APP_NAME} {APP_VERSION}
           </dd>
           <dt className="text-fg-3">Scope</dt>
-          <dd className="m-0">Unit 1, October Foundations (Weeks 1–4)</dd>
+          <dd className="m-0">Unit 1, Foundations (Weeks 1–4)</dd>
           <dt className="text-fg-3">Data</dt>
           <dd className="m-0">
             Stored only on this Mac. No account. Optional AI feedback sends only what you submit to Google.

@@ -3,12 +3,12 @@
 ## Project
 DeutschLab is a **local-first macOS German-learning app** built with **Tauri v2, React, TypeScript, Tailwind CSS v4, and SQLite** (`@tauri-apps/plugin-sql`). No account, cloud backend, or AI service is required for core learning.
 
-**Learner goal:** A0 → strong A1 by January 2027; eventual C1 and academic German for Physics at ETH Zürich by March 2028. Keep workload realistic alongside school.
+**Learner goal:** A0 → strong A1 on a 16-week path starting 15 November 2026 (planning end: 6 March 2027); eventual C1 and academic German for Physics at ETH Zürich by March 2028. Keep workload realistic alongside school.
 
 **Optional AI (v1.1):** Gemini-backed writing/speaking feedback and the "Deutsch mit KI" tutor. Off by default,
 advisory only, never required for core learning. See **AI** below.
 
-**Current implementation:** Weeks **1–4** of Unit 1 (October Foundations, the v1.0 scope) are implemented, including lessons, checkpoints, mistakes, active-recall spaced review, and the daily planner. Week 4 ends with `checkpoint-004` (the October Foundations Checkpoint); Weeks 5–16 are planned only. An implemented feature is **not** automatically verified in the native macOS window.
+**Current implementation:** Weeks **1–4** of Unit 1 (Foundations, the v1.0 scope) are implemented, including lessons, checkpoints, mistakes, active-recall spaced review, and the daily planner. Week 4 ends with `checkpoint-004` (the Foundations Checkpoint); Weeks 5–16 are planned only. An implemented feature is **not** automatically verified in the native macOS window.
 
 ## Curriculum: source of truth
 - **`CURRICULUM.md` is authoritative** for scope, sequence, prerequisites, vocabulary targets, mastery, and longer-term progression.
@@ -120,5 +120,11 @@ If the `test:agent` npm alias is configured, `npm run test:agent` is equivalent.
 - Commit and push only when the user/task explicitly requests it **and** validation passes.
 - Final report: concise changed-file/behavior summary, exact test counts, commit/push status (if applicable), and any native-runtime caveat.
 
+## Modular curriculum revision (13 November 2026)
+- Unit 1 uses Sunday–Saturday study windows, 15 November 2026 – 6 March 2027, grouped into four thematic blocks.
+- `src/data/learningModules.ts` and `docs/MODULE_CURRICULUM.md` define **planned authoring recipes**, not runnable lessons or new mastery rules.
+- Module IDs are separate from existing persisted task/item IDs. Preserve all legacy progress.
+- The next runtime work is the Week 3 possessions pilot in the modular teaching plan; Weeks 5–16 remain unimplemented.
+
 ## Next curriculum work
-Weeks **1–4 (October Foundations) are implementation-complete** for v1.0. Before implementing Week 5 (modal verbs), consult its section of `CURRICULUM.md`. Do not jump ahead or silently alter earlier mastery rules.
+Weeks **1–4 (Foundations) are implementation-complete** for v1.0. Before implementing Week 5 (modal verbs), consult its section of `CURRICULUM.md`. Do not jump ahead or silently alter earlier mastery rules.

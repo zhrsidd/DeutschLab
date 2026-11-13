@@ -115,7 +115,7 @@ function setScores(partial: Partial<typeof board>) {
   });
 }
 
-describe("checkpoint-004 (October Foundations Checkpoint)", () => {
+describe("checkpoint-004 (Foundations Checkpoint)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     setScores({});
@@ -124,7 +124,7 @@ describe("checkpoint-004 (October Foundations Checkpoint)", () => {
   it("introduces six sections, 39 marks and the 32/39 pass mark", () => {
     setup();
 
-    expect(screen.getByRole("heading", { name: "October Foundations Checkpoint" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Foundations Checkpoint" })).toBeInTheDocument();
     expect(screen.getByText("Week 4 · Checkpoint")).toBeInTheDocument();
     expect(screen.getByText("39")).toBeInTheDocument();
     expect(screen.getByText("6")).toBeInTheDocument();
@@ -147,14 +147,14 @@ describe("checkpoint-004 (October Foundations Checkpoint)", () => {
     expect(board.speakingHeading).toBe("Introduce yourself and your daily life.");
   });
 
-  it("passes at 32/39, shows October completion and finishes only on Finish", async () => {
+  it("passes at 32/39, shows Foundations completion and finishes only on Finish", async () => {
     const { user, onSaveAttempt, onFinish } = setup();
 
     setScores({ vocabulary: 6, grammar: 9, reading: 4, listening: 4, writing: 6, speaking: 3 });
     await runThrough(user);
 
     expect(screen.getByText("Week 4 completed")).toBeInTheDocument();
-    expect(screen.getByText(/October Foundations complete/)).toBeInTheDocument();
+    expect(screen.getByText(/Foundations complete/)).toBeInTheDocument();
     expect(screen.getByText(/not a CEFR A1 certificate/)).toBeInTheDocument();
     expect(onSaveAttempt).toHaveBeenCalledWith(
       expect.objectContaining({ total: 32, possible: 39, passed: true }),

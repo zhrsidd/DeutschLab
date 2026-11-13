@@ -93,8 +93,14 @@ test.describe("v1.0 shell (browser, mocked Tauri SQL)", () => {
     await page.goto("/");
     await goTo(page, "Course");
 
-    await expect(page.getByRole("region", { name: "October" })).toContainText("Available");
-    await expect(page.getByRole("region", { name: "November" })).toContainText("Planned");
-    await expect(page.getByRole("region", { name: "November" })).not.toContainText("Available");
+    const foundations = page.getByRole("region", { name: "Foundations", exact: true });
+    await expect(foundations).toContainText("Available");
+    await expect(page.getByText("15 Nov 2026 – 6 Mar 2027", { exact: true })).toBeVisible();
+    await expect(foundations).toContainText("15 Nov 2026 – 21 Nov 2026");
+    await expect(foundations).toContainText("Introduce myself and ask someone for basic personal details.");
+    await expect(foundations).toContainText("Modules · planned");
+    await expect(foundations).toContainText("Give a short personal introduction using familiar sein sentences.");
+    await expect(page.getByRole("region", { name: "Everyday communication", exact: true })).toContainText("Planned");
+    await expect(page.getByRole("region", { name: "Everyday communication", exact: true })).not.toContainText("Available");
   });
 });

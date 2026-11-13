@@ -1,3 +1,5 @@
+import { curriculumModulesByWeek, type CurriculumModule } from "./learningModules";
+
 export type LessonType =
   | "vocabulary"
   | "grammar"
@@ -24,8 +26,15 @@ export interface CurriculumWeek {
   week: number;
   title: string;
   topics: string[];
+  /** Suggested Sunday–Saturday study window; never a date lock. */
+  startsOn: string;
+  endsOn: string;
+  dates: string;
+  outcome: string;
+  modules: CurriculumModule[];
 }
 
+/** Four-week learning block; legacy type/property names retained for compatibility. */
 export interface CurriculumMonth {
   month: string;
   subtitle: string;
@@ -34,11 +43,16 @@ export interface CurriculumMonth {
 
 export const unit1Curriculum: CurriculumMonth[] = [
   {
-    month: "October",
-    subtitle: "A1 Foundations",
+    month: "Foundations",
+    subtitle: "15 Nov – 12 Dec 2026",
     weeks: [
       {
         week: 1,
+        startsOn: "2026-11-15",
+        endsOn: "2026-11-21",
+        dates: "15 Nov 2026 – 21 Nov 2026",
+        outcome: "Introduce myself and ask someone for basic personal details.",
+        modules: curriculumModulesByWeek[1],
         title: "Sounds, introductions & sein",
         topics: [
           "German pronunciation",
@@ -51,6 +65,11 @@ export const unit1Curriculum: CurriculumMonth[] = [
       },
       {
         week: 2,
+        startsOn: "2026-11-22",
+        endsOn: "2026-11-28",
+        dates: "22 Nov 2026 – 28 Nov 2026",
+        outcome: "Describe my family and everyday activities in simple sentences.",
+        modules: curriculumModulesByWeek[2],
         title: "Present tense & everyday German",
         topics: [
           "haben",
@@ -62,6 +81,11 @@ export const unit1Curriculum: CurriculumMonth[] = [
       },
       {
         week: 3,
+        startsOn: "2026-11-29",
+        endsOn: "2026-12-05",
+        dates: "29 Nov 2026 – 5 Dec 2026",
+        outcome: "Describe familiar belongings and say what I have or do not have.",
+        modules: curriculumModulesByWeek[3],
         title: "Articles & gender",
         topics: [
           "der / die / das",
@@ -74,34 +98,54 @@ export const unit1Curriculum: CurriculumMonth[] = [
       },
       {
         week: 4,
+        startsOn: "2026-12-06",
+        endsOn: "2026-12-12",
+        dates: "6 Dec 2026 – 12 Dec 2026",
+        outcome: "Understand and describe everyday actions, people and belongings.",
+        modules: curriculumModulesByWeek[4],
         title: "Accusative & irregular verbs",
         topics: [
           "Everyday vocabulary",
           "Accusative pronouns",
           "sehen, nehmen, fahren, treffen, tragen",
           "Direct objects",
-          "October consolidation",
+          "Foundations consolidation",
         ],
       },
     ],
   },
 
   {
-    month: "November",
-    subtitle: "Making German useful",
+    month: "Everyday communication",
+    subtitle: "13 Dec 2026 – 9 Jan 2027",
     weeks: [
       {
         week: 5,
+        startsOn: "2026-12-13",
+        endsOn: "2026-12-19",
+        dates: "13 Dec 2026 – 19 Dec 2026",
+        outcome: "Say what I can do, must do and want to do.",
+        modules: curriculumModulesByWeek[5],
         title: "Modal verbs I",
         topics: ["können", "müssen", "wollen", "Infinitive at sentence end"],
       },
       {
         week: 6,
+        startsOn: "2026-12-20",
+        endsOn: "2026-12-26",
+        dates: "20 Dec 2026 – 26 Dec 2026",
+        outcome: "Make a polite request and express a preference.",
+        modules: curriculumModulesByWeek[6],
         title: "Modal verbs II",
         topics: ["dürfen", "sollen", "mögen", "möchten"],
       },
       {
         week: 7,
+        startsOn: "2026-12-27",
+        endsOn: "2027-01-02",
+        dates: "27 Dec 2026 – 2 Jan 2027",
+        outcome: "Describe a daily routine with times and separable verbs.",
+        modules: curriculumModulesByWeek[7],
         title: "Separable verbs",
         topics: [
           "aufstehen",
@@ -113,6 +157,11 @@ export const unit1Curriculum: CurriculumMonth[] = [
       },
       {
         week: 8,
+        startsOn: "2027-01-03",
+        endsOn: "2027-01-09",
+        dates: "3 Jan 2027 – 9 Jan 2027",
+        outcome: "Exchange routine information and describe how often I do things.",
+        modules: curriculumModulesByWeek[8],
         title: "Time & frequency",
         topics: [
           "immer",
@@ -127,16 +176,26 @@ export const unit1Curriculum: CurriculumMonth[] = [
   },
 
   {
-    month: "December",
-    subtitle: "Cases & the past",
+    month: "People, places and past",
+    subtitle: "10 Jan – 6 Feb 2027",
     weeks: [
       {
         week: 9,
+        startsOn: "2027-01-10",
+        endsOn: "2027-01-16",
+        dates: "10 Jan 2027 – 16 Jan 2027",
+        outcome: "Understand and use a small set of practical dative patterns.",
+        modules: curriculumModulesByWeek[9],
         title: "Dative introduction",
         topics: ["dem", "der", "den", "einem", "einer"],
       },
       {
         week: 10,
+        startsOn: "2027-01-17",
+        endsOn: "2027-01-23",
+        dates: "17 Jan 2027 – 23 Jan 2027",
+        outcome: "Understand and describe simple places, routes and activities.",
+        modules: curriculumModulesByWeek[10],
         title: "Prepositions",
         topics: [
           "Dative prepositions",
@@ -146,6 +205,11 @@ export const unit1Curriculum: CurriculumMonth[] = [
       },
       {
         week: 11,
+        startsOn: "2027-01-24",
+        endsOn: "2027-01-30",
+        dates: "24 Jan 2027 – 30 Jan 2027",
+        outcome: "Understand and describe a few completed activities in the Perfekt.",
+        modules: curriculumModulesByWeek[11],
         title: "Perfekt",
         topics: [
           "haben + participle",
@@ -155,33 +219,53 @@ export const unit1Curriculum: CurriculumMonth[] = [
       },
       {
         week: 12,
+        startsOn: "2027-01-31",
+        endsOn: "2027-02-06",
+        dates: "31 Jan 2027 – 6 Feb 2027",
+        outcome: "Exchange simple information about yesterday or a recent weekend.",
+        modules: curriculumModulesByWeek[12],
         title: "Talking about the past",
         topics: [
           "Perfekt practice",
           "Yesterday",
           "Weekend",
-          "December consolidation",
+          "Past-tense consolidation",
         ],
       },
     ],
   },
 
   {
-    month: "January",
-    subtitle: "Strong A1",
+    month: "A1 consolidation",
+    subtitle: "7 Feb – 6 Mar 2027",
     weeks: [
       {
         week: 13,
+        startsOn: "2027-02-07",
+        endsOn: "2027-02-13",
+        dates: "7 Feb 2027 – 13 Feb 2027",
+        outcome: "Give a simple reason for a familiar preference or activity.",
+        modules: curriculumModulesByWeek[13],
         title: "weil",
         topics: ["Subordinate clauses", "Verb-final word order", "weil"],
       },
       {
         week: 14,
+        startsOn: "2027-02-14",
+        endsOn: "2027-02-20",
+        dates: "14 Feb 2027 – 20 Feb 2027",
+        outcome: "Understand and report a simple familiar statement.",
+        modules: curriculumModulesByWeek[14],
         title: "dass",
         topics: ["dass clauses", "Joining ideas", "Complex sentences"],
       },
       {
         week: 15,
+        startsOn: "2027-02-21",
+        endsOn: "2027-02-27",
+        dates: "21 Feb 2027 – 27 Feb 2027",
+        outcome: "Describe whose belongings they are and talk about interests.",
+        modules: curriculumModulesByWeek[15],
         title: "Possessives & reflexive verbs",
         topics: [
           "mein / dein / sein",
@@ -191,6 +275,11 @@ export const unit1Curriculum: CurriculumMonth[] = [
       },
       {
         week: 16,
+        startsOn: "2027-02-28",
+        endsOn: "2027-03-06",
+        dates: "28 Feb 2027 – 6 Mar 2027",
+        outcome: "Use familiar German across a new everyday conversation and message.",
+        modules: curriculumModulesByWeek[16],
         title: "A1 Consolidation",
         topics: [
           "Grammar review",
@@ -457,9 +546,9 @@ export const starterTasks: LessonTask[] = [
   },
   {
     id: "checkpoint-004",
-    title: "October Foundations Checkpoint",
+    title: "Foundations Checkpoint",
     description:
-      "The Week 4 mastery check and October assessment: vocabulary, grammar, reading, listening, writing and speaking from Weeks 1–4.",
+      "The Week 4 mastery check and Foundations assessment: vocabulary, grammar, reading, listening, writing and speaking from Weeks 1–4.",
     type: "review",
     minutes: 40,
     week: 4,

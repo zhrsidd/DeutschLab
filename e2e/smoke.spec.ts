@@ -108,6 +108,6 @@ test.describe("DeutschLab smoke tests (browser, mocked Tauri SQL)", () => {
     await goTo(page, "Course");
 
     await expect(page.getByRole("heading", { name: /Unit 1/ })).toBeVisible();
-    await expect(page.getByRole("region", { name: "October" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Foundations", exact: true })).toBeVisible();
   });
 });

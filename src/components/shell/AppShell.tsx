@@ -18,7 +18,7 @@ interface AppShellProps {
   view: View;
   onNavigate: (view: View) => void;
   dueReviewCount: number;
-  /** e.g. "Week 4 of 4" or "October complete". */
+  /** e.g. "Week 4 of 4" or "Foundations complete". */
   weekLabel: string;
   /** e.g. "1 of 8 activities". */
   weekDetail: string;
@@ -101,7 +101,7 @@ export default function AppShell({
           </div>
 
           <div className="mt-auto hidden border-t border-line px-5 py-6 rail:block">
-            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-fg-3">October Foundations</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-fg-3">Foundations</p>
             <p className="mt-2 font-display text-lg font-semibold tracking-tight">{weekLabel}</p>
             <div aria-hidden="true" className="mt-3 h-[3px] overflow-hidden rounded-full bg-surface">
               <div

@@ -96,7 +96,7 @@ export default function HomeView({
         <header className="relative mx-auto grid max-w-page gap-8 px-5 pt-10 pb-10 md:px-10 md:pt-14 md:pb-12 lg:grid-cols-12 lg:items-end">
           <div className="min-w-0 lg:col-span-8">
             <p className={kicker}>
-              <span lang="de">{germanDate(now)}</span> · Unit 1 · {complete ? "October complete" : `Week ${week}`}
+              <span lang="de">{germanDate(now)}</span> · Unit 1 · {complete ? "Foundations complete" : `Week ${week}`}
             </p>
 
             <h1
@@ -115,10 +115,10 @@ export default function HomeView({
 
             {complete ? (
               <div className="dl-enter mt-6 max-w-2xl [animation-delay:240ms]">
-                <p className="font-serif text-3xl italic text-fg md:text-4xl">October Foundations complete.</p>
+                <p className="font-serif text-3xl italic text-fg md:text-4xl">Foundations complete.</p>
                 <p className="mt-3 text-fg-2">
                   You have mastered Weeks 1–4 in DeutschLab: the app's own milestone, not a CEFR certificate.
-                  November is not built yet, so keep your reviews going.
+                  Weeks 5–16 are planned, so keep your reviews going.
                 </p>
               </div>
             ) : phrase ? (
@@ -172,7 +172,7 @@ export default function HomeView({
               <p className="mt-3 text-sm leading-6 text-fg-2">
                 {nextReviewAt ? `Next review: ${formatReviewDate(nextReviewAt)}.` : "No reviews are scheduled yet."}{" "}
                 {complete
-                  ? "There are no new lessons after October yet."
+                  ? "There are no new lessons after Foundations yet."
                   : "Consistency matters more than grinding extra lessons."}
               </p>
             </div>

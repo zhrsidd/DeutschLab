@@ -8,7 +8,7 @@ import { Logomark } from "../shell/Brand";
  * so reopening a finished lesson never replays it. Energy rises with the
  * achievement: an answer is a CSS spring (dl-correct); a lesson is a short
  * kinetic word that dismisses itself; a mastered week and the whole of
- * October hold their results until the learner continues. Every level is
+ * Foundations hold their results until the learner continues. Every level is
  * skippable (click, Escape or Enter) and fully readable without motion.
  */
 
@@ -131,8 +131,8 @@ export default function Celebration({ data, onDone }: { data: CelebrationData; o
   }
 
   const unit = data.kind === "unit";
-  const kicker = unit ? "October Foundations" : `Week ${data.week} completed`;
-  const lineOne = unit ? "Oktober" : `Woche ${data.week}`;
+  const kicker = unit ? "Foundations" : `Week ${data.week} completed`;
+  const lineOne = unit ? "Grundlagen" : `Woche ${data.week}`;
 
   return (
     <div

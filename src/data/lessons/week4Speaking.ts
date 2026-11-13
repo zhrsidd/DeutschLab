@@ -29,7 +29,7 @@ export const week4SpeakingConfig: SpeakingLessonConfig = {
   kicker: "Week 4 · Speaking",
   title: "Introducing myself and my daily life",
   intro:
-    "Bring October together out loud. You'll prepare with sentence frames and a model, practise short prompts, then talk for 2–3 minutes about yourself and your daily life, guided only by cues.",
+    "Bring your Foundations learning together out loud. You'll prepare with sentence frames and a model, practise short prompts, then talk for 2–3 minutes about yourself and your daily life, guided only by cues.",
   finalLabel: "2–3 min",
   frames: [
     { frame: "Ich heiße ___, und ich wohne in ___.", english: "My name is ___, and I live in ___.", example: "Ich heiße Anna, und ich wohne in Zürich." },
@@ -63,7 +63,7 @@ export const week4SpeakingConfig: SpeakingLessonConfig = {
   finalSeconds: 180,
   passScore: 4,
   passMessage:
-    "You can talk about yourself and your daily life for several minutes. This is the spoken goal of October. Say it out loud again on another day.",
+    "You can talk about yourself and your daily life for several minutes. This is the spoken goal of Foundations. Say it out loud again on another day.",
   failMessage:
     "Practise the prompts again, then try the talk once more with the cues.",
 };

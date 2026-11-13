@@ -16,7 +16,7 @@ interface CourseViewProps {
 
 /*
  * The full curriculum as a vertical timeline (DESIGN.md §5): Course → Unit
- * → month → week → activity. The current week is open, mastered weeks are
+ * → learning block → week → activity. The current week is open, mastered weeks are
  * folded, planned weeks and later units are visible but have no actions.
  */
 export default function CourseView({ summaries, completedTasks, startLesson }: CourseViewProps) {
@@ -52,8 +52,8 @@ export default function CourseView({ summaries, completedTasks, startLesson }: C
           </p>
         }
       >
-        Six units from first sounds to C1. DeutschLab v1 builds October (Weeks 1–4); everything after it is
-        the plan ahead, shown so you can see where the course goes.
+        Start Sunday, 15 November 2026. Follow the suggested dates at your own pace; your saved progress determines
+        your current week. Weeks 1–4 have working lessons. Modular teaching and Weeks 5–16 are planned.
       </PageHeader>
 
       {courseUnits.map((unit, unitIndex) =>
@@ -202,7 +202,9 @@ function WeekNode({
         <div className="dl-collapse" data-open={open}>
           <div>
             {open ? (
-              <ul className="pb-3">
+              <div className="pb-3">
+                <WeekOutline week={week} />
+                <ul>
                 {summary.tasks.map((task) => (
                   <ActivityRow
                     key={task.id}
@@ -213,7 +215,8 @@ function WeekNode({
                     startLesson={startLesson}
                   />
                 ))}
-              </ul>
+                </ul>
+              </div>
             ) : null}
           </div>
         </div>
@@ -297,7 +300,29 @@ function PlannedWeek({ week }: { week: CurriculumWeek }) {
           Planned
         </span>
       </div>
+      <WeekOutline week={week} />
     </li>
+  );
+}
+
+/** Authoring roadmap only: these modules do not claim completion or launch lessons. */
+function WeekOutline({ week }: { week: CurriculumWeek }) {
+  return (
+    <div className="mb-3 mt-2 max-w-reading text-sm text-fg-2">
+      <p className="tabular text-xs text-fg-3">{week.dates}</p>
+      <p className="mt-1">{week.outcome}</p>
+      <details className="mt-2">
+        <summary className="cursor-pointer text-xs text-fg-3">Modules · planned</summary>
+        <ul className="mt-2 space-y-2 border-l border-line pl-4">
+          {week.modules.map((module) => (
+            <li key={module.id}>
+              <p>{module.outcome}</p>
+              <p className="mt-0.5 text-xs text-fg-3">Later practice: {module.transferTask}</p>
+            </li>
+          ))}
+        </ul>
+      </details>
+    </div>
   );
 }
 

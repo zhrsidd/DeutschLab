@@ -299,8 +299,8 @@ export async function runNativeSelfTest(reportPath: string, renderApp: () => voi
 
   await check("Course shows Weeks 5–16 as planned", async () => {
     await click(nav("Course"));
-    const november = await waitFor("November", () => document.querySelector('[aria-label="November"]'));
-    if (!november.textContent?.includes("Planned")) throw new Error("no Planned status");
+    const nextBlock = await waitFor("Everyday communication", () => document.querySelector('[aria-label="Everyday communication"]'));
+    if (!nextBlock.textContent?.includes("Planned")) throw new Error("no Planned status");
     return "ok";
   });
 

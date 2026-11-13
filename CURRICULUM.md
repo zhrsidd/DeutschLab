@@ -5,6 +5,9 @@
 > Product code should follow this curriculum rather than inventing lesson order or language scope ad hoc.
 > Later units may be refined as the learner progresses, but any change should be deliberate and reflected here first.
 
+**Revision: 13 November 2026 — modular course, starting Sunday 15 November 2026.**
+This replaces the October-based timetable. Study windows guide planning; checkpoint evidence and prerequisites guide progression. Existing progress is retained. See [module catalogue](docs/MODULE_CURRICULUM.md) and [teaching evidence](docs/research/GERMAN_TEACHING_REPORT.md).
+
 ---
 
 ## 1. Long-term goal
@@ -59,17 +62,19 @@ Minimum viable contact can include:
 
 ## 3. Overall roadmap
 
-| Phase | Dates | Target | Typical workload |
-|---|---|---:|---:|
-| Unit 1 | Oct 2026 – Jan 2027 | A0 → strong A1 | 4.5–5.5 h/week |
-| Unit 2 | Feb – May 2027 | strong A1 → strong A2 | 5–6 h/week |
-| Unit 3 | Jun – Aug 2027 | A2 → B1 | 8–12 h/week |
-| Unit 4 | Sep – Nov 2027 | B1 → B2 | 7–9 h/week |
-| Unit 5 | Dec 2027 | B2 → C1 bridge | 8–10 h/week |
-| Unit 6 | Jan – Feb 2028 | C1 + certification preparation | 8–10 h/week |
-| Buffer | Mar 2028 | Consolidation + ETH Physics German | variable |
+| Phase | Suggested study window | Target | Typical workload |
+|---|---|---|---|
+| Unit 1 · 16 weeks | **15 Nov 2026 – 6 Mar 2027** | A0 → strong A1 | 4.5–6 h/week |
+| Unit 2 · 16 weeks | 7 Mar – 26 Jun 2027 | strong A1 → strong A2 | 5–6 h/week |
+| Unit 3 · 12 weeks | 27 Jun – 18 Sep 2027 | A2 → B1 | 8–12 h/week in holidays; reduce during school |
+| Unit 4 · 12 weeks | 19 Sep – 11 Dec 2027 | B1 → B2 | 7–9 h/week, subject to school workload |
+| Unit 5 · 4 weeks | 12 Dec 2027 – 8 Jan 2028 | B2 → C1 bridge | 8–10 h/week if sustainable |
+| Unit 6 · 8 weeks | 9 Jan – 4 Mar 2028 | C1 + certification preparation | 8–10 h/week if sustainable |
+| Buffer | 5–31 Mar 2028 | Consolidation + academic German | variable |
 
-**Preferred certification timing:** first serious attempt around **February 2028**, leaving March as a buffer.
+These are planning windows, not proficiency promises. The new start preserves sixteen full A1 weeks instead of compressing them to meet the superseded January target. Later windows are provisional and must be re-estimated after the Week 4 and Unit 1 reviews; September school workload may reduce the summer-phase pace.
+
+**Certification aspiration:** February 2028 only if independent readiness evidence supports it; Unit 6 continues through 4 March. March is a limited contingency window, not a guaranteed retake opportunity. Check current ETH requirements, application deadlines, exam availability and result turnaround independently before booking.
 
 ---
 
@@ -77,16 +82,16 @@ Minimum viable contact can include:
 
 ## 4. Unit 1 objective
 
-**Dates:** October 2026 – January 2027
+**Suggested dates:** Sunday **15 November 2026** – Saturday **6 March 2027**.
 
 By the end of Unit 1, the learner should:
 
 - understand and produce simple everyday German
-- hold a basic 7–10 minute conversation on familiar topics
+- take part in a supported familiar-topic exchange; **7–10 minutes** is a stretch practice duration including partner turns, not an A1 certification criterion
 - write approximately 100–130 words on familiar A1 topics
 - understand slow, clear beginner audio
 - have a strong command of basic German sentence structure
-- know approximately **800–1,000 useful words and expressions**
+- build toward **800–1,000 introduced words and expressions**, tracking independent recall and contextual use separately
 - be ready to begin A2 without major A1 gaps
 
 ### Unit 1 end benchmark
@@ -97,7 +102,7 @@ Target performance:
 - Grammar: **80%**
 - Reading: **80%**
 - Listening: **75%+**
-- Speaking: comfortable A1 interaction
+- Speaking: understandable supported A1 interaction, with an honest self-check or instructor review
 - Writing: 100–130 words with generally accurate basic grammar
 
 ---
@@ -118,7 +123,7 @@ Each week should combine:
 - writing
 - spaced review
 
-The app should not rely primarily on recognition-based multiple choice.
+The app should not rely primarily on recognition-based multiple choice. Reviewed closed questions remain useful for diagnostic probes and isolated form practice; module recipes determine how they support an outcome.
 
 Production should progressively increase through:
 
@@ -129,11 +134,101 @@ Production should progressively increase through:
 - guided writing
 - timed speaking
 
+
+### 5a. Modular teaching contract
+
+A **module** teaches one observable ability; a week is a suggested collection of modules rather than one fixed test sequence. Authoring recipes are defined in [docs/MODULE_CURRICULUM.md](docs/MODULE_CURRICULUM.md) and mirrored in the app roadmap. Each recipe specifies a stable module ID, outcome, prerequisites, reusable legacy assets and a changed-context transfer task.
+
+The common teaching cycle is:
+
+1. **Orient and notice:** a meaningful scene and short input, with a visible can-do goal.
+2. **Explain briefly:** one relevant rule or contrast using previously taught language.
+3. **Practise with support:** model → partially completed response → independent attempt.
+4. **Use the language:** a message, question-response exchange or personal description.
+5. **Check and repair:** distinguish first attempts from helped answers; choose a targeted explanation.
+6. **Return later:** retrieve through existing Review and revisit the ability with changed wording/context.
+
+Use 8–12 minutes as a starting design budget for a focused teaching encounter, not a universal lesson length. A recipe may need several encounters; do not force all pronunciation contrasts or all verb forms into one sitting. Divide vocabulary into the existing small batches. Mix previously learned forms once the new form is understood.
+
+**Feedback:** a wrong answer should inform a specific next move. For possessions, first distinguish noun-gender recall from accusative selection. “Ich habe ein Stift” in an indefinite-article task warrants an accusative cue; “Ich habe eine Stift” needs a gender probe before diagnosing case. After at most two guided repairs, show a worked example and offer a pause. These are pilot defaults, not validated cutoffs.
+
+**Evidence:** retain separate labels for recognition, guided production, independent production and delayed transfer. A correct answer after a hint is useful practice but not independent success. Open writing/speaking uses visible criteria, model comparison and honest self-checks or instructor feedback. Optional AI advice is never an authoritative score, a CEFR label or pronunciation assessment.
+
+**Progression:** dates never unlock or lock lessons and never erase completion. Existing checkpoints remain the app's authority for Weeks 1–4. Module prerequisites are authoring relationships, not new runtime locks. After a brief entry diagnostic, an existing learner may revisit weak skills without resetting mastered weeks. New learners begin at the first module.
+
+**Scope:** teach nouns with article, meaning, useful plural and a context. Split gender, plural, meaning and sentence-use evidence. Distinguish meaning from form in grammar; use masculine and unchanged feminine/neuter contrasts. Use reviewed combinations rather than unrestricted word substitution. Listening starts with a purpose, then replay/detail, then optional transcript. Speaking includes responding to another turn, not only a timed monologue.
+
+Weeks 13–15 contain stretch/bridge material (especially dass and reflexive expressions). Introduce only after core everyday language is secure, and defer if workload or understanding warrants it. Deferred extensions do not block core A1 transfer or Unit 2 planning. Formal exam readiness depends on representative independent assessment, not completion of every grammar topic.
+
+### 5a.1. Required variation and adaptation
+
+The learner explicitly does not want the same questions repeated. Modules must form new, valid in-scope sentences and vary response demands: understand a message, complete a form, produce a sentence, answer or ask a question, repair an error, and apply the language personally. Shuffling a fixed bank or its options is insufficient.
+
+Use reviewed lexical data, constructions and morphology for offline generation. Choose the next task from the learner's first-attempt evidence and support needs; keep an exposure history to avoid recent exact and equivalent repeats. Revisit abilities through new instances rather than requiring identical wording. Pool exhaustion must offer another eligible activity, a labelled optional repeat or a stop.
+
+See [adaptive-practice specification](docs/ADAPTIVE_PRACTICE.md) for a worked possessions example, response modes, repeat policy, evidence fields and acceptance criteria. These are mandatory requirements for the future runtime; current lessons retain their legacy question flow until it is replaced.
+
+### 5b. Sunday-start schedule
+
+| Week | Sunday–Saturday | Can-do focus |
+|---|---|---|
+| 1 | 15 Nov 2026 – 21 Nov 2026 | Introduce myself and exchange basic details |
+| 2 | 22 Nov 2026 – 28 Nov 2026 | Describe family and everyday activities |
+| 3 | 29 Nov 2026 – 05 Dec 2026 | Describe belongings and what I do not have |
+| 4 | 06 Dec 2026 – 12 Dec 2026 | Combine everyday actions, descriptions and object references |
+| 5 | 13 Dec 2026 – 19 Dec 2026 | Say what I can, must and want to do |
+| 6 | 20 Dec 2026 – 26 Dec 2026 | Make polite requests and express preferences |
+| 7 | 27 Dec 2026 – 02 Jan 2027 | Describe a routine with times |
+| 8 | 03 Jan 2027 – 09 Jan 2027 | Exchange routine information and frequency |
+| 9 | 10 Jan 2027 – 16 Jan 2027 | Use a few practical recipient patterns |
+| 10 | 17 Jan 2027 – 23 Jan 2027 | Understand practical place and preposition phrases |
+| 11 | 24 Jan 2027 – 30 Jan 2027 | Describe familiar completed activities |
+| 12 | 31 Jan 2027 – 06 Feb 2027 | Exchange a short account of yesterday or a weekend |
+| 13 | 07 Feb 2027 – 13 Feb 2027 | Give a simple reason; optional weil extension |
+| 14 | 14 Feb 2027 – 20 Feb 2027 | Report a simple statement; optional dass extension |
+| 15 | 21 Feb 2027 – 27 Feb 2027 | Describe ownership; optional reflexive interest phrase |
+| 16 | 28 Feb 2027 – 06 Mar 2027 | Repair weak skills and complete fresh integrated A1 tasks |
+
+Suggested entry diagnostics on 15 November are low-stakes: recognise a greeting, understand two personal details and attempt a short introduction. “Not yet” is a useful starting point, not a failed week. Save any existing learner records as they are.
+
+### 5c. First week: ready-to-use study rhythm
+
+Normal week budget: **270 minutes (4.5 hours)**, including app work and offline practice. The Today selector still caps an individual app session at 60 minutes; this schedule is not a new persisted daily planner.
+
+| Day | Budget | Teaching and practice |
+|---|---|---|
+| Sun 15 Nov | 40 min | 5 min diagnostic; 10 min first vocabulary batch; 10 min selected sound contrasts; 10 min model + true sein introduction; 5 min recall/notes |
+| Mon 16 Nov | 40 min | 8 min due recall; 10 min pronoun/sein contrast; 12 min supported then independent sentences; 5 min listen for personal details; 5 min speak/record and self-check |
+| Tue 17 Nov | 40 min | 8 min review; 10 min selected regular verbs; 12 min V2 sentence construction; 5 min changed-subject recall; 5 min read/say a personal response |
+| Wed 18 Nov | 35 min | 8 min review; 10 min yes/no questions; 10 min W-questions; 7 min short question-response role-play using familiar language |
+| Thu 19 Nov | 40 min | 8 min review; 10 min remaining small vocabulary/sound batch; 10 min listening gist then detail; 7 min independent introduction; 5 min identify one repair target |
+| Fri 20 Nov | 30 min | 8 min review; 10 min focused repair; 7 min fresh personal-detail exchange; 5 min reflection |
+| Sat 21 Nov | 45 min | 8 min recall; 22 min existing checkpoint-001; 10 min targeted repair or fresh familiar-topic transfer; 5 min plan the next week |
+
+This is a paced teaching guide, not seven mandatory fixed quizzes. Use the current lesson routes and split longer activities at natural boundaries; the planned module runner will later support finer resume points. The few new teaching minutes above are repeated encounters, not enough to justify claiming automatic mastery.
+
+Busy-day option: 5 minutes of due recall + 5 minutes of meaningful listening + 5 minutes of spoken/typed reuse. Move unfinished new teaching forward; do not double the next day's load or reset the learner.
+
+### 5d. Cumulative retrieval and transfer
+
+| Introduced ability | Near-term revisit | Later changed-context revisit |
+|---|---|---|
+| Week 1 introductions/questions | Next available Review encounter; Week 2 with changed people | Week 4 integrated message/exchange |
+| Week 2 everyday verbs | Week 3, changing subject and familiar activity | Week 5 modal plan with known verbs |
+| Week 3 possessions/negation | Week 4, different familiar objects | Week 6 request/preference after prerequisites are taught |
+| Week 4 object reference/actions | Week 5 short exchange | Week 7 different routine |
+| Weeks 5–8 requests/routine | Following week's meaningful task | Week 12 integrated exchange |
+| Weeks 9–12 place/past patterns | Following week with new familiar details | Week 16 integrated transfer |
+
+The table schedules teaching encounters, not changes to SRS due dates. Existing intervals remain authoritative; avoid duplicating a due item as an additional compulsory review. For the modular pilot, use separate held-out families around 7 and 21 days after teaching, record supports, and keep missing follow-ups visible. Exact dates are practical starting points, not proven optima.
+
 ---
 
-# OCTOBER 2026 — FOUNDATIONS
+# BLOCK 1 — FOUNDATIONS · 15 NOV – 12 DEC 2026
 
 ## Week 1 — Sounds, introductions, sein, basic word order
+
+**Study window:** 15 November 2026 – 21 November 2026. Modules: see the [catalogue](docs/MODULE_CURRICULUM.md).
 
 ### Core objectives
 
@@ -205,6 +300,8 @@ Week 1 is mastered when:
 ---
 
 ## Week 2 — haben, common present-tense verbs, daily life
+
+**Study window:** 22 November 2026 – 28 November 2026. Modules: see the [catalogue](docs/MODULE_CURRICULUM.md).
 
 ### Grammar
 
@@ -278,6 +375,8 @@ Implementation notes (deliberate, recorded so code and curriculum stay aligned):
 ---
 
 ## Week 3 — Articles, plurals, nominative, accusative introduction
+
+**Study window:** 29 November 2026 – 05 December 2026. Modules: see the [catalogue](docs/MODULE_CURRICULUM.md).
 
 ### Grammar
 
@@ -368,6 +467,8 @@ Implementation notes:
 
 ## Week 4 — Accusative consolidation + irregular verbs
 
+**Study window:** 06 December 2026 – 12 December 2026. Modules: see the [catalogue](docs/MODULE_CURRICULUM.md).
+
 ### Grammar
 
 Consolidate:
@@ -388,7 +489,7 @@ Expand:
 - everyday actions
 - descriptions
 
-### End-of-October target
+### End-of-Foundations target
 
 Learner should be able to:
 
@@ -399,7 +500,7 @@ Learner should be able to:
 - ask simple questions
 - use basic nominative/accusative patterns
 - recognise article patterns
-- use approximately **300+ active words/expressions**
+- use approximately the introduced Foundations vocabulary in meaningful contexts; track independent recall separately (296 items currently introduced)
 
 ### Current DeutschLab implementation
 
@@ -412,7 +513,7 @@ Learner should be able to:
 | `listening-004` | Everyday conversations | Implemented |
 | `writing-003` | Describing everyday life | Implemented |
 | `speaking-002` | Introducing myself and my daily life | Implemented |
-| `checkpoint-004` | October Foundations Checkpoint | Implemented |
+| `checkpoint-004` | Foundations Checkpoint | Implemented |
 
 Week 4 order in the app: `vocab-004` → `grammar-009` → `grammar-010` → `reading-003` → `listening-004` → `writing-003` → `speaking-002` → `checkpoint-004`. New Week 4 content is offered on Today once Week 3 is mastered (`checkpoint-003` passed); `checkpoint-004` is offered once every Week 4 lesson is complete (opening it earlier shows a warning, not a lock).
 
@@ -420,11 +521,11 @@ Week 4 is mastered when:
 
 `checkpoint-004` is passed.
 
-Passing `checkpoint-004` also marks the **October Foundations** curriculum as mastered within DeutschLab (`isWeek4Mastered`). It is the app's own milestone, **not** a CEFR A1 certificate. After it, Today shows a completion state and keeps offering due reviews; no Week 5 tasks exist yet.
+Passing `checkpoint-004` also marks the **Foundations** curriculum as mastered within DeutschLab (`isWeek4Mastered`). It is the app's own milestone, **not** a CEFR A1 certificate. After it, Today shows a completion state and keeps offering due reviews; no Week 5 tasks exist yet.
 
 Implementation notes:
 
-- `vocab-004` adds **84** items in 9 resumable batches (8–12 items): 16 everyday verbs (including sehen, nehmen, treffen, tragen, fahren, kaufen, suchen, brauchen), 37 article-aware nouns (meals, home, clothes, school and study), 13 adjectives and 18 expressions and small words. Cumulative introduced vocabulary for October: **296** items (introduced, not mastered). Its 20-question final quiz passes at 16/20; nouns get article and plural questions, while verbs, adjectives and expressions only get meaning and typed questions.
+- `vocab-004` adds **84** items in 9 resumable batches (8–12 items): 16 everyday verbs (including sehen, nehmen, treffen, tragen, fahren, kaufen, suchen, brauchen), 37 article-aware nouns (meals, home, clothes, school and study), 13 adjectives and 18 expressions and small words. Cumulative introduced vocabulary for Foundations: **296** items (introduced, not mastered). Its 20-question final quiz passes at 16/20; nouns get article and plural questions, while verbs, adjectives and expressions only get meaning and typed questions.
 - Scope decisions recorded with `vocab-004`: `machen` (already drilled as a regular verb in Week 1) enters the vocabulary list; `gern` is taught as an adverb (*Ich lese gern*) so learners can say what they like without `mögen` (Week 6); `zu Hause` is a fixed phrase like the earlier `nach Hause` chunk; *Ich habe Hunger / Durst* are taught as haben chunks. Adjectives are only used after `sein`; adjective endings are not taught.
 - `grammar-009` teaches nominative vs accusative personal pronouns (mich, dich, ihn, sie, es, uns, euch, sie, Sie) and pronouns for things by grammatical gender. 16 questions, pass 13/16. Dative pronouns are out of scope.
 - `grammar-010` adds five stem-changing verbs (sehen, nehmen, treffen with e → i/ie; fahren, tragen with a → ä) without repeating the Week 2 tables, then consolidates der → den, ein → einen, accusative pronouns and V2 word order. 16 questions, pass 13/16.
@@ -432,9 +533,9 @@ Implementation notes:
 - `writing-003` (60–80 words) is self-assessed (6 points, pass 5/6) and keeps the learner's draft; `speaking-002` is a 2–3 minute guided talk with prompts, model audio and cues, self-assessed (5 points, pass 4/5). Neither records audio, grades language automatically, or creates mistakes.
 - Review keeps the new grammar targets separate: accusative pronoun (`pr-…`, concept `pronoun`), irregular verb form (`iv-…`, `verb_form`), word order (`word_order`), alongside the existing accusative, negation, article and plural concepts. The SRS intervals are unchanged.
 
-### October Foundations checkpoint (`checkpoint-004`)
+### Foundations checkpoint (`checkpoint-004`)
 
-One checkpoint serves as both the Week 4 mastery check and the October assessment. It is cumulative (Weeks 1–4) with most weight on Week 4, uses fresh questions, and is harder than the earlier checkpoints while staying within taught material.
+One checkpoint serves as both the Week 4 mastery check and the Foundations assessment. It is cumulative (Weeks 1–4) with most weight on Week 4, uses fresh questions, and is harder than the earlier checkpoints while staying within taught material.
 
 | Section | Marks | Minimum |
 |---|---|---|
@@ -450,9 +551,11 @@ Grammar covers noun gender, plurals, the accusative (articles and direct objects
 
 ---
 
-# NOVEMBER 2026 — MODALS, ROUTINE, TIME
+# BLOCK 2 — EVERYDAY COMMUNICATION · 13 DEC 2026 – 9 JAN 2027
 
 ## Week 5 — können, müssen, wollen
+
+**Study window:** 13 December 2026 – 19 December 2026. Modules: see the [catalogue](docs/MODULE_CURRICULUM.md).
 
 ### Grammar
 
@@ -485,6 +588,8 @@ Examples:
 
 ## Week 6 — dürfen, sollen, mögen, möchten
 
+**Study window:** 20 December 2026 – 26 December 2026. Modules: see the [catalogue](docs/MODULE_CURRICULUM.md).
+
 ### Grammar
 
 Teach:
@@ -511,6 +616,8 @@ Target approximately **3 minutes** on familiar topics.
 ---
 
 ## Week 7 — Separable verbs + routine
+
+**Study window:** 27 December 2026 – 02 January 2027. Modules: see the [catalogue](docs/MODULE_CURRICULUM.md).
 
 ### Grammar
 
@@ -540,6 +647,8 @@ Example:
 
 ## Week 8 — Frequency + routine consolidation
 
+**Study window:** 03 January 2027 – 09 January 2027. Modules: see the [catalogue](docs/MODULE_CURRICULUM.md).
+
 ### Vocabulary / adverbs
 
 Teach:
@@ -566,15 +675,17 @@ Target:
 
 **4–5 minutes describing routine**
 
-### End-of-November vocabulary target
+### End-of-Block-2 vocabulary planning target
 
-Approximately **500–550 active words/expressions**.
+Approximately **500–550 introduced words/expressions**, subject to retention and workload.
 
 ---
 
-# DECEMBER 2026 — DATIVE + PAST
+# BLOCK 3 — PEOPLE, PLACES AND PAST · 10 JAN – 6 FEB 2027
 
 ## Week 9 — Dative introduction
+
+**Study window:** 10 January 2027 – 16 January 2027. Modules: see the [catalogue](docs/MODULE_CURRICULUM.md).
 
 ### Grammar
 
@@ -591,6 +702,8 @@ Keep the initial focus practical rather than exhaustive.
 ---
 
 ## Week 10 — Common prepositions
+
+**Study window:** 17 January 2027 – 23 January 2027. Modules: see the [catalogue](docs/MODULE_CURRICULUM.md).
 
 ### Dative prepositions
 
@@ -620,6 +733,8 @@ Focus on high-frequency examples.
 
 ## Week 11 — Perfekt introduction
 
+**Study window:** 24 January 2027 – 30 January 2027. Modules: see the [catalogue](docs/MODULE_CURRICULUM.md).
+
 ### Grammar
 
 Teach conversational past with:
@@ -635,6 +750,8 @@ Do not attempt to teach every exception.
 
 ## Week 12 — Past-tense consolidation
 
+**Study window:** 31 January 2027 – 06 February 2027. Modules: see the [catalogue](docs/MODULE_CURRICULUM.md).
+
 ### Speaking
 
 2–3 minutes about:
@@ -647,15 +764,17 @@ Do not attempt to teach every exception.
 
 Short past-tense paragraph.
 
-### End-of-December vocabulary target
+### End-of-Block-3 vocabulary planning target
 
-Approximately **700 useful words/expressions**.
+Approximately **700 introduced words/expressions**; do not infer mastery from exposure.
 
 ---
 
-# JANUARY 2027 — STRONG A1 CONSOLIDATION
+# BLOCK 4 — A1 CONSOLIDATION · 7 FEB – 6 MAR 2027
 
 ## Week 13 — weil
+
+**Study window:** 07 February 2027 – 13 February 2027. Modules: see the [catalogue](docs/MODULE_CURRICULUM.md).
 
 ### Grammar
 
@@ -674,6 +793,8 @@ Keep subordinate-clause use controlled.
 
 ## Week 14 — dass + longer sentences
 
+**Study window:** 14 February 2027 – 20 February 2027. Modules: see the [catalogue](docs/MODULE_CURRICULUM.md).
+
 ### Grammar
 
 Teach:
@@ -685,6 +806,8 @@ Teach:
 ---
 
 ## Week 15 — Possessives + reflexive introduction
+
+**Study window:** 21 February 2027 – 27 February 2027. Modules: see the [catalogue](docs/MODULE_CURRICULUM.md).
 
 ### Grammar
 
@@ -706,6 +829,8 @@ Avoid overloading the learner with full reflexive-pronoun paradigms at this stag
 ---
 
 ## Week 16 — Unit 1 consolidation
+
+**Study window:** 28 February 2027 – 06 March 2027. Modules: see the [catalogue](docs/MODULE_CURRICULUM.md).
 
 Review:
 
@@ -730,7 +855,7 @@ Review:
 
 ### Final speaking
 
-**7–10 minute conversation**
+**Supported familiar-topic exchange**, with 7–10 minutes including partner turns as a stretch practice goal rather than a compulsory CEFR duration.
 
 ### Final assessment
 
@@ -738,15 +863,15 @@ Full strong-A1 checkpoint / mock.
 
 ### Unit 1 vocabulary target
 
-Approximately **800–1,000 well-known words and expressions**.
+Approximately **800–1,000 introduced words and expressions**, with separate evidence for recall and contextual use. This is a planning range, not a CEFR requirement.
 
 ---
 
 # UNIT 2 — STRONG A1 → STRONG A2
 
-## 6. February – May 2027
+## 6. 7 March – 26 June 2027
 
-**Target:** secure A2 by the end of May.
+**Planning target:** secure A2 by late June, subject to independent assessment.
 
 Approximate workload:
 
@@ -754,7 +879,7 @@ Approximate workload:
 
 Unit 2 should move from isolated beginner sentences toward connected everyday communication.
 
-### February 2027 — Cases + everyday interaction
+### Block 1 · 7 March – 3 April 2027 — Cases + everyday interaction
 
 Primary goals:
 
@@ -775,7 +900,7 @@ Themes:
 - food
 - directions
 
-### March 2027 — Past narration + comparison
+### Block 2 · 4 April – 1 May 2027 — Past narration + comparison
 
 Primary grammar:
 
@@ -793,7 +918,7 @@ Writing:
 
 structured past narrative of approximately **120–150 words**.
 
-### April 2027 — More complex sentence structure
+### Block 3 · 2–29 May 2027 — More complex sentence structure
 
 Primary grammar:
 
@@ -813,7 +938,7 @@ Communication:
 - making plans
 - solving everyday problems
 
-### May 2027 — A2 consolidation
+### Block 4 · 30 May – 26 June 2027 — A2 consolidation
 
 Focus:
 
@@ -839,11 +964,11 @@ Learner should be able to:
 
 # UNIT 3 — A2 → B1
 
-## 7. June – August 2027
+## 7. 27 June – 18 September 2027
 
 **Workload:** approximately **8–12 hours/week**
 
-Summer is the main acceleration period.
+Summer is the main acceleration period; reduce the suggested 8–12 hours when school resumes and re-estimate the end date if needed.
 
 ### Major goals
 
@@ -854,7 +979,7 @@ Summer is the main acceleration period.
 - increase spontaneous speaking
 - begin serious **Physics German**
 
-### June 2027 — B1 bridge + Physics German begins
+### Block 1 · 27 June – 24 July 2027 — B1 bridge + Physics German begins
 
 General German:
 
@@ -878,7 +1003,7 @@ Initial technical themes:
 - describing trends
 - basic experimental language
 
-### July 2027 — B1 expansion
+### Block 2 · 25 July – 21 August 2027 — B1 expansion
 
 General German:
 
@@ -898,7 +1023,7 @@ Physics German:
 - describing methods
 - explaining calculations
 
-### August 2027 — Secure B1
+### Block 3 · 22 August – 18 September 2027 — B1 consolidation
 
 Focus:
 
@@ -910,17 +1035,17 @@ Focus:
 
 Target:
 
-**secure B1 by end of August 2027**.
+**Aim for secure B1 by 18 September 2027**, revising the date if evidence or school workload requires it.
 
 ---
 
 # UNIT 4 — B1 → B2
 
-## 8. September – November 2027
+## 8. 19 September – 11 December 2027
 
 **Workload:** approximately **7–9 hours/week**
 
-### September 2027 — B1+ academic transition
+### Block 1 · 19 September – 16 October 2027 — B1+ academic transition
 
 Focus:
 
@@ -932,7 +1057,7 @@ Focus:
 - adjective endings
 - formal register
 
-### October 2027 — B2 development
+### Block 2 · 17 October – 13 November 2027 — B2 development
 
 Grammar / style:
 
@@ -951,7 +1076,7 @@ Physics:
 - thermal physics
 - practical/lab language
 
-### November 2027 — Secure B2
+### Block 3 · 14 November – 11 December 2027 — B2 consolidation
 
 Focus:
 
@@ -964,13 +1089,13 @@ Focus:
 
 Target:
 
-**functional B2 by end of November 2027**.
+**Aim for functional B2 by 11 December 2027**, subject to representative assessment.
 
 ---
 
 # UNIT 5 — B2 → C1 BRIDGE
 
-## 9. December 2027
+## 9. 12 December 2027 – 8 January 2028
 
 **Workload:** approximately **8–10 hours/week**
 
@@ -1005,7 +1130,7 @@ Physics:
 
 # UNIT 6 — C1 + CERTIFICATION
 
-## 10. January – February 2028
+## 10. 9 January – 4 March 2028
 
 **Workload:** approximately **8–10 hours/week**
 
@@ -1030,7 +1155,7 @@ Weekly work should contain:
 
 Preferred first serious certification attempt:
 
-**February 2028**
+**February 2028 if independently ready**; otherwise revise the booking and readiness plan.
 
 Exact exam should be selected based on ETH requirements and availability at the time.
 
@@ -1038,13 +1163,13 @@ DeutschLab should support exam-style practice without hard-coding an outdated ce
 
 ---
 
-# MARCH 2028 — BUFFER + ETH READINESS
+# 5–31 MARCH 2028 — CONTINGENCY + ETH READINESS
 
 ## 11. Final buffer
 
 Use March for:
 
-- certification retake if necessary
+- a certification retake only if booking, result turnaround and application dates allow it
 - remaining weak areas
 - lecture listening
 - technical Physics vocabulary
@@ -1298,7 +1423,7 @@ Before adding a new lesson:
 6. Define appropriate practice types.
 7. Integrate assessed concepts with Review.
 8. Add/update automated tests.
-9. Run `npm run test:all`.
+9. Run the quiet full gate: `bash scripts/test-agent.sh`.
 10. Commit only when the full automated gate passes.
 
 ---
@@ -1318,43 +1443,29 @@ Do not silently change curriculum scope in code without updating this file.
 
 # 20. Current implementation status
 
-## Implemented
+## Implemented: existing lessons and learning infrastructure
 
-### Week 1
+- Weeks 1–4 lesson routes and checkpoint-001 through checkpoint-004, as listed in the detailed sections above.
+- Local SQLite persistence, writing drafts, resumable vocabulary batches, mistakes and active-recall Review.
+- Deterministic daily planner, backup/export and automated regression suite.
+- Optional advisory AI feedback; no automated CEFR or pronunciation grade.
 
-- `vocab-001`
-- `pronunciation-001`
-- `grammar-001`
-- `grammar-002`
-- `grammar-003`
-- `listening-001`
-- `speaking-001`
-- `checkpoint-001`
+## Revised: curriculum organisation and roadmap
 
-### Week 2
+- Start anchor: Sunday 15 November 2026; sixteen A1 study weeks through 6 March 2027.
+- Four thematic blocks replace calendar-month labels.
+- Planned module outcomes, prerequisites, legacy-asset mappings and transfer tasks are represented in the Course roadmap.
+- Foundations is the new display name for the former October Foundations milestone; checkpoint-004 and every persisted task/item ID remain unchanged.
 
-- `vocab-002`
-- `grammar-004`
-- `grammar-005`
-- `writing-001`
-- `reading-001`
-- `listening-002`
-- `checkpoint-002`
+## Planned: teaching implementation
 
-### Platform
+- All module recipes are **Planned**, including recipes mapped to existing lesson assets.
+- Modular activity runner, bounded reviewed variation, targeted branching, support-aware evidence and module resume.
+- First runtime pilot: Week 3 possessions, after its prerequisites, using grammar-007.
+- Weeks 5–16 runnable lessons; no placeholder task is counted as completed or available.
+- Content review and a delayed-transfer pilot before broad conversion.
 
-- local SQLite persistence
-- mistakes
-- spaced review
-- active-recall Review
-- dynamic daily planner
-- Week 1 and Week 2 mastery checkpoints
-- local writing drafts
-- automated Vitest / React / Playwright test suite
-
-## Next planned
-
-- Week 3 — articles, plurals, nominative and accusative introduction (not started)
+A module catalogue or displayed outcome is not an implemented lesson. No module mastery is inferred from legacy completion.
 
 ---
 

@@ -46,7 +46,7 @@ export const everydayWriting: WritingLessonConfig = {
   kicker: "Week 4 · Writing",
   title: "Describing everyday life",
   intro:
-    "Write about yourself, your school, your activities, your home and your belongings, using everything from October. You can't be marked automatically here, so you'll compare with an example and check your own work honestly.",
+    "Write about yourself, your school, your activities, your home and your belongings, using everything from Foundations. You can't be marked automatically here, so you'll compare with an example and check your own work honestly.",
   lengthLabel: "60–80 words",
   prompt:
     "Write 60–80 words about yourself, your school, your activities, your home and your belongings.",
