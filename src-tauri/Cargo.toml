@@ -1,6 +1,6 @@
 [package]
 name = "deutschlab"
-version = "1.0.0"
+version = "1.0.1"
 description = "DeutschLab: a local-first German learning app"
 authors = ["you"]
 edition = "2024"

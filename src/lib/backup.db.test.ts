@@ -6,6 +6,7 @@ import { DatabaseSync } from "node:sqlite";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getTestDatabase, resetTestDatabase } from "../test/fakeSqlPlugin";
+import { APP_VERSION } from "./appInfo";
 
 vi.mock("@tauri-apps/plugin-sql", async () => import("../test/fakeSqlPlugin"));
 
@@ -83,7 +84,7 @@ describe("JSON export", () => {
       format: "deutschlab-backup",
       version: 3,
       exportedAt: NOW.toISOString(),
-      app: { name: "DeutschLab", version: "1.0.0" },
+      app: { name: "DeutschLab", version: APP_VERSION },
     });
     expect(exported.tables.task_progress.map((row) => row.task_id)).toEqual(["vocab-001", "checkpoint-003"]);
     expect(exported.tables.lesson_attempts).toHaveLength(1);

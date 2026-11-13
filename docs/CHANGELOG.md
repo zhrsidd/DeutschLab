@@ -3,6 +3,13 @@
 Newest first. Versions before 1.0 were internal milestones; dates are commit dates.
 Details of each audit live in `docs/QUALITY_AUDIT.md` (v0.8) and `docs/V1_RELEASE_REPORT.md` (v1.0).
 
+## 1.0.1 — Curriculum roadmap and public updater release (2026-11-13)
+
+Packages the merged curriculum changes as a signed update for existing 1.0.0 installations.
+The app identifier, updater public key, saved progress, checkpoint rules and SRS intervals are unchanged.
+The Sunday-start roadmap and planned module outlines are included. Adaptive sentence generation remains
+specified future work; this release does not claim to implement that engine.
+
 ## Unreleased — Sunday-start modular curriculum (2026-11-13)
 
 Curriculum starts 15 November 2026, with sixteen A1 weeks through 6 March 2027. Four thematic blocks and

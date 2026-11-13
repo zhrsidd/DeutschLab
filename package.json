@@ -1,7 +1,7 @@
 {
   "name": "deutschlab",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "scripts": {
     "test:agent": "bash scripts/test-agent.sh",
